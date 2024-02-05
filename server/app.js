@@ -15,12 +15,12 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-app.use(cors());
+app.use(cors({}));
 app.use(express.json());
 app.use(morgan('dev'));
 connectDB();
 
 app.use('/api', fileRoutes);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
