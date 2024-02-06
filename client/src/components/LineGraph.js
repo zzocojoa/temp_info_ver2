@@ -5,13 +5,13 @@ import {
   Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Brush
  } from 'recharts';
 
-function LineGraph({ averagedData }) {
+function LineGraph({ data }) {
   
   return (
     <LineChart
           width={1000}
           height={500}
-          data={averagedData}
+          data={data}
           margin={{
             top: 5, right: 30, left: 20, bottom: 5,
           }}
