@@ -43,7 +43,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
     // 데이터 정제
     const { averagedData, boxplotStats } = processData(allData);
-    // console.log(averagedData);
+    console.log(averagedData);
 
     // 클라이언트에 정제된 데이터 전송
     res.json({ success: true, message: 'File processed successfully', data: averagedData, boxplotStats });

@@ -6,7 +6,7 @@ function SaveCsvDataButton({ data, onSaveSuccess }) {
   const handleSaveData = async () => {
     // API 요청을 통해 서버에 데이터 저장
     try {
-      const response = await fetch('http://localhost:3000/api/save', {
+      const response = await fetch('http://localhost:5000/api/save', {
         
         method: 'POST',
         headers: {

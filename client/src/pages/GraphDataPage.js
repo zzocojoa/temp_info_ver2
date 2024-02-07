@@ -5,12 +5,17 @@ import FileUploadButton from '../components/FileUploadButton';
 import UploadDataButton from '../components/UploadDataButton';
 import GenerateGraphButton from '../components/GenerateGraphButton';
 import LineGraph from '../components/LineGraph';
+<<<<<<< HEAD
 import BoxGraph from '../components/BoxGraph';
 import { uploadFile } from '../api';
+=======
+// 다른 필요한 컴포넌트 import
+>>>>>>> parent of 175ce43 (add commit)
 
 function GraphDataPage() {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [isUploaded, setIsUploaded] = useState(false);
+<<<<<<< HEAD
   const [graphData, setGraphData] = useState([]);
   const [boxPlotData, setBoxPlotData] = useState(null);
   // const [uploadResult, setUploadResult] = useState(null); // 업로드 결과를 저장할 상태
@@ -47,6 +52,24 @@ function GraphDataPage() {
     } catch (error) {
       console.error('Error uploading file and generating graph:', error)
     }
+=======
+
+  const handleFileSelect = (file) => {
+    setUploadedFile(file);
+    // 여기에서 파일을 처리하거나 서버로 전송하는 로직을 추가할 수 있습니다.
+  };
+
+  const handleUploadSuccess = (result) => {
+    // 여기에서 업로드 성공 후 로직을 처리할 수 있습니다.
+    console.log('GraphDataPage 파일 업로드 성공: ', result);
+    setIsUploaded(true);
+    setGraphData(result.data);
+  };  
+
+  const handleGenerateGraph = () => {
+    // 여기에서 그래프 생성 로직을 처리할 수 있습니다.
+    console.log('GraphDataPage 그래프 생성: ');
+>>>>>>> parent of 175ce43 (add commit)
   };
 
   return (
@@ -55,7 +78,7 @@ function GraphDataPage() {
       <UploadDataButton selectedFile={uploadedFile} onUploadSuccess={handleUploadSuccess} />
       <GenerateGraphButton isEnabled={isUploaded} onGenerateGraph={handleGenerateGraph} />
       {graphData.length > 0 && <LineGraph data={graphData} />}
-      {boxPlotData && <BoxGraph stats={boxPlotData} />}
+      {/* 다른 컴포넌트들을 여기에 배치 */}
     </div>
   );
 }

@@ -7,25 +7,32 @@ function processData(data) {
     let dateCounts = {};
     let temperatures = [];
 
-    // 데이터 전처리 최적화: forEach 대신 for-loop 사용
     for (const item of data) {
-        const date = item['date'];
-        const time = item['time'];
+        const date = item['date']; // 필드 이름 수정
+        const time = item['time']; // 필드 이름 수정
         const temperature = parseFloat(item['temperature']);
 
         if (!isNaN(temperature)) {
             dateCounts[date] = (dateCounts[date] || 0) + 1;
             temperatures.push({ date, time, temperature });
-        } else {
-            // console.log(`유효하지 않은 온도 값: ${rawTemperature}, 해당 행은 무시.`);
         }
     }
 
-    const mostDataDate = Object.keys(dateCounts).reduce((a, b) => dateCounts[a] > dateCounts[b] ? a : b);
+    // 배열이 비어 있을 경우를 대비하여 초기값 설정
+    const mostDataDate = Object.keys(dateCounts).reduce((a, b) => dateCounts[a] > dateCounts[b] ? a : b, null);
 
-    // 해당 날짜의 데이터만 필터링
+    if (mostDataDate === null) {
+        // 처리할 데이터가 없으면 빈 결과 반환
+        return { averagedData: [], boxplotStats: {} };
+    }
+
     temperatures = temperatures.filter(item => item.date === mostDataDate);
     const tempValues = temperatures.map(item => item.temperature);
+
+    // tempValues가 비어 있지 않을 때만 quartile과 reduce 함수 사용
+    if (tempValues.length === 0) {
+        return { averagedData: [], boxplotStats: {} };
+    }
 
     const q1 = quartile(tempValues, 0.25);
     const q3 = quartile(tempValues, 0.75);
@@ -33,20 +40,16 @@ function processData(data) {
     const lowerBound = q1 - 1.5 * iqr;
     const upperBound = q3 + 1.5 * iqr;
 
-    // 필터링 및 데이터 변환
     let filteredData = temperatures.filter(item => item.temperature >= lowerBound && item.temperature <= upperBound)
         .map(item => ({
             Date: item.date,
-            Time: moment(item.time, 'HH:mm:ss:SSS').format('HH:mm:ss'),
+            Time: moment(item.time, 'HH:mm:ss').format('HH:mm:ss'),
             Temperature: item.temperature
         }));
-    
-    // 데이터 그룹화 및 평균 계산 최적화: 객체 대신 Map 사용
+
     let groupedData = new Map();
     filteredData.forEach(item => {
-        const roundedTime = moment(item.Time, 'HH:mm:ss').startOf('minute').seconds(
-            Math.floor(moment(item.Time, 'HH:mm:ss').seconds() / 15) * 15
-        ).format('HH:mm:ss');
+        const roundedTime = moment(item.Time, 'HH:mm:ss').startOf('minute').format('HH:mm:ss');
 
         const dateTimeKey = `${item.Date} ${roundedTime}`;
         if (!groupedData.has(dateTimeKey)) {
@@ -64,17 +67,17 @@ function processData(data) {
     }));
 
     const boxplotStats = {
-        min: tempValues.reduce((min, val) => (val < min ? val : min), tempValues[0]),
+        min: tempValues.reduce((min, val) => Math.min(min, val), tempValues[0]),
         q1,
         median: quartile(tempValues, 0.5),
         q3,
-        max: tempValues.reduce((max, val) => (val > max ? val : max), tempValues[0]),
+        max: tempValues.reduce((max, val) => Math.max(max, val), tempValues[0]),
         outliers: tempValues.filter(t => t < lowerBound || t > upperBound)
     };
-
-    console.log("Refined Data:", boxplotStats);
+    console.log("Refined Data:", averagedData);
 
     return { averagedData, boxplotStats };
 }
+
 
 module.exports = processData;
