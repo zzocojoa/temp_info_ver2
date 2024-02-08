@@ -1,6 +1,6 @@
 // client\src\api.js
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'http://localhost:5000/api';
 
 // 파일 업로드
 export async function uploadFile(file) {

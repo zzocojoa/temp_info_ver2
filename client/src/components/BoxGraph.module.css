@@ -1,0 +1,15 @@
+/* client\src\components\BoxGraph.module.css */
+/* BoxGraph.module.css */
+
+.table {
+    border-collapse: collapse;
+    width: auto;
+  }
+  
+  .th,
+  .td {
+    border: 1px solid black;
+    padding: 5px;
+    text-align: center;
+  }
+  
