@@ -1,43 +1,32 @@
-// src\components\DataListUI.js
+// src/components/DataListUI.js
 
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { fetchDataList } from '../api'; // API 호출 함수 임포트
 
-function DataListUI({ onSelectData, onDeleteData }) {
+function DataListUI() {
   const [dataList, setDataList] = useState([]);
-
-  const handleSelectData = (dataItem) => {
-    onDataSelect(dataItem); // 선택된 데이터 처리
-    navigate('/view-data', { state: { selectedData: dataItem } }); // /view-data 페이지로 이동
-  };
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchDataList = async () => {
-      // 서버로부터 데이터 리스트를 불러옴
-      try {
-        const response = await fetch('YOUR_API_ENDPOINT/data-list');
-        if (response.ok) {
-          const data = await response.json();
-          setDataList(data);
-        } else {
-          alert('Failed to fetch data list.');
-        }
-      } catch (error) {
-        console.error('Error fetching data list:', error);
-        alert('Error fetching data list.');
-      }
+    const loadDataList = async () => {
+      const data = await fetchDataList();
+      setDataList(data);
     };
-
-    fetchDataList();
+    loadDataList();
   }, []);
+
+  const handleSelectData = (dataItem) => {
+    navigate('/view-data', { state: { selectedData: dataItem } });
+  };
 
   return (
     <div>
       {dataList.map((dataItem, index) => (
         <div key={index}>
-          <span>{dataItem.name}</span>
-          <button onClick={() => handleSelectData(dataItem)}>Load</button>
-          <button onClick={() => onSelectData(dataItem)}>Load</button>
-          <button onClick={() => onDeleteData(dataItem)}>Delete</button>
+          {/* numbering과 filedate를 조합하여 표시 */}
+          {/* <span>{`${dataItem.filedate}_${dataItem.numbering.wNumber}_${dataItem.numbering.dwNumber}_${dataItem.numbering.dieNumber}`}</span> */}
+          <button onClick={() => handleSelectData(dataItem)}>불러오기</button>
         </div>
       ))}
     </div>
@@ -45,3 +34,4 @@ function DataListUI({ onSelectData, onDeleteData }) {
 }
 
 export default DataListUI;
+

@@ -41,17 +41,15 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       }
     });
 
-    // 데이터 정제
+    // 데이터 정제 processData
     const { averagedData, boxplotStats } = processData(allData);
     // console.log(averagedData);
 
-    // 클라이언트에 정제된 데이터 전송
     res.json({ success: true, message: 'File processed successfully', data: averagedData, boxplotStats });
   } catch (error) {
     console.error('Error processing file:', error);
     res.status(500).send('Error processing file');
   } finally {
-    // 임시 파일 삭제
     try {
       await fs.unlink(filePath);
     } catch (error) {
@@ -62,19 +60,34 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
 // 데이터 저장 처리
 router.post('/save', async (req, res) => {
-  const { fileName, data } = req.body; // 클라이언트로부터 받은 데이터
-
+  const { fileName, graphData, boxPlotData, numbering, filedate } = req.body;
+  // console.log("Received numbering:", filedate);
   try {
-    // 데이터를 MongoDB에 저장
     const newFileMetadata = new FileMetadata({
-      fileName: fileName,
-      // 데이터 추가 필요
+      fileName,
+      temperatureData: graphData,
+      boxplotStats: boxPlotData,
+      numbering: numbering,
+      filedate,
     });
     await newFileMetadata.save();
+
     res.json({ message: 'Data saved successfully', data: newFileMetadata });
   } catch (error) {
     console.error('Error saving data:', error);
     res.status(500).send('Error saving data');
+  }
+});
+
+// 데이터 리스트 조회 
+router.get('/data-list', async (req, res) => {
+  try {
+    const dataList = await FileMetadata.find({}); // 모든 데이터 리스트 조회
+    console.log(dataList); // 콘솔에 조회된 데이터 리스트 출력
+    res.json(dataList); // 클라이언트에 데이터 리스트 응답
+  } catch (error) {
+    console.error('Error fetching data list:', error); // 에러 로깅
+    res.status(500).send('Error fetching data list');
   }
 });
 

@@ -72,7 +72,7 @@ function processData(data) {
         outliers: tempValues.filter(t => t < lowerBound || t > upperBound)
     };
 
-    console.log("Refined Data:", boxplotStats);
+    // console.log("Refined Data:", boxplotStats);
 
     return { averagedData, boxplotStats };
 }

@@ -2,7 +2,7 @@
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
-// 파일 업로드
+// 파일 업로드 API
 export async function uploadFile(file) {
   const formData = new FormData();
   formData.append('file', file);
@@ -18,32 +18,40 @@ export async function uploadFile(file) {
   }
 }
 
-// 데이터 저장
-export async function saveGraphData(graphData) {
+// 데이터 저장 API
+export async function saveData(data) {
   try {
     const response = await fetch(`${API_BASE_URL}/save`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(graphData),
+      body: JSON.stringify(data),
     });
-    return response.json(); // 저장 결과 반환
+    if (!response.ok) {
+      throw new Error('Failed to save data');
+    }
+    return await response.json(); // 저장 성공 결과 반환
   } catch (error) {
-    console.error('Error saving graph data:', error);
+    console.error('Error saving data:', error);
+    throw error; // 에러를 다시 던져 컴포넌트에서 처리할 수 있게 함
   }
 }
 
 // 데이터 리스트 조회
 export async function fetchDataList() {
   try {
-    const response = await fetch(`${API_BASE_URL}/data/list`);
-    return response.json(); // 조회된 데이터 리스트 반환
+    const response = await fetch(`${API_BASE_URL}/data-list`);
+    if (response.ok) {
+      const dataList = await response.json();
+      return dataList;
+    } else {
+      console.error('Failed to fetch data list');
+    }
   } catch (error) {
     console.error('Error fetching data list:', error);
   }
 }
-
 // 특정 데이터 조회
 export async function fetchDataDetails(dataId) {
   try {
