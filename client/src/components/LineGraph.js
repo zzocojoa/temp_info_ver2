@@ -6,10 +6,6 @@ import {
  } from 'recharts';
 
 function LineGraph({ data }) {
-<<<<<<< HEAD
-  
-=======
->>>>>>> parent of 175ce43 (add commit)
   return (
     <LineChart
           width={1000}
