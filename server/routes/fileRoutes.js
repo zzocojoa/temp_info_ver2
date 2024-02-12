@@ -91,4 +91,21 @@ router.get('/data-list', async (req, res) => {
   }
 });
 
+// 특정 데이터 항목의 상세 정보 조회
+router.get('/data/:id', async (req, res) => {
+  try {
+    const { id } = req.params; // URL에서 id 파라미터 추출
+    const dataItem = await FileMetadata.findById(id); // MongoDB에서 해당 id를 가진 데이터 조회
+
+    if (!dataItem) {
+      return res.status(404).send('Data not found');
+    }
+
+    res.json(dataItem);
+  } catch (error) {
+    console.error('Error fetching data item:', error);
+    res.status(500).send('Server error');
+  }
+});
+
 module.exports = router;
