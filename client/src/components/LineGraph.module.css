@@ -1,0 +1,18 @@
+.NumberWrap {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+label {
+  display: flex;
+}
+
+label p {
+  margin-right: 5px;
+}
+
+label input {
+  margin-right: 5px;
+  
+}

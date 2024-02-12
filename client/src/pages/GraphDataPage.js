@@ -41,7 +41,7 @@ function GraphDataPage() {
   };
 
   return (
-    <div>
+    <div className={styles.graphDataWrap}>
       <div className={styles.graphDataContainer}>
         <div className={styles.leftPanel}>
           <FileUploadButton onFileSelect={handleFileSelect} />

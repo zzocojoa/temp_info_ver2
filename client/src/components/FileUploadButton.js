@@ -1,7 +1,7 @@
 // src\components\FileUploadButton.js
 
 import React, { useState } from 'react';
-import './FileUploadButton.module.css'
+import styles from './FileUploadButton.module.css'
 
 function FileUploadButton({ onFileSelect }) {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -14,8 +14,11 @@ function FileUploadButton({ onFileSelect }) {
 
   return (
     <div>
-      <input type="file" onChange={handleFileChange} accept=".csv" />
-      {selectedFile && <p>File name: {selectedFile.name}</p>}
+      <label for="file">
+        <div className={styles["fileUpload"]}>파일 업로드하기</div>
+      </label>
+      <input className={styles['fileUpload-btn']} type="file" id='file' onChange={handleFileChange} accept=".csv" />
+      {selectedFile && <p className={styles['fileName']}>File name: {selectedFile.name}</p>}
     </div>
   );
 }

@@ -1,10 +1,12 @@
 // src\components\UploadDataButton.js
 
 import React from 'react';
+import styles from './UploadDataButton.module.css'
 import { uploadFile } from '../api';
 
 function UploadDataButton({ selectedFile, onUploadSuccess, isEnabled }) {
   const handleUpload = async () => {
+    
     if (!selectedFile) {
       alert('Please select a file first.');
       return;
@@ -30,8 +32,8 @@ function UploadDataButton({ selectedFile, onUploadSuccess, isEnabled }) {
   };
 
   return (
-    <button onClick={handleUpload} disabled={!isEnabled}>
-      Upload Data
+    <button className={styles['UploadDataButton']} onClick={handleUpload} disabled={!isEnabled}>
+      그래프 생성
     </button>
   );
 }

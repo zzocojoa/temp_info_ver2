@@ -1,0 +1,28 @@
+
+.DownloadBtn {
+  margin-right: 30px;
+  width: 200px;
+  font-size: 16px;
+  border: 2px solid #263343;
+  border-radius: 10px;
+  padding: 5px 10px;
+  text-align: center;
+  /* margin: 20px 0; */
+  background: #263343;
+  background: linear-gradient(0deg, rgb(38, 51, 67) 0%, rgb(29, 39, 51) 100%);
+  border: none;
+  color: white;
+}
+
+.DownloadBtn:before {
+  height: 0%;
+  width: 2px;
+}
+
+.DownloadBtn:hover {
+  font-weight: 700;
+  box-shadow: 4px 4px 6px 0 rgba(255, 255, 255, .5),
+    -4px -4px 6px 0 rgba(116, 125, 136, .5),
+    inset -4px -4px 6px 0 rgba(255, 255, 255, .2),
+    inset 4px 4px 6px 0 rgba(0, 0, 0, .4);
+}

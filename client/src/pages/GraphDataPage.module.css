@@ -1,5 +1,12 @@
 /* src/pages/GraphDataPage.module.css */
 
+.graphDataWrap {
+  width: 1740px;
+  margin: auto;
+  padding-top: 30px;
+}
+
+
 .graphDataContainer {
     display: flex;
     justify-content: space-between;
