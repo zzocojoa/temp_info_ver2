@@ -108,4 +108,20 @@ router.get('/data/:id', async (req, res) => {
   }
 });
 
+// 특정 데이터 항목의 상세 정보 삭제
+router.delete('/data/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedItem = await FileMetadata.findByIdAndRemove(id);
+    if (!deletedItem) {
+      return res.status(404).send({ message: 'Data not found' });
+    }
+    res.status(200).send({ message: 'Data successfully removed' });
+  } catch (error) {
+    console.error('Error removing data:', error);
+    res.status(500).send({ message: 'Error removing data', error: error.message });
+  }
+});
+
+
 module.exports = router;

@@ -1,8 +1,8 @@
-// DataListUI.js
+// client/src/components/DataListUI.js
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchDataList } from '../api';
+import { fetchDataList, deleteData } from '../api';
 import styles from './DataListUI.module.css'; // CSS 모듈 임포트
 
 function DataListUI() {
@@ -31,11 +31,21 @@ function DataListUI() {
     navigate('/view-data', { state: { selectedItems } });
   };
 
+  // 선택한 데이터 항목을 서버에서 제거하는 함수
+  const handleRemoveData = async (itemId) => {
+    try {
+      await deleteData(itemId); // 서버에서 항목 제거
+      setDataList(dataList.filter(item => item._id !== itemId)); // 클라이언트 상태 업데이트
+      setSelectedItems(selectedItems.filter(id => id !== itemId)); // 선택된 항목 목록에서도 제거
+    } catch (error) {
+      console.error("Error removing data:", error);
+    }
+  };
+
   return (
     <div>
       {dataList.slice(0, displayCount).map((dataItem, index) => (
         <div key={index} className={styles.dataItem}>
-          {/* 체크박스와 레이블을 <label>로 감싸고 htmlFor과 id를 사용하여 연결 */}
           <label htmlFor={`checkbox-${dataItem._id}`} className={styles.dataItemLabel}>
             <input
               type="checkbox"
@@ -45,6 +55,8 @@ function DataListUI() {
             />
             {`${dataItem.filedate}_${dataItem.numbering?.wNumber ?? 'N/A'}_${dataItem.numbering?.dwNumber ?? 'N/A'}_${dataItem.numbering?.dieNumber ?? 'N/A'}`}
           </label>
+          {/* "제거" 버튼을 map 함수 내부에 추가 */}
+          <button onClick={() => handleRemoveData(dataItem._id)} className={styles.removeButton}>제거</button>
         </div>
       ))}
       {displayCount < dataList.length && (
