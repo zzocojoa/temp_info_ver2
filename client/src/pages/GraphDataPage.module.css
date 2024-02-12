@@ -1,0 +1,15 @@
+/* src/pages/GraphDataPage.module.css */
+
+.graphDataContainer {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .leftPanel {
+    width: 70%;
+  }
+  
+  .rightPanel {
+    width: 30%;
+  }
+  

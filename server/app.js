@@ -1,6 +1,7 @@
 // server\app.js
 
 const express = require('express');
+const bodyParser = require('body-parser');
 const cors = require('cors');
 const morgan = require('morgan');
 const fileRoutes = require('./routes/fileRoutes');
@@ -14,6 +15,12 @@ const uploadDir = './uploads';
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
+app.use(bodyParser.json({ limit: '50mb' }));
+// URL 인코딩 본문 파서의 크기 제한을 50MB로 설정
+app.use(bodyParser.urlencoded({ 
+  limit: '50mb',
+  extended: true 
+}));
 
 app.use(cors());
 app.use(express.json());

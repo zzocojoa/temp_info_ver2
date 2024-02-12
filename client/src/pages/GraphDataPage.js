@@ -7,6 +7,7 @@ import SaveCsvDataButton from '../components/SaveCsvDataButton';
 import LineGraph from '../components/LineGraph';
 import BoxGraph from '../components/BoxGraph';
 import DataListUI from '../components/DataListUI';
+import styles from './GraphDataPage.module.css';
 
 function GraphDataPage() {
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -41,28 +42,33 @@ function GraphDataPage() {
 
   return (
     <div>
-      <FileUploadButton onFileSelect={handleFileSelect} />
-      <UploadDataButton selectedFile={uploadedFile} onUploadSuccess={handleUploadSuccess} isEnabled={!!uploadedFile} />
-      {graphData.length > 0 && (
-        <SaveCsvDataButton
-          data={{ graphData, boxPlotData, numbering: details }}
-          fileName={uploadedFileName}
-          onSaveSuccess={handleSaveDataSuccess}
-        />
-      )}
-      {graphData.length > 0 && (
-        <div>
-          <LineGraph
-            averagedData={graphData}
-            wNumber={details.wNumber}
-            dwNumber={details.dwNumber}
-            dieNumber={details.dieNumber}
-            onDetailsChange={(key, value) => setDetails({ ...details, [key]: value })}
-          />
-          <BoxGraph boxplotStats={boxPlotData} />
+      <div className={styles.graphDataContainer}>
+        <div className={styles.leftPanel}>
+          <FileUploadButton onFileSelect={handleFileSelect} />
+          <UploadDataButton selectedFile={uploadedFile} onUploadSuccess={handleUploadSuccess} isEnabled={!!uploadedFile} />
+          {graphData.length > 0 && (
+            <>
+              <SaveCsvDataButton
+                data={{ graphData, boxPlotData, numbering: details }}
+                fileName={uploadedFileName}
+                onSaveSuccess={handleSaveDataSuccess}
+              />
+              <LineGraph
+                averagedData={graphData}
+                wNumber={details.wNumber}
+                dwNumber={details.dwNumber}
+                dieNumber={details.dieNumber}
+                onDetailsChange={(key, value) => setDetails({ ...details, [key]: value })}
+              />
+              <BoxGraph boxplotStats={boxPlotData} />
+            </>
+          )}
         </div>
-      )}
-      <DataListUI />
+        
+        <div className={styles.rightPanel}>
+          <DataListUI />
+        </div>
+      </div>
     </div>
   );
 }

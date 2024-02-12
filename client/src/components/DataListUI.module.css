@@ -1,0 +1,36 @@
+/* DataListUI.module.css */
+.DataListUIWrap {
+    max-height: 300px; /* 예를 들어 5개 항목의 총 높이 */
+    overflow-y: auto; /* 스크롤바 표시 */
+    border: 1px solid #ccc; /* 경계선 스타일 */
+    margin: 10px 0; /* 위 아래 여백 */
+    padding: 10px; /* 내부 여백 */
+  }
+  
+  .dataItem {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    
+  }
+  
+  .dataItemLabel {
+    margin-left: 8px;
+  }
+  
+  .loadMoreButton,
+  .loadDataButton {
+    display: block;
+    margin: 10px auto;
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .loadMoreButton {
+    background-color: #0056b3; /* '더 보기' 버튼에 다른 색상 적용 */
+  }
+  
