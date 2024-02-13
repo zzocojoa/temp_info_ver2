@@ -1,13 +1,28 @@
 // src\components\LineGraph.js
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Line, LineChart, XAxis, YAxis, CartesianGrid, Legend, Brush
 } from 'recharts';
 import styles from './LineGraph.module.css'
 
 function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange }) {
+  const [chartSize, setChartSize] = useState({ width: 500, height: 300 });
 
+  useEffect(() => {
+    const handleResize = () => {
+      // 예: 창 너비의 80%를 그래프의 너비로 설정
+      setChartSize({
+        width: window.innerWidth * 0.5,
+        height: 400 // 높이는 고정값 또는 비율로 조정 가능
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // 컴포넌트 마운트 시에도 크기 조정
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   return (
     <>
       <div className={styles['NumberWrap']}>
@@ -25,11 +40,11 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
         </label>
       </div>
       <LineChart
-        width={1000}
-        height={500}
+        width={chartSize.width}
+        height={chartSize.height}
         data={averagedData}
         margin={{
-          top: 5, right: 30, left: 20, bottom: 5,
+          top: 5, right: 30, left: 20, bottom: 5
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />

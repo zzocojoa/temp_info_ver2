@@ -14,23 +14,23 @@ function DataListUI() {
   useEffect(() => {
     const loadDataList = async () => {
       const data = await fetchDataList();
-      // console.log("Initial data loaded:", data);
+      console.log("Initial data loaded:", data);
       setDataList(data);
-      setFilteredDataList(data); // 초기에는 모든 데이터를 보여줌
+      setFilteredDataList(data); // 초기에는 모든 데이터를 보여줍니다.
     };
     loadDataList();
   }, []);
 
   useEffect(() => {
-    // searchTerm이 변경될 때마다 실행되며, dataList를 기반으로 필터링
+    // searchTerm이 변경될 때마다 실행되며, dataList를 기반으로 필터링합니다.
     const filtered = dataList.filter(dataItem =>
       `${dataItem.filedate}_${dataItem.numbering?.wNumber ?? ''}_${dataItem.numbering?.dwNumber ?? ''}_${dataItem.numbering?.dieNumber ?? ''}`
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
     );
-    // console.log("Filtered data:", filtered);
-    setFilteredDataList(filtered); // 필터링된 결과를 저장
-    setDisplayCount(10); // 검색 후 보여줄 아이템 수를 초기화
+    console.log("Filtered data:", filtered);
+    setFilteredDataList(filtered); // 필터링된 결과를 저장합니다.
+    setDisplayCount(10); // 검색 후 보여줄 아이템 수를 초기화합니다.
   }, [searchTerm]);
 
   const handleCheckboxChange = (itemId) => {
@@ -59,21 +59,17 @@ function DataListUI() {
     setSelectedItems([]); // 선택된 항목 초기화
   };
 
+
   return (
     <div className={styles['DataListUIWrap']}>
-      <div className={styles['searchWrap']}>
-        <span className={styles['searchText']}>Search</span>
-        <input
+      <input
         type="text"
         placeholder="데이터 검색..."
-        className={styles['searchContainer']}
+        className={styles.searchInput}
         value={searchTerm}
         onChange={e => setSearchTerm(e.target.value)}
       />
-      </div>
-      
-      <div className={`${styles['DataListContainer']} ${styles['scroll']} ${styles['scroll-css']}`}
-        style={{ overflowY: 'auto', maxHeight: '500px' }}>
+      <div className={styles['DataListContainer']} style={{ overflowY: 'auto', maxHeight: '500px' }}>
         {filteredDataList.slice(0, displayCount).map((dataItem, index) => (
           <div key={index} className={styles.dataItem}>
             <label htmlFor={`checkbox-${dataItem._id}`} className={styles.dataItemLabel}>
@@ -87,22 +83,15 @@ function DataListUI() {
             </label>
           </div>
         ))}
+        {displayCount < dataList.length && (
+          <button onClick={handleScrollDown} className={styles.loadMoreButton}>더 보기</button>
+        )}
       </div>
-      <div className={styles['buttonWrap']}>
-        <div className={styles['buttonContainer']}>
-          {displayCount < dataList.length && (
-            <button onClick={handleScrollDown} className={styles.loadMoreButton}>더 보기</button>
-          )}
-          {selectedItems.length > 0 && (
-            <button onClick={handleRemoveSelectedData} className={styles.removeButton}>제거</button>
-          )}
-        </div>
-        <div>
-          <button onClick={handleLoadSelectedData} className={styles.loadDataButton}>불러오기</button>
-        </div>
-      </div>
+      {selectedItems.length > 0 && (
+        <button onClick={handleRemoveSelectedData} className={styles.removeButton}>선택된 데이터 제거</button>
+      )}
+      <button onClick={handleLoadSelectedData} className={styles.loadDataButton}>불러오기</button>
     </div>
-
   );
 }
 

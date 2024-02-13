@@ -3,6 +3,7 @@
 .graphDataWrap {
   max-width: 1740px;
   margin: auto;
+  padding-bottom: 80px;
 }
 
 .graphDataContainer {
@@ -12,13 +13,22 @@
   padding: 20px;
 }
 
+.leftPanel {
+  padding: 10px;
+  margin-right: 30px;
+  border: 1px solid #e2d1c7;
+  border-radius: 10px;
+  background-color: #e2d1c7;
+  box-shadow: 4px 4px 6px 0 rgb(189, 175, 167, .5),
+    -4px -4px 6px 0 rgb(189, 175, 167, .2)
+}
+
 .rightPanel {
   width: auto;
 }
 
 .leftPanel, .rightPanel {
-  /* flex: 1; */
-  padding: 10px;
+  flex: 1;
 }
 
 /* 화면 너비가 768px 이하일 때 스타일 */
