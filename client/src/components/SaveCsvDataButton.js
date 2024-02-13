@@ -5,20 +5,20 @@ import { saveData } from '../api';
 
 function SaveCsvDataButton({ data, fileName, onSaveSuccess }) {
   const downloadCsv = (data, fileName) => {
-    const { wNumber, dwNumber, dieNumber, graphData } = data;
+    // numbering 정보가 있는 경우 해당 값을 사용하고, 없는 경우 기본값 사용
+    const { wNumber = 'N/A', dwNumber = 'N/A', dieNumber = 'N/A' } = data.numbering || {};
+    const { graphData } = data;
 
     // 파일명에서 날짜 추출
     const dateMatch = fileName.match(/\d{4}-\d{2}-\d{2}/);
     const dateFromFileName = dateMatch ? dateMatch[0] : new Date().toISOString().split('T')[0];
 
     const finalFileName = `${dateFromFileName}_${wNumber}_${dwNumber}_${dieNumber}.csv`;
-    let csvContent = "data:text/csv;charset=utf-8,";
+    console.log("finalFileName :", finalFileName);
+    let csvContent = "data:text/csv;charset=utf-8,Date,Time,Temperature\n";
 
-    // CSV 헤더 추가
-    csvContent += "Date,Time,Temperature\n";
-
-    // 데이터 추가
-    graphData.forEach(row => {
+    // graphData가 정의되지 않았을 경우를 처리
+    (graphData || []).forEach(row => {
       const { Date, Time, Temperature } = row;
       csvContent += `${Date},${Time},${Temperature}\n`;
     });

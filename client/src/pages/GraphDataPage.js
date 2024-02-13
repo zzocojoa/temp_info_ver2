@@ -1,6 +1,6 @@
 // src/pages/GraphDataPage.js
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FileUploadButton from '../components/FileUploadButton';
 import UploadDataButton from '../components/UploadDataButton';
 import SaveCsvDataButton from '../components/SaveCsvDataButton';
@@ -21,6 +21,11 @@ function GraphDataPage() {
   });
   // const [isDataSaved, setIsDataSaved] = useState(false);
 
+  // details 상태가 업데이트될 때마다 실행될 useEffect 훅
+  useEffect(() => {
+    console.log("Current details state:", details);
+  }, [details]);
+
   const handleFileSelect = (file) => {
     setUploadedFile(file);
     setGraphData([]);
@@ -33,6 +38,7 @@ function GraphDataPage() {
     setBoxPlotData(boxplotStats);
     // setIsDataSaved(false);
     setUploadedFileName(uploadedFileName);
+    console.log("uploadedFileName: ", uploadedFileName)
   };
 
   const handleSaveDataSuccess = () => {
