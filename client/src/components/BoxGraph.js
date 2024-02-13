@@ -69,30 +69,36 @@ function BoxGraph({ boxplotStats }) {
   const formatNumber = (num) => num ? num.toFixed(2) : 'N/A';
 
   return (
-    <div>
-      <svg ref={svgRef} width={460} height={400}></svg>
-      {boxplotStats && (
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th className={styles.th}>최소값</th>
-              <th className={styles.th}>Q1 (25번째 백분위수)</th>
-              <th className={styles.th}>중앙값</th>
-              <th className={styles.th}>Q3 (75번째 백분위수)</th>
-              <th className={styles.th}>최대값</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className={styles.td}>{formatNumber(boxplotStats.min)}</td>
-              <td className={styles.td}>{formatNumber(boxplotStats.q1)}</td>
-              <td className={styles.td}>{formatNumber(boxplotStats.median)}</td>
-              <td className={styles.td}>{formatNumber(boxplotStats.q3)}</td>
-              <td className={styles.td}>{formatNumber(boxplotStats.max)}</td>
-            </tr>
-          </tbody>
-        </table>
-      )}
+    <div className={styles['graphDataContainer']}>
+        <svg ref={svgRef} width={460} height={400}></svg>
+      <div>
+        {boxplotStats && (
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th className={styles.th}>최소값</th>
+                <td className={styles.td}>{formatNumber(boxplotStats.min)}</td>
+              </tr>
+              <tr>
+                <th className={styles.th}>Q1 (25번째 백분위수)</th>
+                <td className={styles.td}>{formatNumber(boxplotStats.q1)}</td>
+              </tr>
+              <tr>
+                <th className={styles.th}>중앙값</th>
+                <td className={styles.td}>{formatNumber(boxplotStats.median)}</td>
+              </tr>
+              <tr>
+                <th className={styles.th}>Q3 (75번째 백분위수)</th>
+                <td className={styles.td}>{formatNumber(boxplotStats.q3)}</td>
+              </tr>
+              <tr>
+                <th className={styles.th}>최대값</th>
+                <td className={styles.td}>{formatNumber(boxplotStats.max)}</td>
+              </tr>
+            </thead>
+          </table>
+        )}
+      </div>
     </div>
   );
 }

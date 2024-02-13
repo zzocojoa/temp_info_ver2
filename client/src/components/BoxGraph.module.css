@@ -1,15 +1,52 @@
 /* client\src\components\BoxGraph.module.css */
 /* BoxGraph.module.css */
 
-.table {
-    border-collapse: collapse;
-    width: auto;
-  }
-  
-  .th,
-  .td {
-    border: 1px solid black;
-    padding: 5px;
-    text-align: center;
-  }
-  
+/* .table {
+  border-collapse: collapse;
+  width: auto;
+}
+
+.th,
+.td {
+  border: 1px solid black;
+  padding: 5px;
+  text-align: center;
+} */
+
+.graphDataContainer {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.leftPanel {
+  width: 70%;
+}
+
+.rightPanel {
+  width: 30%;
+}
+
+table {
+  border-collapse: collapse;
+  text-align: left;
+  line-height: 1.5;
+  border-top: 1px solid #ccc;
+  border-left: 3px solid #369;
+  margin : 20px 10px;
+}
+table th {
+  width: 200px;
+  padding: 10px;
+  vertical-align: top;
+  color: #153d73;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  font-weight: bold;
+}
+table td {
+  width: 150px;
+  padding: 10px;
+  vertical-align: top;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}

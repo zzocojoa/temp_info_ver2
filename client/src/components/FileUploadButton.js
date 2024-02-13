@@ -14,7 +14,7 @@ function FileUploadButton({ onFileSelect }) {
 
   return (
     <div>
-      <label for="file">
+      <label htmlFor="file">
         <div className={styles["fileUpload"]}>파일 업로드하기</div>
       </label>
       <input className={styles['fileUpload-btn']} type="file" id='file' onChange={handleFileChange} accept=".csv" />

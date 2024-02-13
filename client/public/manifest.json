@@ -16,6 +16,18 @@
       "src": "logo512.png",
       "type": "image/png",
       "sizes": "512x512"
+    },
+    {
+      "manifest_version": 2,
+      "name": "Your Extension Name",
+      "version": "1.0",
+      "background": {
+        "scripts": ["background.js"],
+        "persistent": false
+      },
+      "permissions": [
+        "activeTab"
+      ]
     }
   ],
   "start_url": ".",
@@ -23,3 +35,5 @@
   "theme_color": "#000000",
   "background_color": "#ffffff"
 }
+
+

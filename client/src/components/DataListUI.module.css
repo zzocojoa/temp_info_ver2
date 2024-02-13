@@ -1,36 +1,148 @@
 /* DataListUI.module.css */
+
 .DataListUIWrap {
-    max-height: 300px; /* 예를 들어 5개 항목의 총 높이 */
-    overflow-y: auto; /* 스크롤바 표시 */
-    border: 1px solid #ccc; /* 경계선 스타일 */
-    margin: 10px 0; /* 위 아래 여백 */
-    padding: 10px; /* 내부 여백 */
-  }
-  
-  .dataItem {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
-    
-  }
-  
-  .dataItemLabel {
-    margin-left: 8px;
-  }
-  
-  .loadMoreButton,
-  .loadDataButton {
-    display: block;
-    margin: 10px auto;
-    padding: 8px 16px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .loadMoreButton {
-    background-color: #0056b3; /* '더 보기' 버튼에 다른 색상 적용 */
-  }
-  
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e2d1c7;
+  border-radius: 10px;
+  background-color: #e2d1c7;
+  box-shadow: 4px 4px 6px 0 rgb(189, 175, 167, .5),
+  -4px -4px 6px 0 rgb(189, 175, 167, .2)
+}
+
+.dataListContainer {
+  width: inherit;
+  max-height: 1000px;
+  overflow-y: auto;
+  margin: 10px 0;
+  padding: 10px;
+}
+
+.scroll{
+  overflow-y: scroll;
+  /* border: 1px solid black; */
+  box-sizing: border-box;
+  /* color: white; */
+  font-family: 'Nanum Gothic';
+  /* background-color: rgba(0,0,0,0.8); */
+}
+
+/* 스크롤바 설정*/
+.scroll-css::-webkit-scrollbar{
+  width: 20px;
+}
+
+/* 스크롤바 막대 설정*/
+.scroll-css::-webkit-scrollbar-thumb{
+  background-color: rgba(0,0,0,0.8);
+  /* 스크롤바 둥글게 설정    */
+  border-radius: 10px; 
+  border: 7px solid #e2d1c7;
+}
+
+/* 스크롤바 뒷 배경 설정*/
+.scroll-css::-webkit-scrollbar-track{
+  background-color: #e2d1c7;
+}
+
+.dataItem {
+  font-size: 18px;
+  width: auto;
+  margin-bottom: 8px;
+  white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+  overflow: hidden; /* 넘치는 텍스트 숨김 */
+  text-overflow: ellipsis; /* 넘치는 텍스트를 ...으로 표시 */
+}
+
+.dataItem:hover {
+  font-weight: 700;
+}
+
+.dataItemLabel {
+  display: inline-block;
+  margin-left: 8px;
+}
+
+.buttonWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.buttonWrap::before {
+  position: absolute;
+  top: 0;
+  left: 10px;
+  right: 10px;
+  content: "";
+  border-top: 2px dashed #000000;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.loadMoreButton,
+.removeButton,
+.loadDataButton {
+  display: inline-block;
+  margin: 10px 10px;
+  padding: 8px 16px;
+  font-size: 16px;
+  border: 2px solid #263343;
+  border-radius: 10px;
+  padding: 5px 10px;
+  text-align: center;
+  background: #263343;
+  background: linear-gradient(0deg, rgb(38, 51, 67) 0%, rgb(29, 39, 51) 100%);
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.loadMoreButton:before {
+  height: 0%;
+  width: 2px;
+}
+
+.removeButton:before {
+  height: 0%;
+  width: 2px;
+}
+
+.loadDataButton:before {
+  height: 0%;
+  width: 2px;
+}
+
+.loadMoreButton:hover {
+  font-weight: 700;
+  box-shadow: 4px 4px 6px 0 rgba(255, 255, 255, .5),
+    -4px -4px 6px 0 rgba(116, 125, 136, .5),
+    inset -4px -4px 6px 0 rgba(255, 255, 255, .2),
+    inset 4px 4px 6px 0 rgba(0, 0, 0, .4);
+}
+
+.removeButton:hover {
+  font-weight: 700;
+  box-shadow: 4px 4px 6px 0 rgba(255, 255, 255, .5),
+    -4px -4px 6px 0 rgba(116, 125, 136, .5),
+    inset -4px -4px 6px 0 rgba(255, 255, 255, .2),
+    inset 4px 4px 6px 0 rgba(0, 0, 0, .4);
+}
+
+.loadDataButton:hover {
+  font-weight: 700;
+  box-shadow: 4px 4px 6px 0 rgba(255, 255, 255, .5),
+    -4px -4px 6px 0 rgba(116, 125, 136, .5),
+    inset -4px -4px 6px 0 rgba(255, 255, 255, .2),
+    inset 4px 4px 6px 0 rgba(0, 0, 0, .4);
+}
+
+.loadMoreButton {
+  background-color: #0056b3;
+  /* '더 보기' 버튼에 다른 색상 적용 */
+}
