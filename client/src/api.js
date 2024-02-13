@@ -64,12 +64,11 @@ export async function fetchDataDetails(dataId) {
 
 // 데이터 삭제
 export async function deleteData(dataId) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/data/${dataId}/delete`, {
-      method: 'DELETE',
-    });
-    return response.json(); // 삭제 결과 반환
-  } catch (error) {
-    console.error('Error deleting data:', error);
+  const response = await fetch(`${API_BASE_URL}/data/${dataId}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
   }
+  return await response.json();
 }

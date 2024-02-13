@@ -4,22 +4,23 @@ import React from 'react';
 import {
   Line, LineChart, XAxis, YAxis, CartesianGrid, Legend, Brush
 } from 'recharts';
+import styles from './LineGraph.module.css'
 
 function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange }) {
 
   return (
     <>
-      <div>
+      <div className={styles['NumberWrap']}>
         <label>
-          W_number:
+          <p>W_number:</p>
           <input type="text" value={wNumber} onChange={(e) => onDetailsChange('wNumber', e.target.value)} />
         </label>
         <label>
-          DW_number:
+          <p>DW_number:</p>
           <input type="text" value={dwNumber} onChange={(e) => onDetailsChange('dwNumber', e.target.value)} />
         </label>
         <label>
-          Die_number:
+          <p>Die_number:</p>
           <input type="text" value={dieNumber} onChange={(e) => onDetailsChange('dieNumber', e.target.value)} />
         </label>
       </div>

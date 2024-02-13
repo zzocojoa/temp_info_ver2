@@ -1,6 +1,7 @@
 // src/components/SaveCsvDataButton.js
 
 import React from 'react';
+import styles from './SaveCsvDataButton.module.css'
 import { saveData } from '../api';
 
 function SaveCsvDataButton({ data, fileName, onSaveSuccess }) {
@@ -47,7 +48,7 @@ function SaveCsvDataButton({ data, fileName, onSaveSuccess }) {
   };
 
   return (
-    <button onClick={handleSaveData}>Download CSV</button>
+    <button className={styles['DownloadBtn']} onClick={handleSaveData}>Download CSV</button>
   );
 }
 
