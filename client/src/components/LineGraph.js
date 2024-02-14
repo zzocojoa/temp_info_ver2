@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import styles from './LineGraph.module.css'
 
-function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange }) {
+function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange, onBrushChange }) {
   const [chartSize, setChartSize] = useState({ width: 500, height: 300 });
 
   useEffect(() => {
@@ -23,6 +23,15 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const handleBrush = (e) => {
+    // Brush 컴포넌트에서 제공하는 startIndex와 endIndex를 사용하여 선택된 데이터 범위 캡처
+    if (e && e.startIndex !== undefined && e.endIndex !== undefined) {
+      // 선택된 데이터의 범위를 onBrushChange를 통해 상위 컴포넌트로 전달
+      onBrushChange(e.startIndex, e.endIndex);
+    }
+  };
+
   return (
     <>
       <div className={styles['NumberWrap']}>
@@ -52,7 +61,7 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
         <YAxis />
         <Legend />
         <Line type="monotone" dataKey="Temperature" stroke="#8884d8" />
-        <Brush dataKey="Time" height={30} stroke="#8884d8" />
+        <Brush dataKey="Time" height={30} stroke="#8884d8" onChange={handleBrush} />
       </LineChart>
     </>
   );

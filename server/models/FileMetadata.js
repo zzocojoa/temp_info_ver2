@@ -1,3 +1,5 @@
+// server\models\FileMetadata.js
+
 const mongoose = require('mongoose');
 
 const fileMetadataSchema = new mongoose.Schema({

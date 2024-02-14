@@ -12,6 +12,7 @@ import styles from './GraphDataPage.module.css';
 function GraphDataPage() {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [graphData, setGraphData] = useState([]);
+  const [selectedRange, setSelectedRange] = useState({ start: 0, end: 0 });
   const [boxPlotData, setBoxPlotData] = useState(null);
   const [uploadedFileName, setUploadedFileName] = useState('');
   const [details, setDetails] = useState({
@@ -46,6 +47,11 @@ function GraphDataPage() {
     // setIsDataSaved(true);
   };
 
+  const handleBrushChange = (startIndex, endIndex) => {
+    // 선택된 데이터 범위를 상태로 저장
+    setSelectedRange({ start: startIndex, end: endIndex });
+  };
+
   return (
     <div className={styles.graphDataWrap}>
       <div className={styles.graphDataContainer}>
@@ -58,6 +64,7 @@ function GraphDataPage() {
                 data={{ graphData, boxPlotData, numbering: details }}
                 fileName={uploadedFileName}
                 onSaveSuccess={handleSaveDataSuccess}
+                selectedRange={selectedRange}
               />
               <LineGraph
                 averagedData={graphData}
@@ -65,6 +72,7 @@ function GraphDataPage() {
                 dwNumber={details.dwNumber}
                 dieNumber={details.dieNumber}
                 onDetailsChange={(key, value) => setDetails({ ...details, [key]: value })}
+                onBrushChange={handleBrushChange} // LineGraph에 handleBrushChange 함수 전달
               />
               <BoxGraph boxplotStats={boxPlotData} />
             </>
