@@ -7,7 +7,7 @@ import SaveCsvDataButton from '../components/SaveCsvDataButton';
 import LineGraph from '../components/LineGraph';
 import BoxGraph from '../components/BoxGraph';
 import DataListUI from '../components/DataListUI';
-import styles from './GraphDataPage.module.css';
+import styles from './GraphData.module.css';
 
 function GraphDataPage() {
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -53,9 +53,9 @@ function GraphDataPage() {
   };
 
   return (
-    <div className={styles.graphDataWrap}>
-      <div className={styles.graphDataContainer}>
-        <div className={styles.leftPanel}>
+    <div className={styles['graphDataWrap']}>
+      <div className={styles['graphDataContainer']}>
+        <div className={styles['leftPanel']}>
           <FileUploadButton onFileSelect={handleFileSelect} />
           <UploadDataButton selectedFile={uploadedFile} onUploadSuccess={handleUploadSuccess} isEnabled={!!uploadedFile} />
           {graphData.length > 0 && (
@@ -78,10 +78,9 @@ function GraphDataPage() {
             </>
           )}
         </div>
-        <div className={styles.rightPanel}>
+        <div className={styles['rightPanel']}>
           <DataListUI />
         </div>
-        {/* </div> */}
       </div>
     </div>
   );

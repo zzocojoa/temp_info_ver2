@@ -1,3 +1,10 @@
+
+.timeContaier {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
 .NumberWrap {
   display: flex;
   align-items: center;
@@ -15,4 +22,34 @@ label p {
 label input {
   margin-right: 5px;
   
+}
+
+
+
+.searchWrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 10px;
+  align-items: stretch;
+}
+
+.searchText {
+  width: 15%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700 !important;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #212529;
+  text-align: center;
+  white-space: nowrap;
+  background-color: #e6c8b6;
+  border: 1px solid #dee2e6;
+  border-top-left-radius: 0.375rem;
+  border-bottom-left-radius: 0.375rem;
+  /* border-radius: 0.375rem; */
 }

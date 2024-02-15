@@ -23,7 +23,11 @@ const fileMetadataSchema = new mongoose.Schema({
         dwNumber: String,
         dieNumber: String,
     },
-    filedate: String
+    filedate: String,
+    selectedRange: {
+        start: Number,
+        end: Number,
+    }
 });
 
 const FileMetadata = mongoose.model('FileMetadata', fileMetadataSchema);
