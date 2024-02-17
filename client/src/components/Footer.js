@@ -1,3 +1,5 @@
+// client/src/components/Footer.js
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Footer.module.css';

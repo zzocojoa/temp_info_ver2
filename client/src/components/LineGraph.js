@@ -11,10 +11,9 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
 
   useEffect(() => {
     const handleResize = () => {
-      // 예: 창 너비의 80%를 그래프의 너비로 설정
       setChartSize({
         width: window.innerWidth * 0.5,
-        height: 400 // 높이는 고정값 또는 비율로 조정 가능
+        height: 400
       });
     };
 

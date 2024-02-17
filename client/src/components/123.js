@@ -16,21 +16,21 @@ function DataListUI() {
       const data = await fetchDataList();
       console.log("Initial data loaded:", data);
       setDataList(data);
-      setFilteredDataList(data); // 초기에는 모든 데이터를 보여줍니다.
+      setFilteredDataList(data); // 초기에는 모든 데이터를 보여줌
     };
     loadDataList();
   }, []);
 
   useEffect(() => {
-    // searchTerm이 변경될 때마다 실행되며, dataList를 기반으로 필터링합니다.
+    // searchTerm이 변경될 때마다 실행, dataList를 기반으로 필터링
     const filtered = dataList.filter(dataItem =>
       `${dataItem.filedate}_${dataItem.numbering?.wNumber ?? ''}_${dataItem.numbering?.dwNumber ?? ''}_${dataItem.numbering?.dieNumber ?? ''}`
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
     );
     console.log("Filtered data:", filtered);
-    setFilteredDataList(filtered); // 필터링된 결과를 저장합니다.
-    setDisplayCount(10); // 검색 후 보여줄 아이템 수를 초기화합니다.
+    setFilteredDataList(filtered); // 필터링된 결과를 저장
+    setDisplayCount(10); // 검색 후 보여줄 아이템 수를 초기화
   }, [searchTerm]);
 
   const handleCheckboxChange = (itemId) => {
