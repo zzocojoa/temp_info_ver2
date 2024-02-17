@@ -73,15 +73,3 @@ export async function deleteData(dataId) {
   }
   return await response.json();
 }
-
-// export async function deleteData(dataId) {
-//   const response = await fetch(`${API_BASE_URL}/data/${dataId}`, {
-//     method: 'DELETE',
-//     headers: { 'Content-Type': 'application/json' },
-//     body: JSON.stringify({ dataId }),
-//   });
-//   if (!response.ok) {
-//     throw new Error('파일 삭제 실패');
-//   }
-//   return response.json();
-// };

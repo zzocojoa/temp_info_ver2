@@ -1,4 +1,4 @@
-// client/src/components/DataListUI.js
+// client\src\components\DataListUI.js
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';

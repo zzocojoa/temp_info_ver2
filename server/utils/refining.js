@@ -7,7 +7,6 @@ function processData(data) {
     let dateCounts = {};
     let temperatures = [];
 
-    // 데이터 전처리 최적화: forEach 대신 for-loop 사용
     for (const item of data) {
         const date = item['date'];
         const time = item['time'];
@@ -16,14 +15,11 @@ function processData(data) {
         if (!isNaN(temperature)) {
             dateCounts[date] = (dateCounts[date] || 0) + 1;
             temperatures.push({ date, time, temperature });
-        } else {
-            // console.log(`유효하지 않은 온도 값: ${rawTemperature}, 해당 행은 무시.`);
         }
     }
 
     const mostDataDate = Object.keys(dateCounts).reduce((a, b) => dateCounts[a] > dateCounts[b] ? a : b);
 
-    // 해당 날짜의 데이터만 필터링
     temperatures = temperatures.filter(item => item.date === mostDataDate);
     const tempValues = temperatures.map(item => item.temperature);
 
@@ -33,7 +29,6 @@ function processData(data) {
     const lowerBound = q1 - 1.5 * iqr;
     const upperBound = q3 + 1.5 * iqr;
 
-    // 필터링 및 데이터 변환
     let filteredData = temperatures.filter(item => item.temperature >= lowerBound && item.temperature <= upperBound)
         .map(item => ({
             Date: item.date,
@@ -41,7 +36,6 @@ function processData(data) {
             Temperature: item.temperature
         }));
     
-    // 데이터 그룹화 및 평균 계산 최적화: 객체 대신 Map 사용
     let groupedData = new Map();
     filteredData.forEach(item => {
         const roundedTime = moment(item.Time, 'HH:mm:ss').startOf('minute').seconds(
@@ -63,16 +57,25 @@ function processData(data) {
         Temperature: entry.sum / entry.count
     }));
 
+    // 여기부터 수정된 부분
+    const temperatureValues = Array.from(groupedData.values()).map(entry => entry.sum / entry.count);
+
+    const min = Math.min(...temperatureValues);
+    const max = Math.max(...temperatureValues);
+    const median = quartile(temperatureValues, 0.5);
+
+    const outliers = temperatureValues.filter(t => t < lowerBound || t > upperBound);
+
     const boxplotStats = {
-        min: tempValues.reduce((min, val) => (val < min ? val : min), tempValues[0]),
+        min,
         q1,
-        median: quartile(tempValues, 0.5),
+        median,
         q3,
-        max: tempValues.reduce((max, val) => (val > max ? val : max), tempValues[0]),
-        outliers: tempValues.filter(t => t < lowerBound || t > upperBound)
+        max,
+        outliers
     };
 
-    // console.log("Refined Data:", boxplotStats);
+    // console.log("averagedData: ", averagedData, "boxplotStats:", boxplotStats);
 
     return { averagedData, boxplotStats };
 }

@@ -1,4 +1,4 @@
-// client/src/pages/ViewDataPage.js
+// client\src\pages\ViewDataPage.js
 
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -6,7 +6,7 @@ import LineGraph from '../components/LineGraph';
 import BoxGraph from '../components/BoxGraph';
 import DataListUI from '../components/DataListUI';
 import { fetchDataDetails } from '../api';
-import styles from './ViewDataPage.module.css'
+import styles from './GraphData.module.css'
 
 function ViewDataPage() {
   const location = useLocation();
@@ -38,10 +38,10 @@ function ViewDataPage() {
   }, [selectedItems]);
 
   return (
-    <div className={styles.graphDataWrap}>
-      <div className={styles.graphDataContainer}>
-        <div className={styles.leftPanel}>
-          <h2>Graph Data Visualization</h2>
+    <div className={styles['graphDataWrap']}>
+      <div className={styles['graphDataContainer']}>
+        <div className={styles['leftPanel']}>
+          <div className={styles['titleName']}>Graph Data Visualization</div>
           {graphData.length > 0 ? <LineGraph averagedData={graphData} /> : <p>Line graph 데이터를 불러오는 중...</p>}
           {boxPlotData.length > 0 ? (
             boxPlotData.map((data, index) => <BoxGraph key={index} boxplotStats={data} />)
@@ -49,10 +49,9 @@ function ViewDataPage() {
             <p>Box plot graph 데이터를 불러오는 중...</p>
           )}
         </div>
-        <div className={styles.rightPanel}>
+        <div className={styles['rightPanel']}>
           <DataListUI />
         </div>
-
       </div>
     </div>
   );
