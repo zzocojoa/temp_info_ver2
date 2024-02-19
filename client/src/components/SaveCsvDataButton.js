@@ -1,5 +1,3 @@
-// src/components/SaveCsvDataButton.js
-
 import React from 'react';
 import styles from './SaveCsvDataButton.module.css';
 import { saveData } from '../api';
@@ -37,16 +35,17 @@ function SaveCsvDataButton({ data, fileName, onSaveSuccess, selectedRange }) {
 
   const handleSaveData = async () => {
     try {
+      // 파일명에서 날짜 추출
       const dateMatch = fileName.match(/\d{4}-\d{2}-\d{2}/);
       const filedate = dateMatch ? dateMatch[0] : new Date().toISOString().split('T')[0];
 
       // 선택된 데이터 범위 정보와 함께 데이터 저장
-      await saveData({ ...data, filedate, selectedRange }); // saveData 함수에 selectedRange를 전달하도록 수정 (API가 이를 처리해야 함)
+      await saveData({ ...data, filedate, selectedRange });
       onSaveSuccess();
+      downloadCsv(data, fileName); // 데이터 저장 성공 후 CSV 다운로드
     } catch (error) {
       alert('Error saving data.');
     }
-    downloadCsv(data, fileName);
   };
 
   return (

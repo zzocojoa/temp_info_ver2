@@ -7,16 +7,13 @@ import {
 import styles from './LineGraph.module.css'
 
 function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange, onBrushChange }) {
-  const [chartSize, setChartSize] = useState({ width: 500, height: 300 });
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [filteredData, setFilteredData] = useState(averagedData);
+  const [chartSize, setChartSize] = useState({ width: 600, height: 300 });
 
-  // 그래프반응형 로직
+  // 그래프 반응형 로직
   useEffect(() => {
     const handleResize = () => {
       setChartSize({
-        width: window.innerWidth * 0.5,
+        width: Math.min(window.innerWidth * 0.9, 1000), // 최대 너비를 1000으로 제한
         height: 400
       });
     };
@@ -26,23 +23,6 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  useEffect(() => {
-    if (startTime && endTime) { // 시작 시간과 끝 시간이 모두 유효한 경우에만 실행
-      const filtered = averagedData.filter(item => {
-        const itemTime = new Date(`1970/01/01 ${item.Time}`).getTime();
-        const startTimeDate = new Date(`1970/01/01 ${startTime}`).getTime();
-        const endTimeDate = new Date(`1970/01/01 ${endTime}`).getTime();
-        return itemTime >= startTimeDate && itemTime <= endTimeDate;
-      });
-
-      if (filtered.length > 0 && (filteredData.length !== filtered.length || filteredData[0].Time !== filtered[0].Time)) {
-        setFilteredData(filtered); // 실제로 필요한 경우에만 상태 업데이트
-        // 필터링된 데이터의 인덱스 범위를 onBrushChange로 전달
-        onBrushChange(averagedData.indexOf(filtered[0]), averagedData.indexOf(filtered[filtered.length - 1]));
-      }
-    }
-  }, [startTime, endTime, averagedData, onBrushChange]);
 
   const handleBrush = (e) => {
     if (e && e.startIndex !== undefined && e.endIndex !== undefined) {
@@ -56,16 +36,6 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
     <>
       <div className={styles['textWrap']}>
         <div className={styles['textContainer']}>
-          <div className={styles['timeContaier']}>
-            <label>
-              <p>Start Time:</p>
-              <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
-            </label>
-            <label>
-              <p>End Time:</p>
-              <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
-            </label>
-          </div>
           <div className={styles['NumberWrap']}>
             <label>
               <p>W_number:</p>
@@ -82,25 +52,35 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
           </div>
         </div>
       </div>
-      <LineChart
+      <LineChart className={styles['lineChart']}
         width={chartSize.width}
         height={chartSize.height}
-        data={filteredData}
+        data={averagedData}
         margin={{
-          top: 5, right: 30, left: 20, bottom: 5
+          top: 5, right: 30, left: 20, bottom: 5,
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
         <Tooltip formatter={temperatureFormatter} />
         <XAxis dataKey="Time" />
-        <YAxis />
+        <YAxis domain={['auto', 'auto']} />
         <Legend />
-        <Line type="monotone" dataKey="Temperature" stroke="#8884d8" />
-        <Brush dataKey="Time" height={30} stroke="#8884d8" onChange={handleBrush} />
+        <Line
+          type="monotone"
+          dataKey="Temperature"
+          stroke="#8884d8"
+          dot={false}
+          activeDot={{ r: 4 }}
+        />
+        <Brush
+          dataKey="Time"
+          height={30}
+          stroke="#8884d8"
+          onChange={handleBrush}
+        />
       </LineChart>
     </>
   );
 }
 
 export default LineGraph;
-
