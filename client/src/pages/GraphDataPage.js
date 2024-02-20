@@ -7,6 +7,7 @@ import SaveCsvDataButton from '../components/SaveCsvDataButton';
 import LineGraph from '../components/LineGraph';
 import BoxGraph from '../components/BoxGraph';
 import DataListUI from '../components/DataListUI';
+import TextInputBox from '../components/TextInputBox';
 import styles from './GraphData.module.css';
 
 function GraphDataPage() {
@@ -19,6 +20,7 @@ function GraphDataPage() {
     wNumber: '',
     dwNumber: '',
     dieNumber: '',
+    additionalInfo: ''
   });
   // const [isDataSaved, setIsDataSaved] = useState(false);
 
@@ -52,6 +54,11 @@ function GraphDataPage() {
     setSelectedRange({ start: startIndex, end: endIndex });
   };
 
+  const handleAdditionalInfoChange = (additionalInfo) => {
+    // 추가 정보를 details 상태에 저장
+    setDetails({ ...details, additionalInfo });
+  };
+
   return (
     <div className={styles['graphDataWrap']}>
       <div className={styles['graphDataContainer']}>
@@ -75,6 +82,10 @@ function GraphDataPage() {
                 onBrushChange={handleBrushChange} // LineGraph에 handleBrushChange 함수 전달
               />
               <BoxGraph boxplotStats={boxPlotData} />
+              <TextInputBox
+                label="추가 정보: "
+                onTextChange={handleAdditionalInfoChange} // 사용자 입력을 처리하기 위한 콜백
+              />
             </>
           )}
         </div>

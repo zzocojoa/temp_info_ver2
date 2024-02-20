@@ -60,24 +60,20 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
 // 데이터 저장 처리
 router.post('/save', async (req, res) => {
-  const { fileName, graphData, boxPlotData, numbering, filedate, selectedRange } = req.body;
-  // 선택된 데이터 범위에 따라 graphData 필터링 (예시에서는 클라이언트로부터 selectedRange를 받는다고 가정)
-  let filteredGraphData = graphData;
-  if (selectedRange && selectedRange.start !== undefined && selectedRange.end !== undefined) {
-    filteredGraphData = graphData.slice(selectedRange.start, selectedRange.end + 1);
-  }
-
+  const { fileName, graphData, boxPlotData, numbering, filedate, selectedRange, additionalInfo } = req.body;
   try {
     const newFileMetadata = new FileMetadata({
       fileName,
-      temperatureData: filteredGraphData, // 필터링된 데이터만 저장
+      temperatureData: graphData,
       boxplotStats: boxPlotData,
       numbering: numbering,
-      filedate,
+      filedate: filedate,
+      selectedRange: selectedRange,
+      additionalInfo: additionalInfo, // 클라이언트에서 받은 추가 정보 저장
     });
     await newFileMetadata.save();
 
-    res.json({ message: 'Selected data saved successfully', data: newFileMetadata });
+    res.json({ message: 'Data saved successfully', data: newFileMetadata });
   } catch (error) {
     console.error('Error saving data:', error);
     res.status(500).send('Error saving data');

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, Tooltip, Brush,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, Tooltip, Brush, ReferenceLine,
 } from 'recharts';
 import styles from './LineGraph.module.css'
 
@@ -31,6 +31,15 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
   };
 
   const temperatureFormatter = (value) => `${value.toFixed(2)}°C`;
+
+  // 중앙값 계산 함수
+  const calculateMedian = (data) => {
+    const temps = data.map(item => item.Temperature).sort((a, b) => a - b);
+    const mid = Math.floor(temps.length / 2);
+    return temps.length % 2 !== 0 ? temps[mid] : (temps[mid - 1] + temps[mid]) / 2;
+  };
+
+  const medianValue = calculateMedian(averagedData);
 
   return (
     <>
@@ -62,8 +71,12 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
       >
         <CartesianGrid strokeDasharray="3 3" />
         <Tooltip formatter={temperatureFormatter} />
-        <XAxis dataKey="Time" />
-        <YAxis domain={['auto', 'auto']} />
+        <XAxis dataKey="Time"
+          // label={{ value: '시간', position: 'insideBottomRight', offset: -20 }}
+        />
+        <YAxis domain={['auto', 'auto']}
+          // label={{ value: '온도', angle: -90, position: 'insideLeft' }}
+        />
         <Legend />
         <Line
           type="monotone"
@@ -78,6 +91,7 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
           stroke="#8884d8"
           onChange={handleBrush}
         />
+        <ReferenceLine y={medianValue} label="Median" stroke="red" strokeDasharray="3 3" />
       </LineChart>
     </>
   );
