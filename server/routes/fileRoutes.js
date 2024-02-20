@@ -95,34 +95,32 @@ router.get('/data-list', async (req, res) => {
 // 특정 데이터 항목의 상세 정보 조회
 router.get('/data/:id', async (req, res) => {
   try {
-    const { id } = req.params; // URL에서 id 파라미터 추출
-    const dataItem = await FileMetadata.findById(id); // MongoDB에서 해당 id를 가진 데이터 조회
-    // console.log("dataItem :", dataItem)
+    const { id } = req.params;
+    const dataItem = await FileMetadata.findById(id);
     if (!dataItem) {
-      return res.status(404).send('Data not found');
+      // 데이터가 존재하지 않을 때 JSON 형식의 응답 반환
+      return res.status(404).json({ message: 'Data not found' });
     }
-
     res.json(dataItem);
   } catch (error) {
+    // 서버 오류 처리
     console.error('Error fetching data item:', error);
-    res.status(500).send('Server error');
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
 // 특정 데이터 항목의 상세 정보 삭제
 router.delete('/data/:id', async (req, res) => {
   try {
-    const id = req.params.id;
-    const deletedItem = await FileMetadata.findByIdAndDelete(id); // 데이터 삭제
-
+    const { id } = req.params;
+    const deletedItem = await FileMetadata.findByIdAndDelete(id);
     if (!deletedItem) {
-      return res.status(404).send({ message: 'Data not found' });
+      return res.status(404).json({ message: 'Data not found' });
     }
-
-    res.send({ message: 'Data successfully removed' }); // 성공 메시지 반환
+    res.json({ message: 'Data successfully removed' });
   } catch (error) {
     console.error('Error removing data:', error);
-    res.status(500).send('Internal server error');
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 

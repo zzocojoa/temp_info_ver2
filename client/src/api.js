@@ -19,21 +19,21 @@ export async function uploadFile(file) {
 }
 
 // 데이터 저장 API
-export async function saveData(data) {
+export async function updateData(id, data) {
   try {
-    const response = await fetch(`${API_BASE_URL}/save`, {
-      method: 'POST',
+    const response = await fetch(`http://localhost:5000/api/data/${id}`, {
+      method: 'PATCH', // 또는 'PUT', 서버 구현에 따라 다름
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
     });
     if (!response.ok) {
-      throw new Error('Failed to save data');
+      throw new Error('Failed to update data');
     }
-    return await response.json(); // 저장 성공 결과 반환
+    return await response.json(); // 수정 성공 결과 반환
   } catch (error) {
-    console.error('Error saving data:', error);
+    console.error('Error updating data:', error);
     throw error; // 에러를 다시 던져 컴포넌트에서 처리할 수 있게 함
   }
 }
@@ -72,4 +72,23 @@ export async function deleteData(dataId) {
     throw new Error('Network response was not ok');
   }
   return await response.json();
+}
+
+export async function saveData(data) {
+  try {
+    const response = await fetch(`http://localhost:5000/api/save`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to save data');
+    }
+    return await response.json(); // 저장 성공 결과 반환
+  } catch (error) {
+    console.error('Error saving data:', error);
+    throw error; // 에러를 다시 던져 컴포넌트에서 처리할 수 있게 함
+  }
 }
