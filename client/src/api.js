@@ -21,8 +21,8 @@ export async function uploadFile(file) {
 // 데이터 저장 API
 export async function updateData(id, data) {
   try {
-    const response = await fetch(`http://localhost:5000/api/data/${id}`, {
-      method: 'PATCH', // 또는 'PUT', 서버 구현에 따라 다름
+    const response = await fetch(`${API_BASE_URL}/save/${id}`, {
+      method: 'POST', // 또는 'PUT', 서버 구현에 따라 다름
       headers: {
         'Content-Type': 'application/json',
       },

@@ -1,29 +1,28 @@
 // client\src\components\SaveCsvDataButton.js
 
 import React from 'react';
-import styles from './SaveCsvDataButton.module.css';
+import styles from './SaveCsvDataButton.module.css'
 import { saveData } from '../api';
 
-function SaveCsvDataButton({ data, fileName, onSaveSuccess, selectedRange, details }) {
+function SaveCsvDataButton({ data, fileName, onSaveSuccess }) {
   const downloadCsv = (data, fileName) => {
-    // 안전한 사용을 위해 selectedRange가 undefined일 경우 전체 범위를 사용
-    const { start = 0, end = data.graphData.length - 1 } = selectedRange || {};
+    // numbering 정보가 있는 경우 해당 값을 사용하고, 없는 경우 기본값 사용
+    const { wNumber = 'N/A', dwNumber = 'N/A', dieNumber = 'N/A' } = data.numbering || {};
+    const { graphData } = data;
 
-    // 선택된 범위에 따라 데이터 필터링
-    const filteredData = data.graphData.slice(start, end + 1);
+    // 파일명에서 날짜 추출
+    const dateMatch = fileName.match(/\d{4}-\d{2}-\d{2}/);
+    const dateFromFileName = dateMatch ? dateMatch[0] : new Date().toISOString().split('T')[0];
 
-    // CSV 파일 생성 로직
+    const finalFileName = `${dateFromFileName}_${wNumber}_${dwNumber}_${dieNumber}.csv`;
+    console.log("finalFileName :", finalFileName);
     let csvContent = "data:text/csv;charset=utf-8,Date,Time,Temperature\n";
-    filteredData.forEach(row => {
+
+    // graphData가 정의되지 않았을 경우를 처리
+    (graphData || []).forEach(row => {
       const { Date, Time, Temperature } = row;
       csvContent += `${Date},${Time},${Temperature}\n`;
     });
-
-    // 파일명에서 날짜 추출 및 최종 파일명 구성
-    const dateMatch = fileName.match(/\d{4}-\d{2}-\d{2}/);
-    const dateFromFileName = dateMatch ? dateMatch[0] : new Date().toISOString().split('T')[0];
-    const { wNumber = 'N/A', dwNumber = 'N/A', dieNumber = 'N/A' } = data.numbering || {};
-    const finalFileName = `${dateFromFileName}_${wNumber}_${dwNumber}_${dieNumber}.csv`;
 
     // CSV 파일 다운로드 로직
     const encodedUri = encodeURI(csvContent);
@@ -42,7 +41,7 @@ function SaveCsvDataButton({ data, fileName, onSaveSuccess, selectedRange, detai
 
       // 선택된 데이터 범위 정보와 함께 데이터 저장
       // 여기서 details (사용자 입력 데이터)를 포함시켜 서버로 전송
-      await saveData({ ...data, filedate, selectedRange, numbering: { ...data.numbering, ...details } });
+      await saveData({ ...data, filedate });
       onSaveSuccess();
       downloadCsv(data, fileName); // 데이터 저장 성공 후 CSV 다운로드
     } catch (error) {
