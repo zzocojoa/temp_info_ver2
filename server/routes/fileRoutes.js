@@ -60,16 +60,15 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
 // 데이터 저장 처리
 router.post('/save', async (req, res) => {
-  const { fileName, graphData, boxPlotData, numbering, filedate, selectedRange, additionalInfo } = req.body;
+  const { fileName, graphData, boxPlotData, numbering, filedate } = req.body;
+  // console.log("Received numbering:", filedate);
   try {
     const newFileMetadata = new FileMetadata({
       fileName,
       temperatureData: graphData,
       boxplotStats: boxPlotData,
       numbering: numbering,
-      filedate: filedate,
-      selectedRange: selectedRange,
-      additionalInfo: additionalInfo, // 클라이언트에서 받은 추가 정보 저장
+      filedate,
     });
     await newFileMetadata.save();
 
@@ -95,32 +94,34 @@ router.get('/data-list', async (req, res) => {
 // 특정 데이터 항목의 상세 정보 조회
 router.get('/data/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const dataItem = await FileMetadata.findById(id);
+    const { id } = req.params; // URL에서 id 파라미터 추출
+    const dataItem = await FileMetadata.findById(id); // MongoDB에서 해당 id를 가진 데이터 조회
+    // console.log("dataItem :", dataItem)
     if (!dataItem) {
-      // 데이터가 존재하지 않을 때 JSON 형식의 응답 반환
-      return res.status(404).json({ message: 'Data not found' });
+      return res.status(404).send('Data not found');
     }
+
     res.json(dataItem);
   } catch (error) {
-    // 서버 오류 처리
     console.error('Error fetching data item:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).send('Server error');
   }
 });
 
 // 특정 데이터 항목의 상세 정보 삭제
 router.delete('/data/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const deletedItem = await FileMetadata.findByIdAndDelete(id);
+    const id = req.params.id;
+    const deletedItem = await FileMetadata.findByIdAndDelete(id); // 데이터 삭제
+
     if (!deletedItem) {
-      return res.status(404).json({ message: 'Data not found' });
+      return res.status(404).send({ message: 'Data not found' });
     }
-    res.json({ message: 'Data successfully removed' });
+
+    res.send({ message: 'Data successfully removed' }); // 성공 메시지 반환
   } catch (error) {
     console.error('Error removing data:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).send('Internal server error');
   }
 });
 

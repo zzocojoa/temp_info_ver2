@@ -1,4 +1,4 @@
-// server\models\FileMetadata.js
+// server/models/FileMetadata.js
 
 const mongoose = require('mongoose');
 
@@ -23,12 +23,7 @@ const fileMetadataSchema = new mongoose.Schema({
         dwNumber: String,
         dieNumber: String,
     },
-    additionalInfo: String, // 추가 정보를 저장하는 필드
-    filedate: String,
-    selectedRange: {
-        start: Number,
-        end: Number,
-    }
+    filedate: String
 });
 
 const FileMetadata = mongoose.model('FileMetadata', fileMetadataSchema);
