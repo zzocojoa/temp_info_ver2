@@ -33,7 +33,7 @@ function DataListUI() {
     // console.log("Filtered data:", filtered);
     setFilteredDataList(filtered); // 필터링된 결과를 저장
     setDisplayCount(10); // 검색 후 보여줄 아이템 수를 초기화
-  }, [searchTerm]);
+  }, [searchTerm, dataList]);
 
   const handleCheckboxChange = (itemId) => {
     setSelectedItems(prev => prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]);

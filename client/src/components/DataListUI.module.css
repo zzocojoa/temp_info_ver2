@@ -20,12 +20,6 @@
   align-items: stretch;
 }
 
-/* .searchContainer {
-  flex: 1 1 auto;
-  width: 1%;
-  min-width: 0;
-} */
-
 .searchText {
   width: 15%;
   display: flex;
@@ -53,7 +47,6 @@
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.5;
-  /* color: var(--bs-body-color); */
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;

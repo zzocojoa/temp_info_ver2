@@ -41,7 +41,7 @@ function ViewDataPage() {
     <div className={styles.graphDataWrap}>
       <div className={styles.graphDataContainer}>
         <div className={styles.leftPanel}>
-          <h2>Graph Data Visualization</h2>
+          <h2 className={styles.headerTitle}>Graph Data Visualization</h2>
           {graphData.length > 0 ? <LineGraph averagedData={graphData} /> : <p>Line graph 데이터를 불러오는 중...</p>}
           {boxPlotData.length > 0 ? (
             boxPlotData.map((data, index) => <BoxGraph key={index} boxplotStats={data} />)

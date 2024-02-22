@@ -1,5 +1,9 @@
 /* FileUploadButton.css - 파일 업로드 버튼 컴포넌트 스타일 */
 
+.fileUploadWrap {
+  /* display: inline-block; */
+}
+
 .fileUpload-btn {
   display: none;
 }
@@ -30,40 +34,3 @@
     inset -4px -4px 6px 0 rgba(255, 255, 255, .2),
     inset 4px 4px 6px 0 rgba(0, 0, 0, .4);
 }
-
-
-/* .fileUpload {
-  border: none;
-  color: #000;
-}
-
-.fileUpload:after {
-  position: absolute;
-  content: "";
-  width: 0;
-  height: 100%;
-  top: 0;
-  left: 0;
-  direction: rtl;
-  z-index: -1;
-  box-shadow:
-    -7px -7px 20px 0px #fff9,
-    -4px -4px 5px 0px #fff9,
-    7px 7px 20px 0px #0002,
-    4px 4px 5px 0px #0001;
-  transition: all 0.3s ease;
-}
-
-.fileUpload:hover {
-  color: #000;
-}
-
-.fileUpload:hover:after {
-  left: auto;
-  right: 0;
-  width: 100%;
-}
-
-.fileUpload:active {
-  top: 2px;
-} */

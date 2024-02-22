@@ -1,8 +1,25 @@
 /* client\src\components\BoxGraph.module.css */
 
-.graphDataContainer {
+.graphDataWrap {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.graphDataTable {
+  border: 1px solid #e2d1c7;
+  border-radius: 10px;
+  background-color: #e2d1c7;
+  box-shadow: 4px 4px 6px 0 rgb(189, 175, 167, .5),
+    -4px -4px 6px 0 rgb(189, 175, 167, .2)
+}
+
+.graphDataSVG {
+  border: 1px solid #e2d1c7;
+  border-radius: 10px;
+  background-color: #e2d1c7;
+  box-shadow: 4px 4px 6px 0 rgb(189, 175, 167, .5),
+    -4px -4px 6px 0 rgb(189, 175, 167, .2)
 }
 
 .leftPanel {

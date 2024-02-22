@@ -13,7 +13,7 @@ function FileUploadButton({ onFileSelect }) {
   };
 
   return (
-    <div>
+    <div className={styles["fileUploadWrap"]}>
       <label htmlFor="file">
         <div className={styles["fileUpload"]}>파일 업로드하기</div>
       </label>

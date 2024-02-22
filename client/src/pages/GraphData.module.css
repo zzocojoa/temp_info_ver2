@@ -6,6 +6,11 @@
   padding-bottom: 80px;
 }
 
+.headerTitle {
+  font-size: 30px;
+  margin-bottom: 20px;
+}
+
 .graphDataContainer {
   display: flex;
   /* align-items: center; */

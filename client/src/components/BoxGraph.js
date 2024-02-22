@@ -69,9 +69,11 @@ function BoxGraph({ boxplotStats }) {
   const formatNumber = (num) => num ? num.toFixed(2) : 'N/A';
 
   return (
-    <div className={styles['graphDataContainer']}>
+    <div className={styles['graphDataWrap']}>
+      <div className={styles['graphDataSVG']}>
         <svg ref={svgRef} width={460} height={400}></svg>
-      <div>
+      </div>
+      <div className={styles['graphDataTable']}>
         {boxplotStats && (
           <table className={styles.table}>
             <thead>

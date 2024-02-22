@@ -46,7 +46,37 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
       <div className={styles['textWrap']}>
         <div className={styles['textContainer']}>
           <div className={styles['NumberWrap']}>
-            <label>
+            <div className={styles['ExWrap']}>
+              <span className={styles['ExNumber']}>W_Number</span>
+              <input
+                type="text"
+                placeholder="0000"
+                className={styles['ExInfo']}
+                value={wNumber}
+                onChange={(e) => onDetailsChange('wNumber', e.target.value)}
+              />
+            </div>
+            <div className={styles['ExWrap']}>
+              <span className={styles['ExNumber']}>DW_Number</span>
+              <input
+                type="text"
+                placeholder="0000"
+                className={styles['ExInfo']}
+                value={dwNumber}
+                onChange={(e) => onDetailsChange('dwNumber', e.target.value)}
+              />
+            </div>
+            <div className={styles['ExWrap']}>
+              <span className={styles['ExNumber']}>Die_Number</span>
+              <input
+                type="text"
+                placeholder="0000"
+                className={styles['ExInfo']}
+                value={dieNumber}
+                onChange={(e) => onDetailsChange('dieNumber', e.target.value)}
+              />
+            </div>
+            {/* <label>
               <p>W_number:</p>
               <input type="text" value={wNumber} onChange={(e) => onDetailsChange('wNumber', e.target.value)} />
             </label>
@@ -57,7 +87,7 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
             <label>
               <p>Die_number:</p>
               <input type="text" value={dieNumber} onChange={(e) => onDetailsChange('dieNumber', e.target.value)} />
-            </label>
+            </label> */}
           </div>
         </div>
       </div>
