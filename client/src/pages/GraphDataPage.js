@@ -67,9 +67,9 @@ function GraphDataPage() {
             <>
               <SaveCsvDataButton
                 data={{
-                  graphData: graphData.filter((_, index) =>
-                    index >= selectedRange.start && index <= selectedRange.end
-                  ),
+                  graphData: selectedRange.start !== 0 || selectedRange.end !== 0 ?
+                    graphData.slice(selectedRange.start, selectedRange.end + 1) :
+                    graphData,
                   boxPlotData,
                   numbering: details,
                   userInput
@@ -93,7 +93,11 @@ function GraphDataPage() {
         <div className={styles['rightPanel']}>
           <DataListUI />
           {isGraphGenerated && (
-            <TextInputBox value={userInput} onTextChange={setUserInput} />
+            <TextInputBox
+              value={userInput}
+              onTextChange={setUserInput}
+              showSaveButton={false}
+            />
           )}
         </div>
       </div>

@@ -3,7 +3,7 @@
 import React from 'react';
 import styles from './TextInputBox.module.css';
 
-function TextInputBox({ value, onTextChange, onSave }) {
+function TextInputBox({ value, onTextChange, onSave, showSaveButton }) {
   const handleChange = (event) => {
     onTextChange(event.target.value);
   };
@@ -12,13 +12,15 @@ function TextInputBox({ value, onTextChange, onSave }) {
     <div className={styles['textBoxUIWrap']}>
       <div className={styles['textBoxUIContainer']}>
         <div className={styles['textBoxUITitle']}>
-          <h3>상세 정보 입력</h3>
-          <button
-            className={styles['resaveDataButton']}
-            onClick={onSave}
-            style={{ marginTop: '10px' }}>
-            저장
-          </button>
+          <h3 className={styles['title']}>상세 정보 입력</h3>
+          {showSaveButton && (
+            <button
+              className={styles['resaveDataButton']}
+              onClick={onSave}
+              style={{ marginTop: '10px' }}>
+              저장
+            </button>
+          )}
         </div>
         <textarea
           className={styles['textBoxTextarea']}

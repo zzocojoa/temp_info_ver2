@@ -4,11 +4,11 @@ import React from 'react';
 import styles from './SaveCsvDataButton.module.css'
 import { saveData } from '../api';
 
-function SaveCsvDataButton({ data, fileName, onSaveSuccess }) {
+function SaveCsvDataButton({ data, fileName, onSaveSuccess, selectedRange }) {
   const downloadCsv = (data, fileName) => {
     // numbering 정보가 있는 경우 해당 값을 사용하고, 없는 경우 기본값 사용
     const { wNumber = 'N/A', dwNumber = 'N/A', dieNumber = 'N/A' } = data.numbering || {};
-    const { graphData } = data;
+    const graphData = data.graphData;
 
     // 파일명에서 날짜 추출
     const dateMatch = fileName.match(/\d{4}-\d{2}-\d{2}/);

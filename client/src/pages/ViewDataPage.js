@@ -67,7 +67,13 @@ function ViewDataPage() {
         <div className={styles['rightPanel']}>
           <DataListUI />
           <div className={styles['textBoxWrap']}>
-            <TextInputBox className={styles['textBox']} value={userInput} onTextChange={setUserInput} onSave={handleSaveData} />
+            <TextInputBox
+              className={styles['textBox']}
+              value={userInput}
+              onTextChange={setUserInput}
+              onSave={handleSaveData}
+              showSaveButton={true}
+            />
           </div>
         </div>
       </div>
