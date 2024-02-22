@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom';
 import LineGraph from '../components/LineGraph';
 import BoxGraph from '../components/BoxGraph';
 import DataListUI from '../components/DataListUI';
+import TextInputBox from '../components/TextInputBox';
 import { fetchDataDetails } from '../api';
 import styles from './GraphData.module.css'
 
@@ -13,6 +14,7 @@ function ViewDataPage() {
   const { selectedItems } = location.state || {};
   const [graphData, setGraphData] = useState([]);
   const [boxPlotData, setBoxPlotData] = useState([]);
+  const [userInput, setUserInput] = useState('');
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -48,6 +50,7 @@ function ViewDataPage() {
           ) : (
             <p>Box plot graph 데이터를 불러오는 중...</p>
           )}
+          <TextInputBox label="추가 정보:" value={userInput} onTextChange={setUserInput} />
         </div>
         <div className={styles.rightPanel}>
           <DataListUI />

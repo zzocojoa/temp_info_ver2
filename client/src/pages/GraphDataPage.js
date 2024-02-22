@@ -1,4 +1,5 @@
 // src/pages/GraphDataPage.js
+
 import React, { useState } from 'react';
 import FileUploadButton from '../components/FileUploadButton';
 import UploadDataButton from '../components/UploadDataButton';
@@ -6,6 +7,7 @@ import SaveCsvDataButton from '../components/SaveCsvDataButton';
 import LineGraph from '../components/LineGraph';
 import BoxGraph from '../components/BoxGraph';
 import DataListUI from '../components/DataListUI';
+import TextInputBox from '../components/TextInputBox';
 import styles from './GraphData.module.css';
 
 function GraphDataPage() {
@@ -14,6 +16,7 @@ function GraphDataPage() {
   const [selectedRange, setSelectedRange] = useState({ start: 0, end: 0 });
   const [boxPlotData, setBoxPlotData] = useState(null);
   const [uploadedFileName, setUploadedFileName] = useState('');
+  const [userInput, setUserInput] = useState('');
   const [details, setDetails] = useState({
     wNumber: '',
     dwNumber: '',
@@ -28,6 +31,7 @@ function GraphDataPage() {
     setUploadedFile(file);
     setGraphData([]);
     setBoxPlotData(null);
+    setUserInput('');
     // setIsDataSaved(false);
   };
   const handleUploadSuccess = async (averagedData, boxplotStats, uploadedFileName) => {
@@ -56,7 +60,14 @@ function GraphDataPage() {
           {graphData.length > 0 && (
             <>
               <SaveCsvDataButton
-                data={{ graphData, boxPlotData, numbering: details }}
+                data={{
+                  graphData: graphData.filter((_, index) =>
+                    index >= selectedRange.start && index <= selectedRange.end
+                  ),
+                  boxPlotData,
+                  numbering: details,
+                  userInput
+                }}
                 fileName={uploadedFileName}
                 onSaveSuccess={handleSaveDataSuccess}
                 selectedRange={selectedRange}
@@ -72,6 +83,7 @@ function GraphDataPage() {
               <BoxGraph boxplotStats={boxPlotData} />
             </>
           )}
+          <TextInputBox label="추가 정보:" onTextChange={setUserInput} />
         </div>
         <div className={styles['rightPanel']}>
           <DataListUI />

@@ -60,7 +60,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
 // 데이터 저장 처리
 router.post('/save', async (req, res) => {
-  const { fileName, graphData, boxPlotData, numbering, filedate } = req.body;
+  const { fileName, graphData, boxPlotData, numbering, filedate, userInput } = req.body;
   // console.log("Received numbering:", filedate);
   try {
     const newFileMetadata = new FileMetadata({
@@ -69,6 +69,7 @@ router.post('/save', async (req, res) => {
       boxplotStats: boxPlotData,
       numbering: numbering,
       filedate,
+      userInput,
     });
     await newFileMetadata.save();
 
@@ -93,9 +94,10 @@ router.get('/data-list', async (req, res) => {
 
 // 특정 데이터 항목의 상세 정보 조회
 router.get('/data/:id', async (req, res) => {
+  const { id } = req.params;
+  const { userInput } = req.body;
   try {
-    const { id } = req.params; // URL에서 id 파라미터 추출
-    const dataItem = await FileMetadata.findById(id); // MongoDB에서 해당 id를 가진 데이터 조회
+    const dataItem = await FileMetadata.findByIdAndUpdate(id, { $set: { userInput } }, { new: true });
     // console.log("dataItem :", dataItem)
     if (!dataItem) {
       return res.status(404).send('Data not found');

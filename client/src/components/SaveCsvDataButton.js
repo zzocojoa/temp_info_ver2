@@ -38,8 +38,9 @@ function SaveCsvDataButton({ data, fileName, onSaveSuccess }) {
     try {
       const dateMatch = fileName.match(/\d{4}-\d{2}-\d{2}/);
       const filedate = dateMatch ? dateMatch[0] : new Date().toISOString().split('T')[0]; // 파일명에서 날짜 추출
+      const { userInput } = data;
 
-      await saveData({ ...data, filedate });
+      await saveData({ ...data, filedate, userInput });
       onSaveSuccess();
     } catch (error) {
       alert('Error saving data.');

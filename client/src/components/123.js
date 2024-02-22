@@ -103,9 +103,11 @@
 //   const formatNumber = (num) => num ? num.toFixed(2) : 'N/A';
 
 //   return (
-//     <div className={styles['graphDataContainer']}>
+//     <div className={styles['graphDataWrap']}>
+//       <div className={styles['graphDataSVG']}>
 //         <svg ref={svgRef} width={460} height={400}></svg>
-//       <div>
+//       </div>
+//       <div className={styles['graphDataTable']}>
 //         {boxplotStats && (
 //           <table className={styles.table}>
 //             <thead>
@@ -239,7 +241,7 @@
 //   };
 
 //   return (
-//     <div>
+//     <div className={styles["fileUploadWrap"]}>
 //       <label htmlFor="file">
 //         <div className={styles["fileUpload"]}>파일 업로드하기</div>
 //       </label>
@@ -252,7 +254,7 @@
 // export default FileUploadButton;
 // ```
 // ```
-// // client\src\components\DataListUI.js
+// // client/src/components/DataListUI.js
 
 // import React, { useEffect, useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
@@ -287,7 +289,7 @@
 //     // console.log("Filtered data:", filtered);
 //     setFilteredDataList(filtered); // 필터링된 결과를 저장
 //     setDisplayCount(10); // 검색 후 보여줄 아이템 수를 초기화
-//   }, [searchTerm]);
+//   }, [searchTerm, dataList]);
 
 //   const handleCheckboxChange = (itemId) => {
 //     setSelectedItems(prev => prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]);
@@ -390,34 +392,31 @@
 // export default TextInputBox;
 // ```
 // ```
-// // client\src\components\SaveCsvDataButton.js
+// // src/components/SaveCsvDataButton.js
 
 // import React from 'react';
-// import styles from './SaveCsvDataButton.module.css';
+// import styles from './SaveCsvDataButton.module.css'
 // import { saveData } from '../api';
 
-// function SaveCsvDataButton({ data, fileName, onSaveSuccess, selectedRange, details }) {
+// function SaveCsvDataButton({ data, fileName, onSaveSuccess }) {
 //   const downloadCsv = (data, fileName) => {
-//     // 안전한 사용을 위해 selectedRange가 undefined일 경우 전체 범위를 사용
-//     const { start = 0, end = data.graphData.length - 1 } = selectedRange || {};
+//     // numbering 정보가 있는 경우 해당 값을 사용하고, 없는 경우 기본값 사용
+//     const { wNumber = 'N/A', dwNumber = 'N/A', dieNumber = 'N/A' } = data.numbering || {};
+//     const { graphData } = data;
 
-//     // 선택된 범위에 따라 데이터 필터링
-//     const filteredData = data.graphData.slice(start, end + 1);
-
-//     // CSV 파일 생성 로직
-//     let csvContent = "data:text/csv;charset=utf-8,Date,Time,Temperature\n";
-//     filteredData.forEach(row => {
-//       const { Date, Time, Temperature } = row;
-//       const formattedTemperature = Temperature.toFixed(2); // 소수점 둘째 자리까지 포매팅
-//       csvContent += `${Date},${Time},${formattedTemperature}\n`;
-//     });
-
-
-//     // 파일명에서 날짜 추출 및 최종 파일명 구성
+//     // 파일명에서 날짜 추출
 //     const dateMatch = fileName.match(/\d{4}-\d{2}-\d{2}/);
 //     const dateFromFileName = dateMatch ? dateMatch[0] : new Date().toISOString().split('T')[0];
-//     const { wNumber = 'N/A', dwNumber = 'N/A', dieNumber = 'N/A' } = data.numbering || {};
+
 //     const finalFileName = `${dateFromFileName}_${wNumber}_${dwNumber}_${dieNumber}.csv`;
+//     console.log("finalFileName :", finalFileName);
+//     let csvContent = "data:text/csv;charset=utf-8,Date,Time,Temperature\n";
+
+//     // graphData가 정의되지 않았을 경우를 처리
+//     (graphData || []).forEach(row => {
+//       const { Date, Time, Temperature } = row;
+//       csvContent += `${Date},${Time},${Temperature}\n`;
+//     });
 
 //     // CSV 파일 다운로드 로직
 //     const encodedUri = encodeURI(csvContent);
@@ -432,17 +431,14 @@
 //   const handleSaveData = async () => {
 //     try {
 //       const dateMatch = fileName.match(/\d{4}-\d{2}-\d{2}/);
-//       const filedate = dateMatch ? dateMatch[0] : new Date().toISOString().split('T')[0];
+//       const filedate = dateMatch ? dateMatch[0] : new Date().toISOString().split('T')[0]; // 파일명에서 날짜 추출
 
-//       // 선택된 데이터 범위 정보와 함께 데이터 저장
-//       // 여기서 details (사용자 입력 데이터)를 포함시켜 서버로 전송
-//       const updatedNumbering = { ...data.numbering, /* 적절한 details 처리 로직 */ };
-//       await saveData({ ...data, filedate, selectedRange, numbering: updatedNumbering });
+//       await saveData({ ...data, filedate });
 //       onSaveSuccess();
-//       downloadCsv(data, fileName); // 데이터 저장 성공 후 CSV 다운로드
 //     } catch (error) {
 //       alert('Error saving data.');
 //     }
+//     downloadCsv(data, fileName);
 //   };
 
 //   return (
@@ -501,7 +497,37 @@
 //       <div className={styles['textWrap']}>
 //         <div className={styles['textContainer']}>
 //           <div className={styles['NumberWrap']}>
-//             <label>
+//             <div className={styles['ExWrap']}>
+//               <span className={styles['ExNumber']}>W_Number</span>
+//               <input
+//                 type="text"
+//                 placeholder="0000"
+//                 className={styles['ExInfo']}
+//                 value={wNumber}
+//                 onChange={(e) => onDetailsChange('wNumber', e.target.value)}
+//               />
+//             </div>
+//             <div className={styles['ExWrap']}>
+//               <span className={styles['ExNumber']}>DW_Number</span>
+//               <input
+//                 type="text"
+//                 placeholder="0000"
+//                 className={styles['ExInfo']}
+//                 value={dwNumber}
+//                 onChange={(e) => onDetailsChange('dwNumber', e.target.value)}
+//               />
+//             </div>
+//             <div className={styles['ExWrap']}>
+//               <span className={styles['ExNumber']}>Die_Number</span>
+//               <input
+//                 type="text"
+//                 placeholder="0000"
+//                 className={styles['ExInfo']}
+//                 value={dieNumber}
+//                 onChange={(e) => onDetailsChange('dieNumber', e.target.value)}
+//               />
+//             </div>
+//             {/* <label>
 //               <p>W_number:</p>
 //               <input type="text" value={wNumber} onChange={(e) => onDetailsChange('wNumber', e.target.value)} />
 //             </label>
@@ -512,7 +538,7 @@
 //             <label>
 //               <p>Die_number:</p>
 //               <input type="text" value={dieNumber} onChange={(e) => onDetailsChange('dieNumber', e.target.value)} />
-//             </label>
+//             </label> */}
 //           </div>
 //         </div>
 //       </div>
@@ -562,57 +588,54 @@
 // import LineGraph from '../components/LineGraph';
 // import BoxGraph from '../components/BoxGraph';
 // import DataListUI from '../components/DataListUI';
-// import { fetchDataDetails, updateData } from '../api';
-// import TextInputBox from '../components/TextInputBox';
+// import { fetchDataDetails } from '../api';
 // import styles from './GraphData.module.css'
 
 // function ViewDataPage() {
 //   const location = useLocation();
 //   const { selectedItems } = location.state || {};
-//   const [additionalInfo, setAdditionalInfo] = useState('');
 //   const [graphData, setGraphData] = useState([]);
 //   const [boxPlotData, setBoxPlotData] = useState([]);
 
 //   useEffect(() => {
 //     const fetchDetails = async () => {
-//       if (selectedItems.length > 0) {
-//         const detail = await fetchDataDetails(selectedItems[0]); // 첫 번째 선택된 항목의 상세 정보를 불러옴
-//         setGraphData(detail.temperatureData || []); // 그래프 데이터 상태 업데이트
-//         setBoxPlotData([detail.boxplotStats].filter(data => data)); // 박스플롯 데이터 상태 업데이트
-//         setAdditionalInfo(detail.additionalInfo || ''); // 추가 정보 상태 업데이트
-//       }
+//       const detailsPromises = selectedItems.map(id => fetchDataDetails(id));
+//       const results = await Promise.all(detailsPromises);
+//       // console.log("API response for details:", results);
+
+//       // MongoDB 스키마에 따라 수정된 데이터 접근 로직
+//       const allGraphData = results.flatMap(detail => detail.temperatureData || []);
+//       // 박스플롯 데이터는 각 문서마다 하나씩 존재한다고 가정
+//       const allBoxPlotData = results.map(detail => detail.boxplotStats).filter(data => data); // 모든 non-null 데이터 사용
+
+//       setGraphData(allGraphData);
+//       setBoxPlotData(allBoxPlotData);
+
+//       // console.log("Loaded graph data:", allGraphData);
+//       // console.log("Loaded box plot data:", allBoxPlotData);
 //     };
 
-//     fetchDetails();
+//     if (selectedItems && selectedItems.length > 0) {
+//       fetchDetails();
+//     }
 //   }, [selectedItems]);
 
-//   const handleAdditionalInfoChange = async (newInfo) => {
-//     setAdditionalInfo(newInfo); // 입력된 추가 정보로 상태 업데이트
-//     if (selectedItems.length > 0) {
-//       await updateData(selectedItems[0], { additionalInfo: newInfo }); // 수정된 추가 정보를 서버에 저장
-//     }
-//   };
-
 //   return (
-//     <div className={styles['graphDataWrap']}>
-//       <div className={styles['graphDataContainer']}>
-//         <div className={styles['leftPanel']}>
-//           <div className={styles['titleName']}>Graph Data Visualization</div>
+//     <div className={styles.graphDataWrap}>
+//       <div className={styles.graphDataContainer}>
+//         <div className={styles.leftPanel}>
+//           <h2 className={styles.headerTitle}>Graph Data Visualization</h2>
 //           {graphData.length > 0 ? <LineGraph averagedData={graphData} /> : <p>Line graph 데이터를 불러오는 중...</p>}
 //           {boxPlotData.length > 0 ? (
 //             boxPlotData.map((data, index) => <BoxGraph key={index} boxplotStats={data} />)
 //           ) : (
 //             <p>Box plot graph 데이터를 불러오는 중...</p>
 //           )}
-//           <TextInputBox
-//             label="추가 정보: "
-//             value={additionalInfo}
-//             onTextChange={handleAdditionalInfoChange} // 사용자 입력을 처리하여 상태 업데이트 및 서버에 저장
-//           />
 //         </div>
-//         <div className={styles['rightPanel']}>
+//         <div className={styles.rightPanel}>
 //           <DataListUI />
 //         </div>
+
 //       </div>
 //     </div>
 //   );
@@ -630,7 +653,6 @@
 // import LineGraph from '../components/LineGraph';
 // import BoxGraph from '../components/BoxGraph';
 // import DataListUI from '../components/DataListUI';
-// import TextInputBox from '../components/TextInputBox';
 // import styles from './GraphData.module.css';
 
 // function GraphDataPage() {
@@ -643,22 +665,18 @@
 //     wNumber: '',
 //     dwNumber: '',
 //     dieNumber: '',
-//     additionalInfo: ''
 //   });
 //   // const [isDataSaved, setIsDataSaved] = useState(false);
-
 //   // details 상태가 업데이트될 때마다 실행될 useEffect 훅
 //   // useEffect(() => {
 //   //   console.log("Current details state:", details);
 //   // }, [details]);
-
 //   const handleFileSelect = (file) => {
 //     setUploadedFile(file);
 //     setGraphData([]);
 //     setBoxPlotData(null);
 //     // setIsDataSaved(false);
 //   };
-
 //   const handleUploadSuccess = async (averagedData, boxplotStats, uploadedFileName) => {
 //     setGraphData(averagedData);
 //     setBoxPlotData(boxplotStats);
@@ -666,26 +684,20 @@
 //     setUploadedFileName(uploadedFileName);
 //     console.log("uploadedFileName: ", uploadedFileName)
 //   };
-
 //   const handleSaveDataSuccess = () => {
 //     // alert('Data saved successfully!');
 //     // setIsDataSaved(true);
 //   };
-
 //   const handleBrushChange = (startIndex, endIndex) => {
 //     // 선택된 데이터 범위를 상태로 저장
 //     setSelectedRange({ start: startIndex, end: endIndex });
-//   };
-
-//   const handleAdditionalInfoChange = (additionalInfo) => {
-//     // 추가 정보를 details 상태에 저장
-//     setDetails({ ...details, additionalInfo });
 //   };
 
 //   return (
 //     <div className={styles['graphDataWrap']}>
 //       <div className={styles['graphDataContainer']}>
 //         <div className={styles['leftPanel']}>
+//           <h2 className={styles.headerTitle}>Graph Data Visualization</h2>
 //           <FileUploadButton onFileSelect={handleFileSelect} />
 //           <UploadDataButton selectedFile={uploadedFile} onUploadSuccess={handleUploadSuccess} isEnabled={!!uploadedFile} />
 //           {graphData.length > 0 && (
@@ -705,10 +717,6 @@
 //                 onBrushChange={handleBrushChange} // LineGraph에 handleBrushChange 함수 전달
 //               />
 //               <BoxGraph boxplotStats={boxPlotData} />
-//               <TextInputBox
-//                 label="추가 정보: "
-//                 onTextChange={handleAdditionalInfoChange} // 사용자 입력을 처리하기 위한 콜백
-//               />
 //             </>
 //           )}
 //         </div>
@@ -719,7 +727,6 @@
 //     </div>
 //   );
 // }
-
 // export default GraphDataPage;
 // ```
 // ```
@@ -766,7 +773,7 @@
 // export default UploadDataButton;
 // ```
 // ```
-// // server\models\FileMetadata.js
+// // server/models/FileMetadata.js
 
 // const mongoose = require('mongoose');
 
@@ -791,12 +798,7 @@
 //         dwNumber: String,
 //         dieNumber: String,
 //     },
-//     additionalInfo: String, // 추가 정보를 저장하는 필드
-//     filedate: String,
-//     selectedRange: {
-//         start: Number,
-//         end: Number,
-//     }
+//     filedate: String
 // });
 
 // const FileMetadata = mongoose.model('FileMetadata', fileMetadataSchema);
@@ -852,21 +854,21 @@
 // }
 
 // // 데이터 저장 API
-// export async function updateData(id, data) {
+// export async function saveData(data) {
 //   try {
-//     const response = await fetch(`${API_BASE_URL}/save/${id}`, {
-//       method: 'POST', // 또는 'PUT', 서버 구현에 따라 다름
+//     const response = await fetch(`${API_BASE_URL}/save`, {
+//       method: 'POST',
 //       headers: {
 //         'Content-Type': 'application/json',
 //       },
 //       body: JSON.stringify(data),
 //     });
 //     if (!response.ok) {
-//       throw new Error('Failed to update data');
+//       throw new Error('Failed to save data');
 //     }
-//     return await response.json(); // 수정 성공 결과 반환
+//     return await response.json(); // 저장 성공 결과 반환
 //   } catch (error) {
-//     console.error('Error updating data:', error);
+//     console.error('Error saving data:', error);
 //     throw error; // 에러를 다시 던져 컴포넌트에서 처리할 수 있게 함
 //   }
 // }
@@ -905,25 +907,6 @@
 //     throw new Error('Network response was not ok');
 //   }
 //   return await response.json();
-// }
-
-// export async function saveData(data) {
-//   try {
-//     const response = await fetch(`http://localhost:5000/api/save`, {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify(data),
-//     });
-//     if (!response.ok) {
-//       throw new Error('Failed to save data');
-//     }
-//     return await response.json(); // 저장 성공 결과 반환
-//   } catch (error) {
-//     console.error('Error saving data:', error);
-//     throw error; // 에러를 다시 던져 컴포넌트에서 처리할 수 있게 함
-//   }
 // }
 // ```
 // ```
@@ -971,6 +954,7 @@
 //     let dateCounts = {};
 //     let temperatures = [];
 
+//     // 데이터 전처리 최적화: forEach 대신 for-loop 사용
 //     for (const item of data) {
 //         const date = item['date'];
 //         const time = item['time'];
@@ -979,11 +963,14 @@
 //         if (!isNaN(temperature)) {
 //             dateCounts[date] = (dateCounts[date] || 0) + 1;
 //             temperatures.push({ date, time, temperature });
+//         } else {
+//             // console.log(`유효하지 않은 온도 값: ${rawTemperature}, 해당 행은 무시.`);
 //         }
 //     }
 
 //     const mostDataDate = Object.keys(dateCounts).reduce((a, b) => dateCounts[a] > dateCounts[b] ? a : b);
 
+//     // 해당 날짜의 데이터만 필터링
 //     temperatures = temperatures.filter(item => item.date === mostDataDate);
 //     const tempValues = temperatures.map(item => item.temperature);
 
@@ -993,6 +980,7 @@
 //     const lowerBound = q1 - 1.5 * iqr;
 //     const upperBound = q3 + 1.5 * iqr;
 
+//     // 필터링 및 데이터 변환
 //     let filteredData = temperatures.filter(item => item.temperature >= lowerBound && item.temperature <= upperBound)
 //         .map(item => ({
 //             Date: item.date,
@@ -1000,6 +988,7 @@
 //             Temperature: item.temperature
 //         }));
     
+//     // 데이터 그룹화 및 평균 계산 최적화: 객체 대신 Map 사용
 //     let groupedData = new Map();
 //     filteredData.forEach(item => {
 //         const roundedTime = moment(item.Time, 'HH:mm:ss').startOf('minute').seconds(
@@ -1039,7 +1028,7 @@
 //         outliers
 //     };
 
-//     // console.log("averagedData: ", averagedData, "boxplotStats:", boxplotStats);
+//     // console.log("Refined Data:", boxplotStats);
 
 //     return { averagedData, boxplotStats };
 // }
@@ -1126,16 +1115,15 @@
 
 // // 데이터 저장 처리
 // router.post('/save', async (req, res) => {
-//   const { fileName, graphData, boxPlotData, numbering, filedate, selectedRange, additionalInfo } = req.body;
+//   const { fileName, graphData, boxPlotData, numbering, filedate } = req.body;
+//   // console.log("Received numbering:", filedate);
 //   try {
 //     const newFileMetadata = new FileMetadata({
 //       fileName,
 //       temperatureData: graphData,
 //       boxplotStats: boxPlotData,
 //       numbering: numbering,
-//       filedate: filedate,
-//       selectedRange: selectedRange,
-//       additionalInfo: additionalInfo, // 클라이언트에서 받은 추가 정보 저장
+//       filedate,
 //     });
 //     await newFileMetadata.save();
 
@@ -1161,32 +1149,34 @@
 // // 특정 데이터 항목의 상세 정보 조회
 // router.get('/data/:id', async (req, res) => {
 //   try {
-//     const { id } = req.params;
-//     const dataItem = await FileMetadata.findById(id);
+//     const { id } = req.params; // URL에서 id 파라미터 추출
+//     const dataItem = await FileMetadata.findById(id); // MongoDB에서 해당 id를 가진 데이터 조회
+//     // console.log("dataItem :", dataItem)
 //     if (!dataItem) {
-//       // 데이터가 존재하지 않을 때 JSON 형식의 응답 반환
-//       return res.status(404).json({ message: 'Data not found' });
+//       return res.status(404).send('Data not found');
 //     }
+
 //     res.json(dataItem);
 //   } catch (error) {
-//     // 서버 오류 처리
 //     console.error('Error fetching data item:', error);
-//     res.status(500).json({ message: 'Server error' });
+//     res.status(500).send('Server error');
 //   }
 // });
 
 // // 특정 데이터 항목의 상세 정보 삭제
 // router.delete('/data/:id', async (req, res) => {
 //   try {
-//     const { id } = req.params;
-//     const deletedItem = await FileMetadata.findByIdAndDelete(id);
+//     const id = req.params.id;
+//     const deletedItem = await FileMetadata.findByIdAndDelete(id); // 데이터 삭제
+
 //     if (!deletedItem) {
-//       return res.status(404).json({ message: 'Data not found' });
+//       return res.status(404).send({ message: 'Data not found' });
 //     }
-//     res.json({ message: 'Data successfully removed' });
+
+//     res.send({ message: 'Data successfully removed' }); // 성공 메시지 반환
 //   } catch (error) {
 //     console.error('Error removing data:', error);
-//     res.status(500).json({ message: 'Internal server error' });
+//     res.status(500).send('Internal server error');
 //   }
 // });
 
