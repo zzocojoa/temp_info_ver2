@@ -1,21 +1,33 @@
 // src/components/TextInputBox.js
 
-import React, { useState } from 'react';
+import React from 'react';
+import styles from './TextInputBox.module.css';
 
-function TextInputBox({ label, onTextChange }) {
-  const [text, setText] = useState('');
-
+function TextInputBox({ value, onTextChange, onSave }) {
   const handleChange = (event) => {
-    setText(event.target.value);
-    onTextChange(event.target.value); // 상위 컴포넌트로 텍스트 데이터 전달
+    onTextChange(event.target.value);
   };
 
   return (
-    <div>
-      <label>
-        {label}
-        <input type="text" value={text} onChange={handleChange} />
-      </label>
+    <div className={styles['textBoxUIWrap']}>
+      <div className={styles['textBoxUIContainer']}>
+        <div className={styles['textBoxUITitle']}>
+          <h3>상세 정보 입력</h3>
+          <button
+            className={styles['resaveDataButton']}
+            onClick={onSave}
+            style={{ marginTop: '10px' }}>
+            저장
+          </button>
+        </div>
+        <textarea
+          className={styles['textBoxTextarea']}
+          type="text"
+          value={value}
+          rows="10"
+          onChange={handleChange} />
+      </div>
+
     </div>
   );
 }

@@ -30,7 +30,8 @@
 
 .rightPanel {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: flex-start;
   align-items: flex-start;
   width: auto;
 }
@@ -38,6 +39,10 @@
 .leftPanel,
 .rightPanel {
   flex: 1;
+}
+
+.textBox {
+  position: relative;
 }
 
 /* 화면 너비가 768px 이하일 때 스타일 */

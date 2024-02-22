@@ -76,18 +76,6 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
                 onChange={(e) => onDetailsChange('dieNumber', e.target.value)}
               />
             </div>
-            {/* <label>
-              <p>W_number:</p>
-              <input type="text" value={wNumber} onChange={(e) => onDetailsChange('wNumber', e.target.value)} />
-            </label>
-            <label>
-              <p>DW_number:</p>
-              <input type="text" value={dwNumber} onChange={(e) => onDetailsChange('dwNumber', e.target.value)} />
-            </label>
-            <label>
-              <p>Die_number:</p>
-              <input type="text" value={dieNumber} onChange={(e) => onDetailsChange('dieNumber', e.target.value)} />
-            </label> */}
           </div>
         </div>
       </div>

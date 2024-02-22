@@ -80,6 +80,26 @@ router.post('/save', async (req, res) => {
   }
 });
 
+// 특정 데이터 항목의 상세 정보 업데이트
+router.patch('/data/:id', async (req, res) => {
+  const { id } = req.params;
+  const { userInput } = req.body; // 요청 본문에서 수정된 userInput 값을 받습니다.
+  
+  try {
+    // findByIdAndUpdate 메서드를 사용하여 해당 ID의 문서를 찾고, userInput 필드를 업데이트합니다.
+    const updatedItem = await FileMetadata.findByIdAndUpdate(id, { $set: { userInput: userInput } }, { new: true });
+    
+    if (!updatedItem) {
+      return res.status(404).send('Data not found');
+    }
+
+    res.json({ message: 'Data updated successfully', data: updatedItem });
+  } catch (error) {
+    console.error('Error updating data:', error);
+    res.status(500).send('Error updating data');
+  }
+});
+
 // 데이터 리스트 조회 
 router.get('/data-list', async (req, res) => {
   try {

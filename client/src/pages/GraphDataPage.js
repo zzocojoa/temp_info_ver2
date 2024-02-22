@@ -22,11 +22,16 @@ function GraphDataPage() {
     dwNumber: '',
     dieNumber: '',
   });
+
+  // 그래프 생성 여부를 추적하는 상태 추가
+  const [isGraphGenerated, setIsGraphGenerated] = useState(false);
+
   // const [isDataSaved, setIsDataSaved] = useState(false);
   // details 상태가 업데이트될 때마다 실행될 useEffect 훅
   // useEffect(() => {
   //   console.log("Current details state:", details);
   // }, [details]);
+
   const handleFileSelect = (file) => {
     setUploadedFile(file);
     setGraphData([]);
@@ -37,8 +42,9 @@ function GraphDataPage() {
   const handleUploadSuccess = async (averagedData, boxplotStats, uploadedFileName) => {
     setGraphData(averagedData);
     setBoxPlotData(boxplotStats);
-    // setIsDataSaved(false);
     setUploadedFileName(uploadedFileName);
+    setIsGraphGenerated(true);
+    // setIsDataSaved(false);
     console.log("uploadedFileName: ", uploadedFileName)
   };
   const handleSaveDataSuccess = () => {
@@ -57,7 +63,7 @@ function GraphDataPage() {
           <h2 className={styles.headerTitle}>Graph Data Visualization</h2>
           <FileUploadButton onFileSelect={handleFileSelect} />
           <UploadDataButton selectedFile={uploadedFile} onUploadSuccess={handleUploadSuccess} isEnabled={!!uploadedFile} />
-          {graphData.length > 0 && (
+          {isGraphGenerated && ( // isGraphGenerated 상태에 따라 조건부 렌더링
             <>
               <SaveCsvDataButton
                 data={{
@@ -78,15 +84,17 @@ function GraphDataPage() {
                 dwNumber={details.dwNumber}
                 dieNumber={details.dieNumber}
                 onDetailsChange={(key, value) => setDetails({ ...details, [key]: value })}
-                onBrushChange={handleBrushChange} // LineGraph에 handleBrushChange 함수 전달
+                onBrushChange={handleBrushChange}
               />
               <BoxGraph boxplotStats={boxPlotData} />
             </>
           )}
-          <TextInputBox label="추가 정보:" onTextChange={setUserInput} />
         </div>
         <div className={styles['rightPanel']}>
           <DataListUI />
+          {isGraphGenerated && (
+            <TextInputBox value={userInput} onTextChange={setUserInput} />
+          )}
         </div>
       </div>
     </div>

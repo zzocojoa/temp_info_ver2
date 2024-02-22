@@ -66,14 +66,13 @@ function DataListUI() {
       <div className={styles['searchWrap']}>
         <span className={styles['searchText']}>Search</span>
         <input
-        type="text"
-        placeholder="데이터 검색..."
-        className={styles['searchContainer']}
-        value={searchTerm}
-        onChange={e => setSearchTerm(e.target.value)}
-      />
+          type="text"
+          placeholder="데이터 검색..."
+          className={styles['searchContainer']}
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+        />
       </div>
-      
       <div className={`${styles['DataListContainer']} ${styles['scroll']} ${styles['scroll-css']}`}
         style={{ overflowY: 'auto', maxHeight: '500px' }}>
         {filteredDataList.slice(0, displayCount).map((dataItem, index) => (
@@ -93,18 +92,17 @@ function DataListUI() {
       <div className={styles['buttonWrap']}>
         <div className={styles['buttonContainer']}>
           {displayCount < dataList.length && (
-            <button onClick={handleScrollDown} className={styles.loadMoreButton}>더 보기</button>
+            <button onClick={handleScrollDown} className={styles['loadMoreButton']}>더 보기</button>
           )}
           {selectedItems.length > 0 && (
-            <button onClick={handleRemoveSelectedData} className={styles.removeButton}>제거</button>
+            <button onClick={handleRemoveSelectedData} className={styles['removeButton']}>제거</button>
           )}
         </div>
         <div>
-          <button onClick={handleLoadSelectedData} className={styles.loadDataButton}>불러오기</button>
+          <button onClick={handleLoadSelectedData} className={styles['loadDataButton']}>불러오기</button>
         </div>
       </div>
     </div>
-
   );
 }
 

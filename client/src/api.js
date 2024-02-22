@@ -38,6 +38,25 @@ export async function saveData(data) {
   }
 }
 
+export async function updateData(id, updatedData) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/data/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedData),
+    });
+    if (!response.ok) {
+      throw new Error('Data update failed');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating data:', error);
+    throw error;
+  }
+}
+
 // 데이터 리스트 조회
 export async function fetchDataList() {
   try {
@@ -52,6 +71,7 @@ export async function fetchDataList() {
     console.error('Error fetching data list:', error);
   }
 }
+
 // 특정 데이터 조회
 export async function fetchDataDetails(dataId) {
   try {
