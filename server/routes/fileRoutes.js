@@ -83,10 +83,10 @@ router.post('/save', async (req, res) => {
 // 특정 데이터 항목의 상세 정보 업데이트
 router.patch('/data/:id', async (req, res) => {
   const { id } = req.params;
-  const { userInput } = req.body; // 요청 본문에서 수정된 userInput 값을 받습니다.
+  const { userInput } = req.body; // 요청 본문에서 수정된 userInput 값을 받기
   
   try {
-    // findByIdAndUpdate 메서드를 사용하여 해당 ID의 문서를 찾고, userInput 필드를 업데이트합니다.
+    // findByIdAndUpdate 메서드를 사용하여 해당 ID의 문서를 찾고, userInput 필드를 업데이트
     const updatedItem = await FileMetadata.findByIdAndUpdate(id, { $set: { userInput: userInput } }, { new: true });
     
     if (!updatedItem) {

@@ -1,7 +1,8 @@
 /* DataListUI.module.css */
 
 .DataListUIWrap {
-  width: 400px;
+  /* width: 400px; */
+  width: 100%;
   display: flex;
   flex-direction: column;
   padding: 10px;
@@ -58,9 +59,9 @@
   transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 
-.dataListContainer {
+.DataListContainer {
   width: inherit;
-  max-height: 1000px;
+  max-height: 500px;
   overflow-y: auto;
   margin: 10px 0;
   padding: 10px;

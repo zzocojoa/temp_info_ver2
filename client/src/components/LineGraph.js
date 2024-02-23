@@ -43,74 +43,76 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
 
   return (
     <>
-      <div className={styles['textWrap']}>
-        <div className={styles['textContainer']}>
-          <div className={styles['NumberWrap']}>
-            <div className={styles['ExWrap']}>
-              <span className={styles['ExNumber']}>W_Number</span>
-              <input
-                type="text"
-                placeholder="0000"
-                className={styles['ExInfo']}
-                value={wNumber}
-                onChange={(e) => onDetailsChange('wNumber', e.target.value)}
-              />
-            </div>
-            <div className={styles['ExWrap']}>
-              <span className={styles['ExNumber']}>DW_Number</span>
-              <input
-                type="text"
-                placeholder="0000"
-                className={styles['ExInfo']}
-                value={dwNumber}
-                onChange={(e) => onDetailsChange('dwNumber', e.target.value)}
-              />
-            </div>
-            <div className={styles['ExWrap']}>
-              <span className={styles['ExNumber']}>Die_Number</span>
-              <input
-                type="text"
-                placeholder="0000"
-                className={styles['ExInfo']}
-                value={dieNumber}
-                onChange={(e) => onDetailsChange('dieNumber', e.target.value)}
-              />
+      <div className={styles['lineGrahpWrap']}>
+        <div className={styles['textWrap']}>
+          <div className={styles['textContainer']}>
+            <div className={styles['NumberWrap']}>
+              <div className={styles['ExWrap']}>
+                <span className={styles['ExNumber']}>W_Number</span>
+                <input
+                  type="text"
+                  placeholder="0000"
+                  className={styles['ExInfo']}
+                  value={wNumber}
+                  onChange={(e) => onDetailsChange('wNumber', e.target.value)}
+                />
+              </div>
+              <div className={styles['ExWrap']}>
+                <span className={styles['ExNumber']}>DW_Number</span>
+                <input
+                  type="text"
+                  placeholder="0000"
+                  className={styles['ExInfo']}
+                  value={dwNumber}
+                  onChange={(e) => onDetailsChange('dwNumber', e.target.value)}
+                />
+              </div>
+              <div className={styles['ExWrap']}>
+                <span className={styles['ExNumber']}>Die_Number</span>
+                <input
+                  type="text"
+                  placeholder="0000"
+                  className={styles['ExInfo']}
+                  value={dieNumber}
+                  onChange={(e) => onDetailsChange('dieNumber', e.target.value)}
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <LineChart className={styles['lineChart']}
-        width={chartSize.width}
-        height={chartSize.height}
-        data={averagedData}
-        margin={{
-          top: 5, right: 30, left: 20, bottom: 5,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <Tooltip formatter={temperatureFormatter} />
-        <XAxis dataKey="Time"
+        <LineChart className={styles['lineChart']}
+          width={chartSize.width}
+          height={chartSize.height}
+          data={averagedData}
+          margin={{
+            top: 5, right: 30, left: 20, bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <Tooltip formatter={temperatureFormatter} />
+          <XAxis dataKey="Time"
           // label={{ value: '시간', position: 'insideBottomRight', offset: -20 }}
-        />
-        <YAxis domain={['auto', 'auto']}
+          />
+          <YAxis domain={['auto', 'auto']}
           // label={{ value: '온도', angle: -90, position: 'insideLeft' }}
-        />
-        <Legend />
-        <Line
-          type="monotone"
-          dataKey="Temperature"
-          stroke="#8884d8"
-          dot={false}
-          activeDot={{ r: 4 }}
-        />
-        <Brush
-          dataKey="Time"
-          height={30}
-          stroke="#8884d8"
-          onChange={handleBrush}
-        />
-        <ReferenceLine y={medianValue} label="Median" stroke="red" strokeDasharray="3 3" />
-      </LineChart>
+          />
+          <Legend />
+          <Line
+            type="monotone"
+            dataKey="Temperature"
+            stroke="#8884d8"
+            dot={false}
+            activeDot={{ r: 4 }}
+          />
+          <Brush
+            dataKey="Time"
+            height={30}
+            stroke="#8884d8"
+            onChange={handleBrush}
+          />
+          <ReferenceLine y={medianValue} label="Median" stroke="red" strokeDasharray="3 3" />
+        </LineChart>
+      </div>
     </>
   );
 }

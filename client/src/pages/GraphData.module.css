@@ -12,13 +12,21 @@
 }
 
 .graphDataContainer {
-  display: flex;
-  /* align-items: center; */
-  justify-content: space-between;
+  /* display: flex; */
+  /* justify-content: space-between; */
   padding: 20px;
+  display: grid;
+  grid-template-areas:
+    'leftPanel rightPanel';
+  grid-template-columns:
+    auto 25%;
+  align-content: start;
+  justify-content: space-around;
+  justify-items: stretch;
 }
 
 .leftPanel {
+  width: 100%;
   padding: 30px;
   margin-right: 30px;
   border: 1px solid #e2d1c7;
@@ -33,33 +41,38 @@
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
-  width: auto;
+  width: 100%;
 }
 
-.leftPanel,
-.rightPanel {
-  flex: 1;
-}
+@media (max-width: 1470px) {
 
-.textBox {
-  position: relative;
-}
-
-/* 화면 너비가 768px 이하일 때 스타일 */
-@media (max-width: 768px) {
   .graphDataContainer {
-    flex-direction: column;
-    /* 화면이 좁아지면 세로 방향으로 레이아웃 조정 */
+    /* flex-direction: column; */
+
+    display: grid;
+    grid-template-areas:
+      'leftPanel rightPanel';
+    grid-template-columns:
+      60% 25%;
   }
 
   .leftPanel,
   .rightPanel {
     width: 100%;
-    /* 패널 너비를 화면에 맞춤 */
   }
 }
 
-/* 추가적인 반응형 디자인을 위한 미디어 쿼리 */
+@media (max-width: 768px) {
+  .graphDataContainer {
+    flex-direction: column;
+  }
+
+  .leftPanel,
+  .rightPanel {
+    width: 100%;
+  }
+}
+
 @media (max-width: 480px) {
   .graphDataWrap {
     padding: 10px;

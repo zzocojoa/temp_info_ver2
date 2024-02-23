@@ -1,7 +1,14 @@
+.lineGrahpWrap {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  align-items: center;
+}
+
 .lineChart {
+  display: inline-block;
   margin: 30px 0;
   padding: 10px 0;
-  /* border: solid 1px #b9aba2; */
   border-radius: 10px;
   box-shadow: 4px 4px 6px 0 rgb(189, 175, 167, .5),
     -4px -4px 6px 0 rgb(189, 175, 167, .2);

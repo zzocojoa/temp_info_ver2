@@ -74,7 +74,7 @@ function DataListUI() {
         />
       </div>
       <div className={`${styles['DataListContainer']} ${styles['scroll']} ${styles['scroll-css']}`}
-        style={{ overflowY: 'auto', maxHeight: '500px' }}>
+        >
         {filteredDataList.slice(0, displayCount).map((dataItem, index) => (
           <div key={index} className={styles.dataItem}>
             <label htmlFor={`checkbox-${dataItem._id}`} className={styles.dataItemLabel}>

@@ -14,7 +14,13 @@ function ViewDataPage() {
   const { selectedItems } = location.state || {};
   const [graphData, setGraphData] = useState([]);
   const [boxPlotData, setBoxPlotData] = useState([]);
-  const [userInput, setUserInput] = useState(''); // 사용자 입력 상태 초기화
+  const [selectedRange, setSelectedRange] = useState({ start: 0, end: 0 });
+  const [userInput, setUserInput] = useState('');
+  const [details, setDetails] = useState({
+    wNumber: '',
+    dwNumber: '',
+    dieNumber: '',
+  });
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -25,13 +31,20 @@ function ViewDataPage() {
         // MongoDB 스키마에 따라 수정된 데이터 접근 로직
         const allGraphData = results.flatMap(detail => detail.temperatureData || []);
         const allBoxPlotData = results.map(detail => detail.boxplotStats).filter(data => data);
+
         // 사용자 입력 데이터 처리를 위해 첫 번째 선택된 항목의 userInput을 사용
         const firstUserInput = results[0]?.userInput || '';
-        // console.log("firstUserInput: ", firstUserInput)
+
+        // MongoDB에서 조회된 데이터를 기반으로 상태 업데이트
+        const firstItemDetails = results[0]?.numbering || {};
+        const { wNumber, dwNumber, dieNumber } = firstItemDetails;
+
+        // 상태에 Die_Number, DW_Number, W_Number 저장
+        setDetails({ wNumber, dwNumber, dieNumber });
 
         setGraphData(allGraphData);
         setBoxPlotData(allBoxPlotData);
-        setUserInput(firstUserInput); // 첫 번째 항목의 사용자 입력 상태 설정
+        setUserInput(firstUserInput);
       }
     };
 
@@ -41,9 +54,10 @@ function ViewDataPage() {
   // textBox Update logic
   const handleSaveData = async () => {
     if (selectedItems && selectedItems.length > 0) {
-      const itemId = selectedItems[0]; // 예시로 첫 번째 선택된 항목의 ID를 사용합니다.
+      const itemId = selectedItems[0];
       try {
-        await updateData(itemId, { userInput }); // 수정된 userInput을 서버에 업데이트합니다.
+        // 수정된 userInput을 서버에 업데이트
+        await updateData(itemId, { userInput });
         alert('데이터가 성공적으로 업데이트 되었습니다.');
       } catch (error) {
         console.error('데이터 업데이트 실패:', error);
@@ -52,12 +66,28 @@ function ViewDataPage() {
     }
   };
 
+  const handleBrushChange = (startIndex, endIndex) => {
+    setSelectedRange({ start: startIndex, end: endIndex });
+
+  };
+
   return (
     <div className={styles['graphDataWrap']}>
       <div className={styles['graphDataContainer']}>
         <div className={styles['leftPanel']}>
           <h2 className={styles['headerTitle']}>Graph Data Visualization</h2>
-          {graphData.length > 0 ? <LineGraph averagedData={graphData} /> : <p>Line graph 데이터를 불러오는 중...</p>}
+          {graphData.length > 0 ? (
+            <LineGraph
+              averagedData={graphData}
+              wNumber={details.wNumber}
+              dwNumber={details.dwNumber}
+              dieNumber={details.dieNumber}
+              onDetailsChange={(key, value) => setDetails(prev => ({ ...prev, [key]: value }))}
+              onBrushChange={handleBrushChange}
+            />
+          ) : (
+            <p>Line graph 데이터를 불러오는 중...</p>
+          )}
           {boxPlotData.length > 0 ? (
             boxPlotData.map((data, index) => <BoxGraph key={index} boxplotStats={data} />)
           ) : (
@@ -66,15 +96,13 @@ function ViewDataPage() {
         </div>
         <div className={styles['rightPanel']}>
           <DataListUI />
-          <div className={styles['textBoxWrap']}>
-            <TextInputBox
-              className={styles['textBox']}
-              value={userInput}
-              onTextChange={setUserInput}
-              onSave={handleSaveData}
-              showSaveButton={true}
-            />
-          </div>
+          <TextInputBox
+            // className={styles['textBox']}
+            value={userInput}
+            onTextChange={setUserInput}
+            onSave={handleSaveData}
+            showSaveButton={true}
+          />
         </div>
       </div>
     </div>
