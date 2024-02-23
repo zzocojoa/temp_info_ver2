@@ -147,4 +147,32 @@ router.delete('/data/:id', async (req, res) => {
   }
 });
 
+// CSV 변환을 위한 함수
+const objectToCsv = (data) => {
+  const csvRows = data.map(item => {
+    const { userInput, numbering, boxplotStats } = item;
+    return `"${userInput}","${numbering.wNumber}","${numbering.dwNumber}","${numbering.dieNumber}","${boxplotStats.median}"`;
+  });
+  return `userInput,wNumber,dwNumber,dieNumber,median\n${csvRows.join("\n")}`;
+};
+
+// 선택된 데이터를 CSV로 변환하여 반환하는 엔드포인트
+router.post('/export-csv', async (req, res) => {
+  const { ids } = req.body; // 클라이언트에서 전송한 데이터 ID 배열
+
+  try {
+    const data = await FileMetadata.find({ '_id': { $in: ids } });
+    if (!data.length) {
+      return res.status(404).send('Data not found');
+    }
+    const csvData = objectToCsv(data);
+    res.header('Content-Type', 'text/csv');
+    res.attachment('exported_data.csv');
+    return res.send(csvData);
+  } catch (error) {
+    console.error('Error exporting to CSV:', error);
+    return res.status(500).send('Internal Server Error');
+  }
+});
+
 module.exports = router;

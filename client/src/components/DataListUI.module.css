@@ -63,7 +63,6 @@
   width: inherit;
   max-height: 500px;
   overflow-y: auto;
-  margin: 10px 0;
   padding: 10px;
 }
 
@@ -131,7 +130,8 @@
 
 .loadMoreButton,
 .removeButton,
-.loadDataButton {
+.loadDataButton,
+.saveCsvButton {
   display: inline-block;
   margin: 10px 10px;
   padding: 8px 16px;
@@ -162,6 +162,11 @@
   width: 2px;
 }
 
+.saveCsvButton:before {
+  height: 0%;
+  width: 2px;
+}
+
 .loadMoreButton:hover {
   font-weight: 700;
   box-shadow: 4px 4px 6px 0 rgba(255, 255, 255, .5),
@@ -186,6 +191,37 @@
     inset 4px 4px 6px 0 rgba(0, 0, 0, .4);
 }
 
+.saveCsvButton:hover {
+  font-weight: 700;
+  box-shadow: 4px 4px 6px 0 rgba(255, 255, 255, .5),
+    -4px -4px 6px 0 rgba(116, 125, 136, .5),
+    inset -4px -4px 6px 0 rgba(255, 255, 255, .2),
+    inset 4px 4px 6px 0 rgba(0, 0, 0, .4);
+}
+
 .loadMoreButton {
   background-color: #0056b3;
+}
+
+.selectAllCheckbox {
+  display: flex;
+  align-items: center;
+}
+
+.selectAllCheckbox input[type="checkbox"] {
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+.selectAllLabel {
+  cursor: pointer;
+  user-select: none;
+}
+
+.userButton {
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
 }

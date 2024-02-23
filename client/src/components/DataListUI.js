@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchDataList, deleteData } from '../api';
+import { fetchDataList, deleteData, fetchDataDetails } from '../api';
 import styles from './DataListUI.module.css';
 
 function DataListUI() {
@@ -36,7 +36,10 @@ function DataListUI() {
   }, [searchTerm, dataList]);
 
   const handleCheckboxChange = (itemId) => {
-    setSelectedItems(prev => prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]);
+    setSelectedItems(prev => {
+      const newSelectedItems = prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId];
+      return newSelectedItems;
+    });
   };
 
   const handleScrollDown = () => {
@@ -61,6 +64,45 @@ function DataListUI() {
     setSelectedItems([]); // 선택된 항목 초기화
   };
 
+  const handleSelectAllChange = (e) => {
+    if (e.target.checked) {
+      // 모든 데이터 항목의 ID를 selectedItems 배열에 추가
+      setSelectedItems(filteredDataList.map(item => item._id));
+    } else {
+      // selectedItems 배열을 비움
+      setSelectedItems([]);
+    }
+  };
+
+  // DB CSV data save
+  const handleSaveCsv = async () => {
+    // 선택된 항목의 상세 정보를 비동기적으로 가져옵니다.
+    const selectedDataDetails = await Promise.all(selectedItems.map(id => fetchDataDetails(id)));
+
+    // CSV 헤더
+    const csvHeader = 'filedate,wNumber,dwNumber,dieNumber,median\n';
+
+    // 각 항목을 CSV 형식의 문자열로 변환
+    const csvRows = selectedDataDetails.map(item => {
+      const { filedate, numbering: { wNumber, dwNumber, dieNumber }, boxplotStats: { median } } = item;
+      return `"${filedate}","${wNumber}","${dwNumber}","${dieNumber}","${median}"`;
+    });
+
+    // CSV 헤더와 모든 행을 결합하여 최종 CSV 내용을 생성
+    const csvContent = `data:text/csv;charset=utf-8,${csvHeader}${csvRows.join("\n")}`;
+
+    // encodeURI를 사용하여 CSV 내용에 대한 URI를 생성
+    const encodedUri = encodeURI(csvContent);
+
+    // 임시 링크를 생성하여 프로그램적으로 클릭 이벤트를 발생시켜 파일 다운로드를 트리거
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'selected_data.csv'); // 다운로드될 파일명 설정
+    document.body.appendChild(link); // 링크를 문서에 추가
+    link.click(); // 링크 클릭 이벤트 강제 실행
+    document.body.removeChild(link); // 사용 후 링크 제거
+  };
+
   return (
     <div className={styles['DataListUIWrap']}>
       <div className={styles['searchWrap']}>
@@ -73,11 +115,19 @@ function DataListUI() {
           onChange={e => setSearchTerm(e.target.value)}
         />
       </div>
-      <div className={`${styles['DataListContainer']} ${styles['scroll']} ${styles['scroll-css']}`}
-        >
+      <div className={styles['selectAllCheckbox']}>
+        <label className={styles['selectAllLabel']}>
+          <input
+            type="checkbox"
+            checked={selectedItems.length === filteredDataList.length && filteredDataList.length > 0}
+            onChange={handleSelectAllChange}
+          />전체 선택
+        </label>
+      </div>
+      <div className={`${styles['DataListContainer']} ${styles['scroll']} ${styles['scroll-css']}`}>
         {filteredDataList.slice(0, displayCount).map((dataItem, index) => (
-          <div key={index} className={styles.dataItem}>
-            <label htmlFor={`checkbox-${dataItem._id}`} className={styles.dataItemLabel}>
+          <div key={index} className={styles['dataItem']}>
+            <label htmlFor={`checkbox-${dataItem._id}`} className={styles['dataItemLabel']}>
               <input
                 type="checkbox"
                 id={`checkbox-${dataItem._id}`}
@@ -98,8 +148,13 @@ function DataListUI() {
             <button onClick={handleRemoveSelectedData} className={styles['removeButton']}>제거</button>
           )}
         </div>
-        <div>
-          <button onClick={handleLoadSelectedData} className={styles['loadDataButton']}>불러오기</button>
+        <div className={styles['userButton']}>
+          <div>
+            <button onClick={handleLoadSelectedData} className={styles['loadDataButton']}>불러오기</button>
+          </div>
+          <div>
+            <button onClick={handleSaveCsv} className={styles['saveCsvButton']}>CSV 데이터 저장</button>
+          </div>
         </div>
       </div>
     </div>

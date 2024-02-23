@@ -482,6 +482,8 @@
 
 // function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange, onBrushChange }) {
 //   const [chartSize, setChartSize] = useState({ width: 600, height: 300 });
+//   const [startTime, setStartTime] = useState('');
+//   const [endTime, setEndTime] = useState('');
 
 //   // 그래프 반응형 로직
 //   useEffect(() => {
@@ -498,9 +500,47 @@
 //     return () => window.removeEventListener('resize', handleResize);
 //   }, []);
 
-//   const handleBrush = (e) => {
-//     if (e && e.startIndex !== undefined && e.endIndex !== undefined) {
-//       onBrushChange(e.startIndex, e.endIndex);
+//   useEffect(() => {
+//     if (startTime && endTime) {
+//       const findClosestIndex = (time) => {
+//         return averagedData.findIndex(data => data.Time >= time);
+//       };
+
+//       const startIndex = findClosestIndex(startTime);
+//       const endIndex = findClosestIndex(endTime);
+//       if (startIndex !== -1 && endIndex !== -1 && (averagedData[startIndex].Time !== startTime || averagedData[endIndex].Time !== endTime)) {
+//         onBrushChange(startIndex, endIndex);
+//       }
+//     }
+//   }, [startTime, endTime, onBrushChange, averagedData]);
+
+//   const handleBrushChange = (e) => {
+//     if (!e) return;
+
+//     const { startIndex, endIndex } = e;
+//     // 변경 사항이 있는 경우에만 onBrushChange 호출
+//     if (startIndex !== endIndex) {
+//       onBrushChange(startIndex, endIndex);
+//     }
+
+//     // averagedData의 유효한 인덱스인지 확인
+//     if (averagedData[startIndex] && averagedData[endIndex]) {
+//       const newStartTime = averagedData[startIndex].Time;
+//       const newEndTime = averagedData[endIndex].Time;
+//       // startTime과 endTime이 현재 상태와 다를 때만 업데이트
+//       if (startTime !== newStartTime || endTime !== newEndTime) {
+//         setStartTime(newStartTime);
+//         setEndTime(newEndTime);
+//       }
+//     }
+//   };
+
+//   // 입력 필드 변경 처리 로직
+//   const handleTimeChange = (type, value) => {
+//     if (type === 'start' && value !== startTime) {
+//       setStartTime(value);
+//     } else if (type === 'end' && value !== endTime) {
+//       setEndTime(value);
 //     }
 //   };
 
@@ -554,6 +594,30 @@
 //             </div>
 //           </div>
 //         </div>
+//         <div className={styles['timeInputWrap']}>
+//           <div className={styles['timeInputContainer']}>
+//             <div className={styles['startTimeBox']}>
+//               <span className={styles['startTimeTitle']}>Start Time</span>
+//               <input
+//                 className={styles['startTimeInput']}
+//                 type="time"
+//                 value={startTime}
+//                 onChange={(e) => handleTimeChange('start', e.target.value)}
+//                 readOnly
+//               />
+//             </div>
+//             <div className={styles['endTimeBox']}>
+//               <span className={styles['endTimeTitle']}>End Time</span>
+//               <input
+//                 className={styles['endTimeInput']}
+//                 type="time"
+//                 value={endTime}
+//                 onChange={(e) => handleTimeChange('end', e.target.value)}
+//                 readOnly
+//               />
+//             </div>
+//           </div>
+//         </div>
 //         <LineChart className={styles['lineChart']}
 //           width={chartSize.width}
 //           height={chartSize.height}
@@ -582,7 +646,7 @@
 //             dataKey="Time"
 //             height={30}
 //             stroke="#8884d8"
-//             onChange={handleBrush}
+//             onChange={handleBrushChange}
 //           />
 //           <ReferenceLine y={medianValue} label="Median" stroke="red" strokeDasharray="3 3" />
 //         </LineChart>
