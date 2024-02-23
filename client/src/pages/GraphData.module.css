@@ -12,8 +12,6 @@
 }
 
 .graphDataContainer {
-  /* display: flex; */
-  /* justify-content: space-between; */
   padding: 20px;
   display: grid;
   grid-template-areas:
@@ -21,6 +19,7 @@
   grid-template-columns:
     auto 25%;
   align-content: start;
+  align-items: start;
   justify-content: space-around;
   justify-items: stretch;
 }

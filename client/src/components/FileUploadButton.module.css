@@ -1,7 +1,11 @@
 /* FileUploadButton.css - 파일 업로드 버튼 컴포넌트 스타일 */
 
-.fileUploadWrap {
-  /* display: inline-block; */
+.fileUploadContainer {
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .fileUpload-btn {
@@ -33,4 +37,11 @@
     -4px -4px 6px 0 rgba(116, 125, 136, .5),
     inset -4px -4px 6px 0 rgba(255, 255, 255, .2),
     inset 4px 4px 6px 0 rgba(0, 0, 0, .4);
+}
+
+.fileName {
+  margin-left: 20px;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
 }

@@ -85,7 +85,7 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
           height={chartSize.height}
           data={averagedData}
           margin={{
-            top: 5, right: 30, left: 20, bottom: 5,
+            top: 20, right: 45, left: -10, bottom: 10,
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />

@@ -14,11 +14,17 @@ function FileUploadButton({ onFileSelect }) {
 
   return (
     <div className={styles["fileUploadWrap"]}>
-      <label htmlFor="file">
-        <div className={styles["fileUpload"]}>파일 업로드하기</div>
-      </label>
-      <input className={styles['fileUpload-btn']} type="file" id='file' onChange={handleFileChange} accept=".csv" />
-      {selectedFile && <p className={styles['fileName']}>File name: {selectedFile.name}</p>}
+      <div className={styles["fileUploadContainer"]}>
+        <div className={styles["fileUploadButton"]}>
+          <label htmlFor="file">
+            <div className={styles["fileUpload"]}>파일 업로드하기</div>
+          </label>
+          <input className={styles['fileUpload-btn']} type="file" id='file' onChange={handleFileChange} accept=".csv" />
+        </div>
+        <div className={styles["fileUploadName"]}>
+          {selectedFile && <p className={styles['fileName']}>File name: {selectedFile.name}</p>}
+        </div>
+      </div>
     </div>
   );
 }

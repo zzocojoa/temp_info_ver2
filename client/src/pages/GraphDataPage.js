@@ -60,35 +60,37 @@ function GraphDataPage() {
     <div className={styles['graphDataWrap']}>
       <div className={styles['graphDataContainer']}>
         <div className={styles['leftPanel']}>
-          <h2 className={styles.headerTitle}>Graph Data Visualization</h2>
-          <FileUploadButton onFileSelect={handleFileSelect} />
-          <UploadDataButton selectedFile={uploadedFile} onUploadSuccess={handleUploadSuccess} isEnabled={!!uploadedFile} />
-          {isGraphGenerated && ( // isGraphGenerated 상태에 따라 조건부 렌더링
-            <>
-              <SaveCsvDataButton
-                data={{
-                  graphData: selectedRange.start !== 0 || selectedRange.end !== 0 ?
-                    graphData.slice(selectedRange.start, selectedRange.end + 1) :
-                    graphData,
-                  boxPlotData,
-                  numbering: details,
-                  userInput
-                }}
-                fileName={uploadedFileName}
-                onSaveSuccess={handleSaveDataSuccess}
-                selectedRange={selectedRange}
-              />
-              <LineGraph
-                averagedData={graphData}
-                wNumber={details.wNumber}
-                dwNumber={details.dwNumber}
-                dieNumber={details.dieNumber}
-                onDetailsChange={(key, value) => setDetails({ ...details, [key]: value })}
-                onBrushChange={handleBrushChange}
-              />
-              <BoxGraph boxplotStats={boxPlotData} />
-            </>
-          )}
+          <h2 className={styles['headerTitle']}>Graph Data Visualization</h2>
+          <FileUploadButton className={styles['fileUploadButton']} onFileSelect={handleFileSelect} />
+          <div className={styles['graphGenerated']}>
+            <UploadDataButton className={styles['uploadDataButton']} selectedFile={uploadedFile} onUploadSuccess={handleUploadSuccess} isEnabled={!!uploadedFile} />
+            {isGraphGenerated && (
+              <>
+                <SaveCsvDataButton
+                  data={{
+                    graphData: selectedRange.start !== 0 || selectedRange.end !== 0 ?
+                      graphData.slice(selectedRange.start, selectedRange.end + 1) :
+                      graphData,
+                    boxPlotData,
+                    numbering: details,
+                    userInput
+                  }}
+                  fileName={uploadedFileName}
+                  onSaveSuccess={handleSaveDataSuccess}
+                  selectedRange={selectedRange}
+                />
+                <LineGraph
+                  averagedData={graphData}
+                  wNumber={details.wNumber}
+                  dwNumber={details.dwNumber}
+                  dieNumber={details.dieNumber}
+                  onDetailsChange={(key, value) => setDetails({ ...details, [key]: value })}
+                  onBrushChange={handleBrushChange}
+                />
+                <BoxGraph boxplotStats={boxPlotData} />
+              </>
+            )}
+          </div>
         </div>
         <div className={styles['rightPanel']}>
           <DataListUI />
