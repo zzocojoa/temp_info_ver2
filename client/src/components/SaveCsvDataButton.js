@@ -4,7 +4,7 @@ import React from 'react';
 import styles from './SaveCsvDataButton.module.css'
 import { saveData } from '../api';
 
-function SaveCsvDataButton({ data, fileName, onSaveSuccess, selectedRange }) {
+function SaveCsvDataButton({ data, fileName, onSaveSuccess, startTime, endTime }) {
   const downloadCsv = (data, fileName) => {
     // numbering 정보가 있는 경우 해당 값을 사용하고, 없는 경우 기본값 사용
     const { wNumber = 'N/A', dwNumber = 'N/A', dieNumber = 'N/A' } = data.numbering || {};
@@ -15,7 +15,7 @@ function SaveCsvDataButton({ data, fileName, onSaveSuccess, selectedRange }) {
     const dateFromFileName = dateMatch ? dateMatch[0] : new Date().toISOString().split('T')[0];
 
     const finalFileName = `${dateFromFileName}_${wNumber}_${dwNumber}_${dieNumber}.csv`;
-    console.log("finalFileName :", finalFileName);
+    // console.log("finalFileName :", finalFileName);
     let csvContent = "data:text/csv;charset=utf-8,Date,Time,Temperature\n";
 
     // graphData가 정의되지 않았을 경우를 처리
@@ -34,13 +34,14 @@ function SaveCsvDataButton({ data, fileName, onSaveSuccess, selectedRange }) {
     document.body.removeChild(link);
   };
 
+  // 다운로드 핸들 로직
   const handleSaveData = async () => {
     try {
       const dateMatch = fileName.match(/\d{4}-\d{2}-\d{2}/);
       const filedate = dateMatch ? dateMatch[0] : new Date().toISOString().split('T')[0]; // 파일명에서 날짜 추출
       const { userInput } = data;
 
-      await saveData({ ...data, filedate, userInput });
+      await saveData({ ...data, filedate, userInput, startTime, endTime });
       onSaveSuccess();
     } catch (error) {
       alert('Error saving data.');

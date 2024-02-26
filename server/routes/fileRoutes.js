@@ -60,7 +60,9 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
 // 데이터 저장 처리
 router.post('/save', async (req, res) => {
-  const { fileName, graphData, boxPlotData, numbering, filedate, userInput } = req.body;
+  const { fileName, graphData, boxPlotData, numbering, filedate, userInput, startTime, endTime } = req.body;
+  console.log("graphData: ", graphData)
+
   // console.log("Received numbering:", filedate);
   try {
     const newFileMetadata = new FileMetadata({
@@ -70,6 +72,8 @@ router.post('/save', async (req, res) => {
       numbering: numbering,
       filedate,
       userInput,
+      startTime, 
+      endTime,
     });
     await newFileMetadata.save();
 

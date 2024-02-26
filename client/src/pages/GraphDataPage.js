@@ -14,6 +14,8 @@ function GraphDataPage() {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [graphData, setGraphData] = useState([]);
   const [selectedRange, setSelectedRange] = useState({ start: 0, end: 0 });
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [boxPlotData, setBoxPlotData] = useState(null);
   const [uploadedFileName, setUploadedFileName] = useState('');
   const [userInput, setUserInput] = useState('');
@@ -52,6 +54,11 @@ function GraphDataPage() {
     // setIsDataSaved(true);
   };
   const handleBrushChange = (startIndex, endIndex) => {
+    // 시간 UI 상태로 저장
+    const newStartTime = graphData[startIndex]?.Time || '';
+    const newEndTime = graphData[endIndex]?.Time || '';
+    setStartTime(newStartTime);
+    setEndTime(newEndTime);
     // 선택된 데이터 범위를 상태로 저장
     setSelectedRange({ start: startIndex, end: endIndex });
   };
@@ -78,6 +85,8 @@ function GraphDataPage() {
                   fileName={uploadedFileName}
                   onSaveSuccess={handleSaveDataSuccess}
                   selectedRange={selectedRange}
+                  startTime={startTime}
+                  endTime={endTime}
                 />
                 <LineGraph
                   averagedData={graphData}

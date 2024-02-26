@@ -15,7 +15,8 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
   useEffect(() => {
     const handleResize = () => {
       setChartSize({
-        width: Math.min(window.innerWidth * 0.9, 1000), // 최대 너비를 1000으로 제한
+         // 최대 너비를 1000으로 제한
+        width: Math.min(window.innerWidth * 0.9, 1000),
         height: 400
       });
     };
@@ -42,15 +43,15 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
 
   const handleBrushChange = (e) => {
     if (!e) return;
-
+  
     const { startIndex, endIndex } = e;
     // 변경 사항이 있는 경우에만 onBrushChange 호출
     if (startIndex !== endIndex) {
       onBrushChange(startIndex, endIndex);
     }
-
-    // averagedData의 유효한 인덱스인지 확인
-    if (averagedData[startIndex] && averagedData[endIndex]) {
+  
+    // averagedData의 유효한 인덱스인지 확인하고 Time 속성이 있는지 확인
+    if (averagedData[startIndex]?.Time && averagedData[endIndex]?.Time) {
       const newStartTime = averagedData[startIndex].Time;
       const newEndTime = averagedData[endIndex].Time;
       // startTime과 endTime이 현재 상태와 다를 때만 업데이트
@@ -58,15 +59,8 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
         setStartTime(newStartTime);
         setEndTime(newEndTime);
       }
-    }
-  };
-
-  // 입력 필드 변경 처리 로직
-  const handleTimeChange = (type, value) => {
-    if (type === 'start' && value !== startTime) {
-      setStartTime(value);
-    } else if (type === 'end' && value !== endTime) {
-      setEndTime(value);
+    } else {
+      console.log('averagedData에 유효한 Time 속성이 없습니다.');
     }
   };
 
@@ -128,7 +122,6 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
                 className={styles['startTimeInput']}
                 type="time"
                 value={startTime}
-                onChange={(e) => handleTimeChange('start', e.target.value)}
                 readOnly
               />
             </div>
@@ -138,7 +131,6 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
                 className={styles['endTimeInput']}
                 type="time"
                 value={endTime}
-                onChange={(e) => handleTimeChange('end', e.target.value)}
                 readOnly
               />
             </div>

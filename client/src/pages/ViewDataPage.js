@@ -14,7 +14,6 @@ function ViewDataPage() {
   const { selectedItems } = location.state || {};
   const [graphData, setGraphData] = useState([]);
   const [boxPlotData, setBoxPlotData] = useState([]);
-  const [selectedRange, setSelectedRange] = useState({ start: 0, end: 0 });
   const [userInput, setUserInput] = useState('');
   const [details, setDetails] = useState({
     wNumber: '',
@@ -66,11 +65,6 @@ function ViewDataPage() {
     }
   };
 
-  const handleBrushChange = (startIndex, endIndex) => {
-    setSelectedRange({ start: startIndex, end: endIndex });
-
-  };
-
   return (
     <div className={styles['graphDataWrap']}>
       <div className={styles['graphDataContainer']}>
@@ -83,7 +77,8 @@ function ViewDataPage() {
               dwNumber={details.dwNumber}
               dieNumber={details.dieNumber}
               onDetailsChange={(key, value) => setDetails(prev => ({ ...prev, [key]: value }))}
-              onBrushChange={handleBrushChange}
+              // onBrushChange에 빈 함수를 전달하여 에러 방지
+              onBrushChange={() => {}}
             />
           ) : (
             <p>Line graph 데이터를 불러오는 중...</p>

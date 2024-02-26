@@ -25,6 +25,8 @@ const fileMetadataSchema = new mongoose.Schema({
     },
     filedate: String,
     userInput: String,
+    startTime: String, 
+    endTime: String,
 });
 
 const FileMetadata = mongoose.model('FileMetadata', fileMetadataSchema);
