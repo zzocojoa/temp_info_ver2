@@ -212,14 +212,18 @@
 .selectAllCheckbox {
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 .selectAllCheckbox input[type="checkbox"] {
-  margin-right: 5px;
+  margin-right: 10px;
   cursor: pointer;
 }
 
 .selectAllLabel {
+  display: flex;
+  margin: 0 5px;
   cursor: pointer;
   user-select: none;
 }
