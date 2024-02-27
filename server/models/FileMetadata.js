@@ -19,6 +19,7 @@ const fileMetadataSchema = new mongoose.Schema({
         outliers: [Number]
     },
     numbering: {
+        countNumber: String,
         wNumber: String,
         dwNumber: String,
         dieNumber: String,

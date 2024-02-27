@@ -18,6 +18,7 @@ function ViewDataPage() {
   const [startTime, setstartTime] = useState('');
   const [endTime, setendTime] = useState('');
   const [details, setDetails] = useState({
+    countNumber: '',
     wNumber: '',
     dwNumber: '',
     dieNumber: '',
@@ -34,12 +35,12 @@ function ViewDataPage() {
         // 사용자 입력 데이터 처리를 위해 첫 번째 선택된 항목의 userInput을 사용
         const firstUserInput = results[0]?.userInput || '';
         const firstItemDetails = results[0]?.numbering || {};
-        const { wNumber, dwNumber, dieNumber } = firstItemDetails;
+        const { countNumber, wNumber, dwNumber, dieNumber } = firstItemDetails;
         const setInitialStartTime = results[0]?.startTime || '';
         const setInitialEndTime = results[0]?.endTime || '';
 
         // 상태에 Die_Number, DW_Number, W_Number 저장
-        setDetails({ wNumber, dwNumber, dieNumber });
+        setDetails({ countNumber, wNumber, dwNumber, dieNumber });
         setGraphData(allGraphData);
         setBoxPlotData(allBoxPlotData);
         setUserInput(firstUserInput);
@@ -74,6 +75,7 @@ function ViewDataPage() {
           {graphData.length > 0 ? (
             <LineGraph
               averagedData={graphData}
+              countNumber={details.countNumber}
               wNumber={details.wNumber}
               dwNumber={details.dwNumber}
               dieNumber={details.dieNumber}

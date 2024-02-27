@@ -7,9 +7,9 @@ import {
 import styles from './LineGraph.module.css'
 
 function LineGraph({
-  averagedData, wNumber, dwNumber,
-  dieNumber, onDetailsChange, onBrushChange,
-  initialStartTime, initialEndTime
+  averagedData, onDetailsChange,
+  countNumber, dieNumber, wNumber, dwNumber,  
+  onBrushChange, initialStartTime, initialEndTime
 }) {
   const [chartSize, setChartSize] = useState({ width: 600, height: 300 });
   const [startTime, setStartTime] = useState(initialStartTime || '');
@@ -83,6 +83,16 @@ function LineGraph({
         <div className={styles['textWrap']}>
           <div className={styles['textContainer']}>
             <div className={styles['NumberWrap']}>
+              <div className={styles['ExWrap']}>
+                <span className={styles['ExNumber']}>C_Number</span>
+                <input
+                  type="text"
+                  placeholder="0000"
+                  className={styles['ExInfo']}
+                  value={countNumber || ''}
+                  onChange={(e) => onDetailsChange('countNumber', e.target.value)}
+                />
+              </div>
               <div className={styles['ExWrap']}>
                 <span className={styles['ExNumber']}>W_Number</span>
                 <input

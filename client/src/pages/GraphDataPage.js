@@ -22,6 +22,7 @@ function GraphDataPage() {
   const [uploadedFileName, setUploadedFileName] = useState('');
   const [userInput, setUserInput] = useState('');
   const [details, setDetails] = useState({
+    countNumber: '',
     wNumber: '',
     dwNumber: '',
     dieNumber: '',
@@ -101,6 +102,7 @@ function GraphDataPage() {
                 />
                 <LineGraph
                   averagedData={graphData}
+                  countNumber={details.countNumber}
                   wNumber={details.wNumber}
                   dwNumber={details.dwNumber}
                   dieNumber={details.dieNumber}

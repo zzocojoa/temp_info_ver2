@@ -26,7 +26,7 @@ function DataListUI() {
   useEffect(() => {
     // searchTerm이 변경될 때마다 실행되며, dataList를 기반으로 필터링
     const filtered = dataList.filter(dataItem =>
-      `${dataItem.filedate}_${dataItem.numbering?.wNumber ?? ''}_${dataItem.numbering?.dwNumber ?? ''}_${dataItem.numbering?.dieNumber ?? ''}`
+      `${dataItem.filedate}-${dataItem.numbering?.countNumber ?? ''}_${dataItem.numbering?.wNumber ?? ''}_${dataItem.numbering?.dwNumber ?? ''}_${dataItem.numbering?.dieNumber ?? ''}`
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
     );
@@ -80,12 +80,12 @@ function DataListUI() {
     const selectedDataDetails = await Promise.all(selectedItems.map(id => fetchDataDetails(id)));
 
     // CSV 헤더
-    const csvHeader = 'filedate,wNumber,dwNumber,dieNumber,median\n';
+    const csvHeader = 'filedate,countNumber,wNumber,dwNumber,dieNumber,median, startTime, endTime\n';
 
     // 각 항목을 CSV 형식의 문자열로 변환
     const csvRows = selectedDataDetails.map(item => {
-      const { filedate, numbering: { wNumber, dwNumber, dieNumber }, boxplotStats: { median } } = item;
-      return `"${filedate}","${wNumber}","${dwNumber}","${dieNumber}","${median}"`;
+      const { filedate, numbering: { countNumber, wNumber, dwNumber, dieNumber }, boxplotStats: { median }, startTime, endTime } = item;
+      return `"${filedate}","${countNumber}","${wNumber}","${dwNumber}","${dieNumber}","${median}","${startTime}","${endTime}"`;
     });
 
     // CSV 헤더와 모든 행을 결합하여 최종 CSV 내용을 생성
@@ -134,7 +134,7 @@ function DataListUI() {
                 checked={selectedItems.includes(dataItem._id)}
                 onChange={() => handleCheckboxChange(dataItem._id)}
               />
-              {`${dataItem.filedate}_${dataItem.numbering?.wNumber ?? 'N/A'}_${dataItem.numbering?.dwNumber ?? 'N/A'}_${dataItem.numbering?.dieNumber ?? 'N/A'}`}
+              {`${dataItem.filedate}-${dataItem.numbering?.countNumber ?? 'N/A'}_${dataItem.numbering?.wNumber ?? 'N/A'}_${dataItem.numbering?.dwNumber ?? 'N/A'}_${dataItem.numbering?.dieNumber ?? 'N/A'}`}
             </label>
           </div>
         ))}
