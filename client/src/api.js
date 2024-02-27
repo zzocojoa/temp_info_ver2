@@ -84,7 +84,7 @@ export async function fetchDataDetails(dataId) {
 
 // 데이터 삭제
 export async function deleteData(dataId) {
-  console.log("dataId :", dataId)
+  // console.log("dataId :", dataId)
   const response = await fetch(`${API_BASE_URL}/data/${dataId}`, {
     method: 'DELETE',
   });

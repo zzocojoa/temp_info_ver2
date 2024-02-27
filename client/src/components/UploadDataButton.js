@@ -6,7 +6,7 @@ import { uploadFile } from '../api';
 
 function UploadDataButton({ selectedFile, onUploadSuccess, isEnabled }) {
   const handleUpload = async () => {
-    
+
     if (!selectedFile) {
       alert('Please select a file first.');
       return;
@@ -19,7 +19,10 @@ function UploadDataButton({ selectedFile, onUploadSuccess, isEnabled }) {
         const { averagedData, boxplotStats } = response;
         // 파일 업로드 성공 시, handleUploadSuccess 콜백을 호출하고,
         // 업로드된 파일의 데이터와 파일 이름을 인자로 전달
-        onUploadSuccess(averagedData, boxplotStats, selectedFile.name);
+        // 업로드 성공 후 처리 로직에서 시작 시간과 종료 시간을 설정
+        const startTime = averagedData[0]?.Time || '';
+        const endTime = averagedData[averagedData.length - 1]?.Time || '';
+        onUploadSuccess(averagedData, boxplotStats, selectedFile.name, startTime, endTime);
         // alert('File uploaded successfully!');
       } else {
         // 서버 응답이 없거나 업로드 실패 시

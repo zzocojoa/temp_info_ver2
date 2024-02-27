@@ -15,6 +15,8 @@ function ViewDataPage() {
   const [graphData, setGraphData] = useState([]);
   const [boxPlotData, setBoxPlotData] = useState([]);
   const [userInput, setUserInput] = useState('');
+  const [startTime, setstartTime] = useState('');
+  const [endTime, setendTime] = useState('');
   const [details, setDetails] = useState({
     wNumber: '',
     dwNumber: '',
@@ -26,24 +28,23 @@ function ViewDataPage() {
       if (selectedItems && selectedItems.length > 0) {
         const detailsPromises = selectedItems.map(id => fetchDataDetails(id));
         const results = await Promise.all(detailsPromises);
-
         // MongoDB 스키마에 따라 수정된 데이터 접근 로직
         const allGraphData = results.flatMap(detail => detail.temperatureData || []);
         const allBoxPlotData = results.map(detail => detail.boxplotStats).filter(data => data);
-
         // 사용자 입력 데이터 처리를 위해 첫 번째 선택된 항목의 userInput을 사용
         const firstUserInput = results[0]?.userInput || '';
-
-        // MongoDB에서 조회된 데이터를 기반으로 상태 업데이트
         const firstItemDetails = results[0]?.numbering || {};
         const { wNumber, dwNumber, dieNumber } = firstItemDetails;
+        const setInitialStartTime = results[0]?.startTime || '';
+        const setInitialEndTime = results[0]?.endTime || '';
 
         // 상태에 Die_Number, DW_Number, W_Number 저장
         setDetails({ wNumber, dwNumber, dieNumber });
-
         setGraphData(allGraphData);
         setBoxPlotData(allBoxPlotData);
         setUserInput(firstUserInput);
+        setstartTime(setInitialStartTime);
+        setendTime(setInitialEndTime);
       }
     };
 
@@ -78,7 +79,9 @@ function ViewDataPage() {
               dieNumber={details.dieNumber}
               onDetailsChange={(key, value) => setDetails(prev => ({ ...prev, [key]: value }))}
               // onBrushChange에 빈 함수를 전달하여 에러 방지
-              onBrushChange={() => {}}
+              onBrushChange={() => { }}
+              initialStartTime={startTime}
+              initialEndTime={endTime}
             />
           ) : (
             <p>Line graph 데이터를 불러오는 중...</p>

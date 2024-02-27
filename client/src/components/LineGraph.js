@@ -6,16 +6,20 @@ import {
 } from 'recharts';
 import styles from './LineGraph.module.css'
 
-function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange, onBrushChange }) {
+function LineGraph({
+  averagedData, wNumber, dwNumber,
+  dieNumber, onDetailsChange, onBrushChange,
+  initialStartTime, initialEndTime
+}) {
   const [chartSize, setChartSize] = useState({ width: 600, height: 300 });
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
+  const [startTime, setStartTime] = useState(initialStartTime || '');
+  const [endTime, setEndTime] = useState(initialEndTime || '');
 
   // 그래프 반응형 로직
   useEffect(() => {
     const handleResize = () => {
       setChartSize({
-         // 최대 너비를 1000으로 제한
+        // 최대 너비를 1000으로 제한
         width: Math.min(window.innerWidth * 0.9, 1000),
         height: 400
       });
@@ -28,37 +32,35 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
   }, []);
 
   useEffect(() => {
-    if (startTime && endTime) {
-      const findClosestIndex = (time) => {
-        return averagedData.findIndex(data => data.Time >= time);
-      };
-
-      const startIndex = findClosestIndex(startTime);
-      const endIndex = findClosestIndex(endTime);
-      if (startIndex !== -1 && endIndex !== -1 && (averagedData[startIndex].Time !== startTime || averagedData[endIndex].Time !== endTime)) {
-        onBrushChange(startIndex, endIndex);
-      }
-    }
-  }, [startTime, endTime, onBrushChange, averagedData]);
+    // props로 받은 initialStartTime과 initialEndTime을 사용하여 초기 시간 설정
+    setStartTime(initialStartTime);
+    setEndTime(initialEndTime);
+  }, [initialStartTime, initialEndTime]);
 
   const handleBrushChange = (e) => {
-    if (!e) return;
-  
-    const { startIndex, endIndex } = e;
-    // 변경 사항이 있는 경우에만 onBrushChange 호출
-    if (startIndex !== endIndex) {
+    if (!e) {
+      // Brush 이벤트가 없을 경우 초기 시간으로 설정
+      setStartTime(initialStartTime);
+      setEndTime(initialEndTime);
+      // 초기 인덱스 값으로 onBrushChange 호출
+      const startIndex = 0;
+      const endIndex = averagedData.length - 1;
       onBrushChange(startIndex, endIndex);
+      return;
     }
-  
+
+    const { startIndex, endIndex } = e;
+    // console.log(`Brush event triggered: startIndex = ${startIndex}, endIndex = ${endIndex}`);
+    // 변경 사항이 없는 경우도 포함하여 onBrushChange 호출
+    onBrushChange(startIndex, endIndex);
+
     // averagedData의 유효한 인덱스인지 확인하고 Time 속성이 있는지 확인
     if (averagedData[startIndex]?.Time && averagedData[endIndex]?.Time) {
       const newStartTime = averagedData[startIndex].Time;
       const newEndTime = averagedData[endIndex].Time;
-      // startTime과 endTime이 현재 상태와 다를 때만 업데이트
-      if (startTime !== newStartTime || endTime !== newEndTime) {
-        setStartTime(newStartTime);
-        setEndTime(newEndTime);
-      }
+
+      setStartTime(newStartTime);
+      setEndTime(newEndTime);
     } else {
       console.log('averagedData에 유효한 Time 속성이 없습니다.');
     }
@@ -87,7 +89,7 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
                   type="text"
                   placeholder="0000"
                   className={styles['ExInfo']}
-                  value={wNumber}
+                  value={wNumber || ''}
                   onChange={(e) => onDetailsChange('wNumber', e.target.value)}
                 />
               </div>
@@ -97,7 +99,7 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
                   type="text"
                   placeholder="0000"
                   className={styles['ExInfo']}
-                  value={dwNumber}
+                  value={dwNumber || ''}
                   onChange={(e) => onDetailsChange('dwNumber', e.target.value)}
                 />
               </div>
@@ -107,7 +109,7 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
                   type="text"
                   placeholder="0000"
                   className={styles['ExInfo']}
-                  value={dieNumber}
+                  value={dieNumber || ''}
                   onChange={(e) => onDetailsChange('dieNumber', e.target.value)}
                 />
               </div>
@@ -121,7 +123,7 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
               <input
                 className={styles['startTimeInput']}
                 type="time"
-                value={startTime}
+                value={startTime || ''}
                 readOnly
               />
             </div>
@@ -130,7 +132,7 @@ function LineGraph({ averagedData, wNumber, dwNumber, dieNumber, onDetailsChange
               <input
                 className={styles['endTimeInput']}
                 type="time"
-                value={endTime}
+                value={endTime || ''}
                 readOnly
               />
             </div>

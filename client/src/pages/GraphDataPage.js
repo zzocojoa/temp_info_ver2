@@ -1,6 +1,6 @@
 // src/pages/GraphDataPage.js
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FileUploadButton from '../components/FileUploadButton';
 import UploadDataButton from '../components/UploadDataButton';
 import SaveCsvDataButton from '../components/SaveCsvDataButton';
@@ -16,6 +16,8 @@ function GraphDataPage() {
   const [selectedRange, setSelectedRange] = useState({ start: 0, end: 0 });
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
+  const [initialStartTime, setInitialStartTime] = useState('');
+  const [initialEndTime, setInitialEndTime] = useState('');
   const [boxPlotData, setBoxPlotData] = useState(null);
   const [uploadedFileName, setUploadedFileName] = useState('');
   const [userInput, setUserInput] = useState('');
@@ -28,31 +30,40 @@ function GraphDataPage() {
   // 그래프 생성 여부를 추적하는 상태 추가
   const [isGraphGenerated, setIsGraphGenerated] = useState(false);
 
-  // const [isDataSaved, setIsDataSaved] = useState(false);
-  // details 상태가 업데이트될 때마다 실행될 useEffect 훅
-  // useEffect(() => {
-  //   console.log("Current details state:", details);
-  // }, [details]);
-
   const handleFileSelect = (file) => {
     setUploadedFile(file);
     setGraphData([]);
     setBoxPlotData(null);
     setUserInput('');
-    // setIsDataSaved(false);
   };
-  const handleUploadSuccess = async (averagedData, boxplotStats, uploadedFileName) => {
+  const handleUploadSuccess = async (
+    averagedData, boxplotStats,
+    uploadedFileName, startTime, endTime,
+    uploadedStartTime, uploadedEndTime
+  ) => {
     setGraphData(averagedData);
     setBoxPlotData(boxplotStats);
     setUploadedFileName(uploadedFileName);
     setIsGraphGenerated(true);
-    // setIsDataSaved(false);
+    setInitialStartTime(startTime);
+    setInitialEndTime(endTime);
+    setStartTime(uploadedStartTime);
+    setEndTime(uploadedEndTime);
     console.log("uploadedFileName: ", uploadedFileName)
   };
+
+  useEffect(() => {
+    // props로 받은 initialStartTime과 initialEndTime을 사용하여 초기 시간 설정
+    setStartTime(initialStartTime);
+    setEndTime(initialEndTime);
+    // console.log(`Initial start time: ${initialStartTime}, Initial end time: ${initialEndTime}`);
+  }, [initialStartTime, initialEndTime]);
+
   const handleSaveDataSuccess = () => {
     // alert('Data saved successfully!');
     // setIsDataSaved(true);
   };
+
   const handleBrushChange = (startIndex, endIndex) => {
     // 시간 UI 상태로 저장
     const newStartTime = graphData[startIndex]?.Time || '';
@@ -95,6 +106,8 @@ function GraphDataPage() {
                   dieNumber={details.dieNumber}
                   onDetailsChange={(key, value) => setDetails({ ...details, [key]: value })}
                   onBrushChange={handleBrushChange}
+                  initialStartTime={initialStartTime}
+                  initialEndTime={initialEndTime}
                 />
                 <BoxGraph boxplotStats={boxPlotData} />
               </>
