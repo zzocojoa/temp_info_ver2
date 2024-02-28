@@ -63,7 +63,6 @@ function processData(data) {
         Temperature: entry.sum / entry.count
     }));
 
-    // 여기부터 수정된 부분
     const temperatureValues = Array.from(groupedData.values()).map(entry => entry.sum / entry.count);
 
     const min = Math.min(...temperatureValues);

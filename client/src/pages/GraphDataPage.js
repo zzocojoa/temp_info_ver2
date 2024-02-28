@@ -36,6 +36,7 @@ function GraphDataPage() {
     setGraphData([]);
     setBoxPlotData(null);
     setUserInput('');
+    setIsGraphGenerated(false);
   };
   const handleUploadSuccess = async (
     averagedData, boxplotStats,
@@ -111,7 +112,7 @@ function GraphDataPage() {
                   initialStartTime={initialStartTime}
                   initialEndTime={initialEndTime}
                 />
-                <BoxGraph boxplotStats={boxPlotData} />
+                <BoxGraph boxplotStats={boxPlotData} selectedRange={selectedRange} />
               </>
             )}
           </div>
@@ -131,3 +132,4 @@ function GraphDataPage() {
   );
 }
 export default GraphDataPage;
+
