@@ -43,7 +43,6 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
     // 데이터 정제 processData
     const { averagedData, boxplotStats, temperatureValues } = processData(allData);
-    // console.log(averagedData);
 
     res.json({ success: true, message: 'File processed successfully', data: averagedData, boxplotStats, temperatureValues });
   } catch (error) {
@@ -55,6 +54,22 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     } catch (error) {
       console.error('Error deleting file:', error);
     }
+  }
+});
+
+// bolplot dynamic data
+router.post('/process-filtered-data', async (req, res) => {
+  const { filteredData } = req.body;
+
+  try {
+    // console.log(filteredData);
+    const processedResult = processData(filteredData);
+    console.log(processedResult);
+
+    res.json({ success: true, message: 'Filtered data processed successfully' });
+  } catch (error) {
+    console.error('Error processing filtered data:', error);
+    res.status(500).send('Error processing filtered data');
   }
 });
 

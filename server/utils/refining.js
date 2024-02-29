@@ -63,10 +63,8 @@ function processData(data) {
         Temperature: entry.sum / entry.count
     }));
 
-
-    // const temperatureValues = Array.from(groupedData.values()).map(entry => entry.sum / entry.count);
     const temperatureValues = averagedData.map(entry => entry.Temperature);
-
+    
     const min = Math.min(...temperatureValues);
     const max = Math.max(...temperatureValues);
     const median = quartile(temperatureValues, 0.5);

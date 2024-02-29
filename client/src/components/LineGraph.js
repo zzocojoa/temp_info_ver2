@@ -32,7 +32,6 @@ function LineGraph({
   }, []);
 
   useEffect(() => {
-    // props로 받은 initialStartTime과 initialEndTime을 사용하여 초기 시간 설정
     setStartTime(initialStartTime);
     setEndTime(initialEndTime);
   }, [initialStartTime, initialEndTime]);
@@ -40,8 +39,8 @@ function LineGraph({
   const handleBrushChange = (e) => {
     if (!e) {
       // Brush 이벤트가 없을 경우 초기 시간으로 설정
-      setStartTime(initialStartTime);
-      setEndTime(initialEndTime);
+      // setStartTime(initialStartTime);
+      // setEndTime(initialEndTime);
       // 초기 인덱스 값으로 onBrushChange 호출
       const startIndex = 0;
       const endIndex = averagedData.length - 1;

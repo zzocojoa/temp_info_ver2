@@ -2,42 +2,39 @@
 
 import React, { useState, useEffect } from 'react';
 import ReactApexChart from 'react-apexcharts';
+import { sendFilteredData } from '../api';
 import styles from './BoxGraph.module.css';
 
-function BoxGraph({ boxplotStats, selectedRange, temperatureValues, averagedData, initialStartTime, initialEndTime }) {
+function BoxGraph({ boxplotStats,
+  selectedRange,
+  averagedData,
+  initialStartTime,
+  initialEndTime }) {
 
   const [startTime, setStartTime] = useState(initialStartTime || '');
   const [endTime, setEndTime] = useState(initialEndTime || '');
-  const [filteredAveragedData, setFilteredAveragedData] = useState([]);
-  const [selectedRangeStats, setselectedRangeStats] = useState(selectedRange);
-  const [temperatureValuesStats, settemperatureValuesStats] = useState(temperatureValues);
-
-  useEffect(() => {
-    // boxplotStats 변경 시 필터링 로직 실행
-    const filterDataByTimeRange = () => {
-      // setFilteredStats(boxplotStats);
-      setselectedRangeStats(selectedRange);
-      settemperatureValuesStats(temperatureValues);
-    };
-
-    filterDataByTimeRange();
-  }, [boxplotStats, selectedRange, temperatureValues]);
 
   // 초기 시간 설정 및 averagedData 필터링을 결합한 useEffect
   useEffect(() => {
     if (!selectedRange || (selectedRange.start === 0 && selectedRange.end === 0)) {
       setStartTime(initialStartTime);
       setEndTime(initialEndTime);
-      setFilteredAveragedData(averagedData);
 
     } else {
       if (averagedData && selectedRange) {
         const filteredData = averagedData.slice(selectedRange.start, selectedRange.end + 1);
-        
-        setFilteredAveragedData(filteredData);
-        settemperatureValuesStats(filteredData)
         setStartTime(filteredData[0]?.Time || initialStartTime);
         setEndTime(filteredData[filteredData.length - 1]?.Time || initialEndTime);
+  
+        // filteredData를 서버에 전송하고 응답을 처리하는 로직을 추가합니다.
+        sendFilteredData(filteredData)
+          .then(response => {
+            console.log('Server response:', response);
+            // 필요한 경우 서버로부터 받은 데이터를 상태에 저장하거나 다른 처리를 할 수 있습니다.
+          })
+          .catch(error => {
+            console.error('Failed to send filtered data:', error);
+          });
       }
     }
   }, [initialStartTime, initialEndTime, averagedData, selectedRange]);

@@ -18,6 +18,26 @@ export async function uploadFile(file) {
   }
 }
 
+// filteredData를 서버로 전송하는 함수(bolplot dynamic data)
+export async function sendFilteredData(filteredData) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/process-filtered-data`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ filteredData }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to send filtered data');
+    }
+    return await response.json(); // 서버 응답 반환
+  } catch (error) {
+    console.error('Error sending filtered data:', error);
+    throw error; // 컴포넌트에서 처리할 수 있게 에러를 다시 던짐
+  }
+}
+
 // 데이터 저장 API
 export async function saveData(data) {
   try {
