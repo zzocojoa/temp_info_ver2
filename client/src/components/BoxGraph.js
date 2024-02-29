@@ -6,7 +6,6 @@ import styles from './BoxGraph.module.css';
 
 function BoxGraph({ boxplotStats, selectedRange, temperatureValues, averagedData, initialStartTime, initialEndTime }) {
 
-  // const [filteredStats, setFilteredStats] = useState(boxplotStats);
   const [startTime, setStartTime] = useState(initialStartTime || '');
   const [endTime, setEndTime] = useState(initialEndTime || '');
   const [filteredAveragedData, setFilteredAveragedData] = useState([]);
