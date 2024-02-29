@@ -1,10 +1,47 @@
 // src\components\BoxGraph.js
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import styles from './BoxGraph.module.css';
 
-function BoxGraph({ boxplotStats }) {
+function BoxGraph({ boxplotStats, selectedRange, temperatureValues, averagedData, initialStartTime, initialEndTime }) {
+
+  const [startTime, setStartTime] = useState(initialStartTime || '');
+  const [endTime, setEndTime] = useState(initialEndTime || '');
+  const [filteredAveragedData, setFilteredAveragedData] = useState([]);
+  const [selectedRangeStats, setselectedRangeStats] = useState(selectedRange);
+  const [temperatureValuesStats, settemperatureValuesStats] = useState(temperatureValues);
+
+  useEffect(() => {
+    // boxplotStats 변경 시 필터링 로직 실행
+    const filterDataByTimeRange = () => {
+      // setFilteredStats(boxplotStats);
+      setselectedRangeStats(selectedRange);
+      settemperatureValuesStats(temperatureValues);
+    };
+
+    filterDataByTimeRange();
+  }, [boxplotStats, selectedRange, temperatureValues]);
+
+  // 초기 시간 설정 및 averagedData 필터링을 결합한 useEffect
+  useEffect(() => {
+    if (!selectedRange || (selectedRange.start === 0 && selectedRange.end === 0)) {
+      setStartTime(initialStartTime);
+      setEndTime(initialEndTime);
+      setFilteredAveragedData(averagedData);
+
+    } else {
+      if (averagedData && selectedRange) {
+        const filteredData = averagedData.slice(selectedRange.start, selectedRange.end + 1);
+        
+        setFilteredAveragedData(filteredData);
+        settemperatureValuesStats(filteredData)
+        setStartTime(filteredData[0]?.Time || initialStartTime);
+        setEndTime(filteredData[filteredData.length - 1]?.Time || initialEndTime);
+      }
+    }
+  }, [initialStartTime, initialEndTime, averagedData, selectedRange]);
+
   const stats = boxplotStats || {
     min: 0,
     q1: 0,
@@ -28,7 +65,7 @@ function BoxGraph({ boxplotStats }) {
     },
     yaxis: {
       labels: {
-        formatter: function(val) {
+        formatter: function (val) {
           return val.toFixed(0); // 소수점 없이 정수만 표시
         }
       }

@@ -11,8 +11,8 @@ export async function uploadFile(file) {
       method: 'POST',
       body: formData,
     });
-    const { data: averagedData, boxplotStats } = await response.json();
-    return { averagedData, boxplotStats }; // 업로드 결과 반환
+    const { data: averagedData, boxplotStats, temperatureValues } = await response.json();
+    return { averagedData, boxplotStats, temperatureValues }; // 업로드 결과 반환
   } catch (error) {
     console.error('Error uploading file:', error);
   }
