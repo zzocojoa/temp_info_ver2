@@ -112,7 +112,14 @@ function GraphDataPage() {
                   initialStartTime={initialStartTime}
                   initialEndTime={initialEndTime}
                 />
-                <BoxGraph boxplotStats={boxPlotData} selectedRange={selectedRange} />
+                <BoxGraph
+                  initialStartTime={initialStartTime}
+                  initialEndTime={initialEndTime}
+                  averagedData={graphData}
+                  boxplotStats={boxPlotData}
+                  selectedRange={selectedRange}
+                  onBrushChange={handleBrushChange}
+                  />
               </>
             )}
           </div>

@@ -42,10 +42,10 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     });
 
     // 데이터 정제 processData
-    const { averagedData, boxplotStats } = processData(allData);
+    const { averagedData, boxplotStats, temperatureValues } = processData(allData);
     // console.log(averagedData);
 
-    res.json({ success: true, message: 'File processed successfully', data: averagedData, boxplotStats });
+    res.json({ success: true, message: 'File processed successfully', data: averagedData, boxplotStats, temperatureValues });
   } catch (error) {
     console.error('Error processing file:', error);
     res.status(500).send('Error processing file');
@@ -61,7 +61,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 // 데이터 저장 처리
 router.post('/save', async (req, res) => {
   const { fileName, graphData, boxPlotData, numbering, filedate, userInput, startTime, endTime } = req.body;
-  console.log("graphData: ", graphData)
+  // console.log("graphData: ", graphData)
 
   // console.log("Received numbering:", filedate);
   try {

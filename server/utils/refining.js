@@ -63,7 +63,9 @@ function processData(data) {
         Temperature: entry.sum / entry.count
     }));
 
-    const temperatureValues = Array.from(groupedData.values()).map(entry => entry.sum / entry.count);
+
+    // const temperatureValues = Array.from(groupedData.values()).map(entry => entry.sum / entry.count);
+    const temperatureValues = averagedData.map(entry => entry.Temperature);
 
     const min = Math.min(...temperatureValues);
     const max = Math.max(...temperatureValues);
@@ -80,9 +82,10 @@ function processData(data) {
         outliers
     };
 
-    // console.log("Refined Data:", boxplotStats);
+    // console.log("Refined averagedData: ", averagedData)
+    // console.log("Refined temperatureValues: ", temperatureValues);
 
-    return { averagedData, boxplotStats };
+    return { averagedData, boxplotStats, temperatureValues };
 }
 
 module.exports = processData;
