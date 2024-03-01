@@ -8,7 +8,7 @@ const router = express.Router();
 const Papa = require('papaparse');
 const FileMetadata = require('../models/FileMetadata');
 const processData = require('../utils/refining');
-
+const calculateQuartiles = require('../utils/quartileCalculations');
 
 // 파일 업로드 미들웨어 설정
 const storage = multer.diskStorage({
@@ -42,9 +42,11 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     });
 
     // 데이터 정제 processData
-    const { averagedData, boxplotStats, temperatureValues } = processData(allData);
+    const { averagedData, boxplotStats } = processData(allData);
+    // const { boxplotStats } = calculateQuartiles(averagedData);
 
-    res.json({ success: true, message: 'File processed successfully', data: averagedData, boxplotStats, temperatureValues });
+
+    res.json({ success: true, message: 'File processed successfully', data: averagedData, boxplotStats });
   } catch (error) {
     console.error('Error processing file:', error);
     res.status(500).send('Error processing file');
@@ -59,12 +61,12 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
 // bolplot dynamic data
 router.post('/process-filtered-data', async (req, res) => {
-  const { filteredData } = req.body;
+  const { boxFilteredData } = req.body;
 
   try {
     // console.log(filteredData);
-    const processedResult = processData(filteredData);
-    console.log(processedResult);
+    // const processedResult = processData(filteredData);
+    // console.log(filteredData);
 
     res.json({ success: true, message: 'Filtered data processed successfully' });
   } catch (error) {

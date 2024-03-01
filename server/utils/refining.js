@@ -1,89 +1,34 @@
-// server\utils\refining.js
+// server/utils/refining.js
 
 const moment = require('moment');
-const quartile = require('./quartile');
+const calculateQuartiles = require('./quartileCalculations');
+const calculateAveragedData = require('./averageData');
+const calculateBoxplotStats = require('./boxplotStats');
+const preprocessData = require('./preprocessData');
 
 function processData(data) {
-    let dateCounts = {};
-    let temperatures = [];
+    // 데이터 전처리 로직 호출
+    const { temperatures, tempValues } = preprocessData(data);
 
-    // 데이터 전처리 최적화: forEach 대신 for-loop 사용
-    for (const item of data) {
-        const date = item['date'];
-        const time = item['time'];
-        const temperature = parseFloat(item['temperature']);
+    // Quartile 관련 계산 로직 호출
+    const { q1, q3, lowerBound, upperBound } = calculateQuartiles(tempValues);
 
-        if (!isNaN(temperature)) {
-            dateCounts[date] = (dateCounts[date] || 0) + 1;
-            temperatures.push({ date, time, temperature });
-        } else {
-            // console.log(`유효하지 않은 온도 값: ${rawTemperature}, 해당 행은 무시.`);
-        }
-    }
-
-    const mostDataDate = Object.keys(dateCounts).reduce((a, b) => dateCounts[a] > dateCounts[b] ? a : b);
-
-    // 해당 날짜의 데이터만 필터링
-    temperatures = temperatures.filter(item => item.date === mostDataDate);
-    const tempValues = temperatures.map(item => item.temperature);
-
-    const q1 = quartile(tempValues, 0.25);
-    const q3 = quartile(tempValues, 0.75);
-    const iqr = q3 - q1;
-    const lowerBound = q1 - 1.5 * iqr;
-    const upperBound = q3 + 1.5 * iqr;
-
-    // 필터링 및 데이터 변환
+    // 필터링 및 데이터 변환 로직 호출
     let filteredData = temperatures.filter(item => item.temperature >= lowerBound && item.temperature <= upperBound)
         .map(item => ({
             Date: item.date,
             Time: moment(item.time, 'HH:mm:ss:SSS').format('HH:mm:ss'),
             Temperature: item.temperature
         }));
-    
-    // 데이터 그룹화 및 평균 계산 최적화: 객체 대신 Map 사용
-    let groupedData = new Map();
-    filteredData.forEach(item => {
-        const roundedTime = moment(item.Time, 'HH:mm:ss').startOf('minute').seconds(
-            Math.floor(moment(item.Time, 'HH:mm:ss').seconds() / 15) * 15
-        ).format('HH:mm:ss');
 
-        const dateTimeKey = `${item.Date} ${roundedTime}`;
-        if (!groupedData.has(dateTimeKey)) {
-            groupedData.set(dateTimeKey, { sum: 0, count: 0, date: item.Date, time: roundedTime });
-        }
-        let entry = groupedData.get(dateTimeKey);
-        entry.sum += item.Temperature;
-        entry.count += 1;
-    });
+    // AveragedData 계산 로직 호출
+    const averagedData = calculateAveragedData(filteredData);
 
-    const averagedData = Array.from(groupedData.values()).map(entry => ({
-        Date: entry.date,
-        Time: entry.time,
-        Temperature: entry.sum / entry.count
-    }));
+    // BoxplotStats 계산 로직 호출
+    const boxplotStats = calculateBoxplotStats(averagedData, q1, q3, lowerBound, upperBound);
 
-    const temperatureValues = averagedData.map(entry => entry.Temperature);
-    
-    const min = Math.min(...temperatureValues);
-    const max = Math.max(...temperatureValues);
-    const median = quartile(temperatureValues, 0.5);
-
-    const outliers = temperatureValues.filter(t => t < lowerBound || t > upperBound);
-
-    const boxplotStats = {
-        min,
-        q1,
-        median,
-        q3,
-        max,
-        outliers
-    };
-
-    // console.log("Refined averagedData: ", averagedData)
-    // console.log("Refined temperatureValues: ", temperatureValues);
-
-    return { averagedData, boxplotStats, temperatureValues };
+    console.log("boxplotStats: ", boxplotStats);
+    return { averagedData, boxplotStats };
 }
 
 module.exports = processData;

@@ -86,7 +86,14 @@ function BoxGraph({ boxplotStats,
     }]
   }];
 
-  const formatNumber = (num) => num ? num.toFixed(2) : 'N/A';
+  const formatNumber = (num) => {
+    const number = parseFloat(num);
+    if (!isNaN(number)) {
+      return number.toFixed(2);
+    } else {
+      return 'N/A';
+    }
+  };
 
   return (
     <div className={styles.graphDataWrap}>
