@@ -8,7 +8,6 @@ const router = express.Router();
 const Papa = require('papaparse');
 const FileMetadata = require('../models/FileMetadata');
 const processData = require('../utils/refining');
-const preprocessData = require('./preprocessData');
 const calculateQuartiles = require('../utils/quartileCalculations');
 
 // 파일 업로드 미들웨어 설정
@@ -25,12 +24,10 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     return res.status(400).send('No file uploaded.');
   }
 
-  // 파일 경로
   const filePath = req.file.path;
   let allData = [];
 
   try {
-    // 파일 읽기 및 파싱
     const fileContent = await fs.readFile(filePath, 'utf8');
     Papa.parse(fileContent, {
       header: true,
@@ -41,12 +38,8 @@ router.post('/upload', upload.single('file'), async (req, res) => {
         allData.push({ date, time, temperature });
       }
     });
-    const { temperatures, tempValues } = preprocessData(allData);
 
-    // 데이터 정제 processData
-    const { averagedData, boxplotStats } = processData(temperatures, tempValues);
-    // const { boxplotStats } = calculateQuartiles(averagedData);
-
+    const { averagedData, boxplotStats } = processData(allData);
 
     res.json({ success: true, message: 'File processed successfully', data: averagedData, boxplotStats });
   } catch (error) {
@@ -61,20 +54,19 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-// bolplot dynamic data
+// boxplot dynamic data
 router.post('/process-filtered-data', async (req, res) => {
-  const { filteredData } = req.body; // 클라이언트로부터 filteredData 받기
+  const { filteredData } = req.body;
 
   try {
-    // processData 함수를 사용하여 filteredData 처리
     const { boxplotStats } = processData(filteredData);
-    // 처리된 boxplotStats를 응답으로 반환
     res.json({ success: true, message: 'Filtered data processed successfully', boxplotStats });
   } catch (error) {
     console.error('Error processing filtered data:', error);
     res.status(500).send('Error processing filtered data');
   }
 });
+
 
 // 데이터 저장 처리
 router.post('/save', async (req, res) => {
