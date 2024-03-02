@@ -8,6 +8,8 @@ const router = express.Router();
 const Papa = require('papaparse');
 const FileMetadata = require('../models/FileMetadata');
 const processData = require('../utils/refining');
+const preprocessData = require('./preprocessData');
+const calculateQuartiles = require('../utils/quartileCalculations');
 
 // 파일 업로드 미들웨어 설정
 const storage = multer.diskStorage({
@@ -39,9 +41,10 @@ router.post('/upload', upload.single('file'), async (req, res) => {
         allData.push({ date, time, temperature });
       }
     });
+    const { temperatures, tempValues } = preprocessData(allData);
 
     // 데이터 정제 processData
-    const { averagedData, boxplotStats } = processData(allData);
+    const { averagedData, boxplotStats } = processData(temperatures, tempValues);
     // const { boxplotStats } = calculateQuartiles(averagedData);
 
 
