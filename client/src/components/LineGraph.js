@@ -4,12 +4,13 @@ import React, { useState, useEffect } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, Tooltip, Brush, ReferenceLine,
 } from 'recharts';
+import { sendFilteredData } from '../api';
 import styles from './LineGraph.module.css'
 
 function LineGraph({
   averagedData, onDetailsChange,
   countNumber, dieNumber, wNumber, dwNumber,  
-  onBrushChange, initialStartTime, initialEndTime
+  onBrushChange, initialStartTime, initialEndTime, setBoxplotStats
 }) {
   const [chartSize, setChartSize] = useState({ width: 600, height: 300 });
   const [startTime, setStartTime] = useState(initialStartTime || '');
@@ -36,12 +37,8 @@ function LineGraph({
     setEndTime(initialEndTime);
   }, [initialStartTime, initialEndTime]);
 
-  const handleBrushChange = (e) => {
+  const handleBrushChange = async (e) => {
     if (!e) {
-      // Brush 이벤트가 없을 경우 초기 시간으로 설정
-      // setStartTime(initialStartTime);
-      // setEndTime(initialEndTime);
-      // 초기 인덱스 값으로 onBrushChange 호출
       const startIndex = 0;
       const endIndex = averagedData.length - 1;
       onBrushChange(startIndex, endIndex);
@@ -49,20 +46,25 @@ function LineGraph({
     }
 
     const { startIndex, endIndex } = e;
-    // console.log(`Brush event triggered: startIndex = ${startIndex}, endIndex = ${endIndex}`);
-    // 변경 사항이 없는 경우도 포함하여 onBrushChange 호출
-    onBrushChange(startIndex, endIndex);
+  onBrushChange(startIndex, endIndex);
 
-    // averagedData의 유효한 인덱스인지 확인하고 Time 속성이 있는지 확인
-    if (averagedData[startIndex]?.Time && averagedData[endIndex]?.Time) {
-      const newStartTime = averagedData[startIndex].Time;
-      const newEndTime = averagedData[endIndex].Time;
+  if (averagedData[startIndex]?.Time && averagedData[endIndex]?.Time) {
+    const newStartTime = averagedData[startIndex].Time;
+    const newEndTime = averagedData[endIndex].Time;
 
-      setStartTime(newStartTime);
-      setEndTime(newEndTime);
-    } else {
-      console.log('averagedData에 유효한 Time 속성이 없습니다.');
+    setStartTime(newStartTime);
+    setEndTime(newEndTime);
+
+    const filteredData = averagedData.slice(startIndex, endIndex + 1);
+    try {
+      const { boxplotStats } = await sendFilteredData(filteredData); // await 사용하여 비동기 처리
+      setBoxplotStats(boxplotStats); // 상태 업데이트
+    } catch (error) {
+      console.error('필터링된 데이터를 처리하는 중 오류 발생:', error);
     }
+  } else {
+    console.log('선택된 데이터 범위에 유효한 Time 속성이 없습니다.');
+  }
   };
 
   const temperatureFormatter = (value) => `${value.toFixed(2)}°C`;

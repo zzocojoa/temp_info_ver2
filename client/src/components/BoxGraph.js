@@ -19,14 +19,13 @@ function BoxGraph({ boxplotStats,
     if (!selectedRange || (selectedRange.start === 0 && selectedRange.end === 0)) {
       setStartTime(initialStartTime);
       setEndTime(initialEndTime);
-
     } else {
       if (averagedData && selectedRange) {
         const filteredData = averagedData.slice(selectedRange.start, selectedRange.end + 1);
         setStartTime(filteredData[0]?.Time || initialStartTime);
         setEndTime(filteredData[filteredData.length - 1]?.Time || initialEndTime);
   
-        // filteredData를 서버에 전송하고 응답을 처리하는 로직을 추가합니다.
+        // filteredData를 서버에 전송하고 응답을 처리하는 로직
         sendFilteredData(filteredData)
           .then(response => {
             console.log('Server response:', response);

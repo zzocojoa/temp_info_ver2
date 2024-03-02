@@ -8,7 +8,6 @@ const router = express.Router();
 const Papa = require('papaparse');
 const FileMetadata = require('../models/FileMetadata');
 const processData = require('../utils/refining');
-const calculateQuartiles = require('../utils/quartileCalculations');
 
 // 파일 업로드 미들웨어 설정
 const storage = multer.diskStorage({
@@ -61,14 +60,13 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
 // bolplot dynamic data
 router.post('/process-filtered-data', async (req, res) => {
-  const { boxFilteredData } = req.body;
+  const { filteredData } = req.body; // 클라이언트로부터 filteredData 받기
 
   try {
-    // console.log(filteredData);
-    // const processedResult = processData(filteredData);
-    // console.log(filteredData);
-
-    res.json({ success: true, message: 'Filtered data processed successfully' });
+    // processData 함수를 사용하여 filteredData 처리
+    const { boxplotStats } = processData(filteredData);
+    // 처리된 boxplotStats를 응답으로 반환
+    res.json({ success: true, message: 'Filtered data processed successfully', boxplotStats });
   } catch (error) {
     console.error('Error processing filtered data:', error);
     res.status(500).send('Error processing filtered data');

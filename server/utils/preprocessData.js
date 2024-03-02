@@ -16,8 +16,17 @@ function preprocessData(data) {
         }
     }
 
-    const mostDataDate = Object.keys(dateCounts).reduce((a, b) => dateCounts[a] > dateCounts[b] ? a : b);
-    temperatures = temperatures.filter(item => item.date === mostDataDate);
+    // dateCounts 객체가 비어있는 경우 처리
+    const mostDataDate = Object.keys(dateCounts).length > 0
+        ? Object.keys(dateCounts).reduce((a, b) => dateCounts[a] > dateCounts[b] ? a : b)
+        : null;
+
+    if (mostDataDate) {
+        temperatures = temperatures.filter(item => item.date === mostDataDate);
+    } else {
+        temperatures = []; // mostDataDate가 없는 경우, temperatures 배열을 비웁니다.
+    }
+
     const tempValues = temperatures.map(item => item.temperature);
 
     return { temperatures, tempValues };

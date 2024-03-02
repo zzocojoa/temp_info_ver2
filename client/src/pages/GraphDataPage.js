@@ -111,6 +111,7 @@ function GraphDataPage() {
                   onBrushChange={handleBrushChange}
                   initialStartTime={initialStartTime}
                   initialEndTime={initialEndTime}
+                  setBoxplotStats={setBoxPlotData}
                 />
                 <BoxGraph
                   initialStartTime={initialStartTime}

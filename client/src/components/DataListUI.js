@@ -17,10 +17,11 @@ function DataListUI() {
 
   useEffect(() => {
     const loadDataList = async () => {
-      const data = await fetchDataList();
-      // console.log("Initial data loaded:", data);
-      setDataList(data);
-      setFilteredDataList(data); // 초기에는 모든 데이터를 보여줌
+      const response = await fetchDataList();
+      if (response && Array.isArray(response)) { // 응답 확인 및 배열인지 확인
+        setDataList(response);
+        setFilteredDataList(response); // 초기에는 모든 데이터를 보여줌
+      }
     };
     loadDataList();
   }, []);
