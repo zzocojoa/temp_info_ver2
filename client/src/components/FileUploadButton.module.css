@@ -24,6 +24,7 @@
   background: linear-gradient(0deg, rgb(38, 51, 67) 0%, rgb(29, 39, 51) 100%);
   border: none;
   color: white;
+  cursor: pointer;
 }
 
 .fileUpload:before {

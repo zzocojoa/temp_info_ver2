@@ -152,19 +152,23 @@ function DataListUI() {
       </div>
       <div className={styles['selectAllCheckbox']}>
         <div className={styles['selectAllLabel']}>
-          <input
-            type="checkbox"
-            checked={selectedItems.length === filteredDataList.length && filteredDataList.length > 0}
-            onChange={handleSelectAllChange}
-          />전체 선택
+          <label className={styles['checkboxLabel']}>
+            <input
+              type="checkbox"
+              checked={selectedItems.length === filteredDataList.length && filteredDataList.length > 0}
+              onChange={handleSelectAllChange}
+            /> 전체 선택
+          </label>
         </div>
         <div className={styles['selectAllLabel']}>
-          <input
-            type="checkbox"
-            checked={isHandleSaveCsvChecked}
-            onChange={e => setIsHandleSaveCsvChecked(e.target.checked)}
-          />
-          <label>{`저장 유형 선택: ${csvSaveModeText}`}</label>
+          <label className={styles['checkboxLabel']}>
+            <input
+              type="checkbox"
+              checked={isHandleSaveCsvChecked}
+              onChange={e => setIsHandleSaveCsvChecked(e.target.checked)}
+            />
+            <label>{`저장 유형 선택: ${csvSaveModeText}`}</label>
+          </label>
         </div>
       </div>
       <div className={`${styles['DataListContainer']} ${styles['scroll']} ${styles['scroll-css']}`}>

@@ -97,7 +97,6 @@
 .dataItem {
   /* font-size: 18px; */
   font-size: 1.2rem;
-
   width: auto;
   margin-bottom: 8px;
   white-space: nowrap;
@@ -216,18 +215,22 @@
   align-items: center;
   justify-content: center;
   width: 100%;
+  cursor: pointer;
+
 }
 
 .selectAllCheckbox input[type="checkbox"] {
   margin-right: 10px;
-  cursor: pointer;
 }
 
 .selectAllLabel {
   display: flex;
   margin: 0 5px;
-  cursor: pointer;
   user-select: none;
+}
+
+.selectAllLabel {
+  cursor: pointer;
 }
 
 .userButton {

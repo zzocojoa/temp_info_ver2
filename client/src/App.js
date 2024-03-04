@@ -16,6 +16,8 @@ function App() {
         <Route path="/"  />
         <Route path="/graph-data" element={<GraphDataPage />} />
         <Route path="/view-data" element={<ViewDataPage />} />
+        <Route path="/program-maker"  />
+
       </Routes>
       <Footer />
     </Router>

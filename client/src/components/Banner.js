@@ -10,13 +10,17 @@ import { faFacebookSquare, faInstagramSquare } from '@fortawesome/free-brands-sv
 
 function Banner() {
     let navigate = useNavigate();
-    
+
     const main = () => {
         navigate('/');
     };
 
     const goToGraphData = () => {
         navigate('/graph-data');
+    };
+
+    const programMaker = () => {
+        navigate('/');
     };
 
 
@@ -46,7 +50,9 @@ function Banner() {
 
             <ul className={styles['banner-icons']}>
                 <li><FontAwesomeIcon icon={faFacebookSquare} /></li>
-                <li><FontAwesomeIcon icon={faInstagramSquare} /></li>
+                <li onClick={programMaker} style={{ cursor: 'pointer' }}>
+                    <FontAwesomeIcon icon={faInstagramSquare} />
+                </li>
             </ul>
         </div>
     );
