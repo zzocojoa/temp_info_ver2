@@ -6,9 +6,9 @@ const fileMetadataSchema = new mongoose.Schema({
     fileName: String,
     uploadDate: { type: Date, default: Date.now },
     temperatureData: [{
-        Date: String,
-        Time: String,
-        Temperature: Number
+        date: String,
+        time: String,
+        temperature: Number
     }],
     boxplotStats: {
         min: Number,

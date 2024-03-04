@@ -58,7 +58,6 @@ function GraphDataPage() {
     // props로 받은 initialStartTime과 initialEndTime을 사용하여 초기 시간 설정
     setStartTime(initialStartTime);
     setEndTime(initialEndTime);
-    // console.log(`Initial start time: ${initialStartTime}, Initial end time: ${initialEndTime}`);
   }, [initialStartTime, initialEndTime]);
 
   const handleSaveDataSuccess = () => {
@@ -68,8 +67,8 @@ function GraphDataPage() {
 
   const handleBrushChange = (startIndex, endIndex) => {
     // 시간 UI 상태로 저장
-    const newStartTime = graphData[startIndex]?.Time || '';
-    const newEndTime = graphData[endIndex]?.Time || '';
+    const newStartTime = graphData[startIndex]?.time || '';
+    const newEndTime = graphData[endIndex]?.time || '';
     setStartTime(newStartTime);
     setEndTime(newEndTime);
     // 선택된 데이터 범위를 상태로 저장

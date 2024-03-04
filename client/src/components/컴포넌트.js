@@ -12,14 +12,17 @@
 //   const [selectedItems, setSelectedItems] = useState([]);
 //   const [displayCount, setDisplayCount] = useState(10);
 //   const [searchTerm, setSearchTerm] = useState('');
+//   const [isHandleSaveCsvChecked, setIsHandleSaveCsvChecked] = useState(true);
+//   const csvSaveModeText = isHandleSaveCsvChecked ? "개별" : "복수";
 //   const navigate = useNavigate();
 
 //   useEffect(() => {
 //     const loadDataList = async () => {
-//       const data = await fetchDataList();
-//       // console.log("Initial data loaded:", data);
-//       setDataList(data);
-//       setFilteredDataList(data); // 초기에는 모든 데이터를 보여줌
+//       const response = await fetchDataList();
+//       if (response && Array.isArray(response)) { // 응답 확인 및 배열인지 확인
+//         setDataList(response);
+//         setFilteredDataList(response); // 초기에는 모든 데이터를 보여줌
+//       }
 //     };
 //     loadDataList();
 //   }, []);
@@ -31,7 +34,6 @@
 //         .toLowerCase()
 //         .includes(searchTerm.toLowerCase())
 //     );
-//     // console.log("Filtered data:", filtered);
 //     setFilteredDataList(filtered); // 필터링된 결과를 저장
 //     setDisplayCount(10); // 검색 후 보여줄 아이템 수를 초기화
 //   }, [searchTerm, dataList]);
@@ -77,31 +79,64 @@
 
 //   // DB CSV data save
 //   const handleSaveCsv = async () => {
-//     // 선택된 항목의 상세 정보를 비동기적으로 가져옵니다.
-//     const selectedDataDetails = await Promise.all(selectedItems.map(id => fetchDataDetails(id)));
+//     if (isHandleSaveCsvChecked) {
+//       const selectedDataDetails = await Promise.all(selectedItems.map(id => fetchDataDetails(id)));
 
-//     // CSV 헤더
-//     const csvHeader = 'filedate,countNumber,wNumber,dwNumber,dieNumber,median, startTime, endTime\n';
+//       selectedDataDetails.forEach((item) => {
+//         // CSV 헤더
+//         const csvHeader = 'date,time,temperature\n';
 
-//     // 각 항목을 CSV 형식의 문자열로 변환
-//     const csvRows = selectedDataDetails.map(item => {
-//       const { filedate, numbering: { countNumber, wNumber, dwNumber, dieNumber }, boxplotStats: { median }, startTime, endTime } = item;
-//       return `"${filedate}","${countNumber}","${wNumber}","${dwNumber}","${dieNumber}","${median}","${startTime}","${endTime}"`;
-//     });
+//         // 각 항목의 temperatureData를 CSV 형식의 문자열로 변환
+//         const csvRows = item.temperatureData.map(tempData => {
+//           const { date, time, temperature } = tempData;
+//           return `"${date}","${time}","${temperature}"`;
+//         }).join("\n");
 
-//     // CSV 헤더와 모든 행을 결합하여 최종 CSV 내용을 생성
-//     const csvContent = `data:text/csv;charset=utf-8,${csvHeader}${csvRows.join("\n")}`;
+//         // 파일명 생성 로직 수정: 각 항목에 대한 고유 파일명 생성
+//         const { filedate, numbering: { countNumber, wNumber, dwNumber, dieNumber } } = item;
+//         // 파일명을 생성하는 부분을 forEach 루프 내부에 넣어 각 항목별로 고유한 이름을 가지도록 함
+//         const csvFileName = `${filedate}-${countNumber}_${wNumber}_${dwNumber}_${dieNumber}`.replace(/\/|:|\s/g, '_'); // 파일명에 사용 불가능한 문자는 '_'로 대체
 
-//     // encodeURI를 사용하여 CSV 내용에 대한 URI를 생성
-//     const encodedUri = encodeURI(csvContent);
+//         // CSV 헤더와 모든 행을 결합하여 최종 CSV 내용을 생성
+//         const csvContent = `data:text/csv;charset=utf-8,${csvHeader}${csvRows}`;
+//         const encodedUri = encodeURI(csvContent);
 
-//     // 임시 링크를 생성하여 프로그램적으로 클릭 이벤트를 발생시켜 파일 다운로드를 트리거
-//     const link = document.createElement('a');
-//     link.setAttribute('href', encodedUri);
-//     link.setAttribute('download', 'selected_data.csv'); // 다운로드될 파일명 설정
-//     document.body.appendChild(link); // 링크를 문서에 추가
-//     link.click(); // 링크 클릭 이벤트 강제 실행
-//     document.body.removeChild(link); // 사용 후 링크 제거
+//         // 임시 링크를 생성하여 프로그램적으로 클릭 이벤트를 발생시켜 파일 다운로드를 트리거
+//         const link = document.createElement('a');
+//         link.setAttribute('href', encodedUri);
+//         link.setAttribute('download', `${csvFileName}.csv`); // 수정된 파일명 사용
+//         document.body.appendChild(link);
+//         link.click();
+//         document.body.removeChild(link);
+//       });
+
+//     } else {
+//       // 선택된 항목의 상세 정보를 비동기적으로 가져옵니다.
+//       const selectedDataDetails = await Promise.all(selectedItems.map(id => fetchDataDetails(id)));
+
+//       // CSV 헤더
+//       const csvHeader = 'filedate,countNumber,wNumber,dwNumber,dieNumber,median, startTime, endTime\n';
+
+//       // 각 항목을 CSV 형식의 문자열로 변환
+//       const csvRows = selectedDataDetails.map(item => {
+//         const { filedate, numbering: { countNumber, wNumber, dwNumber, dieNumber }, boxplotStats: { median }, startTime, endTime } = item;
+//         return `"${filedate}","${countNumber}","${wNumber}","${dwNumber}","${dieNumber}","${median}","${startTime}","${endTime}"`;
+//       });
+
+//       // CSV 헤더와 모든 행을 결합하여 최종 CSV 내용을 생성
+//       const csvContent = `data:text/csv;charset=utf-8,${csvHeader}${csvRows.join("\n")}`;
+
+//       // encodeURI를 사용하여 CSV 내용에 대한 URI를 생성
+//       const encodedUri = encodeURI(csvContent);
+
+//       // 임시 링크를 생성하여 프로그램적으로 클릭 이벤트를 발생시켜 파일 다운로드를 트리거
+//       const link = document.createElement('a');
+//       link.setAttribute('href', encodedUri);
+//       link.setAttribute('download', 'selected_data.csv'); // 다운로드될 파일명 설정
+//       document.body.appendChild(link); // 링크를 문서에 추가
+//       link.click(); // 링크 클릭 이벤트 강제 실행
+//       document.body.removeChild(link); // 사용 후 링크 제거
+//     }
 //   };
 
 //   return (
@@ -117,13 +152,21 @@
 //         />
 //       </div>
 //       <div className={styles['selectAllCheckbox']}>
-//         <label className={styles['selectAllLabel']}>
+//         <div className={styles['selectAllLabel']}>
 //           <input
 //             type="checkbox"
 //             checked={selectedItems.length === filteredDataList.length && filteredDataList.length > 0}
 //             onChange={handleSelectAllChange}
 //           />전체 선택
-//         </label>
+//         </div>
+//         <div className={styles['selectAllLabel']}>
+//           <input
+//             type="checkbox"
+//             checked={isHandleSaveCsvChecked}
+//             onChange={e => setIsHandleSaveCsvChecked(e.target.checked)}
+//           />
+//           <label>{`저장 유형 선택: ${csvSaveModeText}`}</label>
+//         </div>
 //       </div>
 //       <div className={`${styles['DataListContainer']} ${styles['scroll']} ${styles['scroll-css']}`}>
 //         {filteredDataList.slice(0, displayCount).map((dataItem, index) => (
@@ -168,106 +211,100 @@
 // ```
 // // src\components\BoxGraph.js
 
-// import React, { useEffect, useRef } from 'react';
-// import * as d3 from 'd3';
-// import styles from './BoxGraph.module.css'; // 가정한 CSS 모듈 경로
+// import React, { useState, useEffect, useMemo } from 'react';
+// import ReactApexChart from 'react-apexcharts';
+// import { sendFilteredData } from '../api';
+// import styles from './BoxGraph.module.css';
 
-// function BoxGraph({ boxplotStats }) {
-//   const svgRef = useRef();
+// function BoxGraph({ boxplotStats, selectedRange, averagedData, initialStartTime, initialEndTime }) {
+//   const [currentBoxplotStats, setCurrentBoxplotStats] = useState({
+//     ...boxplotStats,
+//     min: boxplotStats?.min || 0,
+//     q1: boxplotStats?.q1 || 0,
+//     median: boxplotStats?.median || 0,
+//     q3: boxplotStats?.q3 || 0,
+//     max: boxplotStats?.max || 0,
+//     outliers: boxplotStats?.outliers || []
+//   });
+//   const [startTime, setStartTime] = useState(initialStartTime || '');
+//   const [endTime, setEndTime] = useState(initialEndTime || '');
 
 //   useEffect(() => {
-//     if (!boxplotStats) return;
-//     const svg = d3.select(svgRef.current);
-//     const margin = { top: 10, right: 30, bottom: 30, left: 40 };
-//     const width = 460 - margin.left - margin.right;
-//     const height = 400 - margin.top - margin.bottom;
-
-//     svg.selectAll("*").remove();
-//     const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-
-//     const y = d3.scaleLinear().domain([boxplotStats.min, boxplotStats.max]).range([height, 0]);
-//     g.append("g").call(d3.axisLeft(y));
-
-//     g.append("line")
-//       .attr("x1", width / 2)
-//       .attr("x2", width / 2)
-//       .attr("y1", y(boxplotStats.min))
-//       .attr("y2", y(boxplotStats.max))
-//       .attr("stroke", "black");
-
-//     g.append("rect")
-//       .attr("x", width / 2 - 50)
-//       .attr("y", y(boxplotStats.q3))
-//       .attr("height", y(boxplotStats.q1) - y(boxplotStats.q3))
-//       .attr("width", 100)
-//       .attr("stroke", "black")
-//       .style("fill", "#69b3a2");
-
-//     g.append("line")
-//       .attr("x1", width / 2 - 50)
-//       .attr("x2", width / 2 + 50)
-//       .attr("y1", y(boxplotStats.median))
-//       .attr("y2", y(boxplotStats.median))
-//       .attr("stroke", "black");
-
-//     g.selectAll(".whisker")
-//       .data([boxplotStats.min, boxplotStats.max])
-//       .enter()
-//       .append("line")
-//       .attr("x1", width / 2 - 25)
-//       .attr("x2", width / 2 + 25)
-//       .attr("y1", d => y(d))
-//       .attr("y2", d => y(d))
-//       .attr("stroke", "black");
-
-//     if (Array.isArray(boxplotStats.outliers)) {
-//       g.selectAll(".outlier")
-//         .data(boxplotStats.outliers)
-//         .enter()
-//         .append("circle")
-//         .attr("class", "outlier")
-//         .attr("cx", width / 2)
-//         .attr("cy", d => y(d))
-//         .attr("r", 5)
-//         .style("fill", "red");
-//     }
+//     setCurrentBoxplotStats(boxplotStats || {
+//       min: 0,
+//       q1: 0,
+//       median: 0,
+//       q3: 0,
+//       max: 0,
+//       outliers: []
+//     });
 //   }, [boxplotStats]);
 
-//   // 숫자 포맷팅 함수
-//   const formatNumber = (num) => num ? num.toFixed(2) : 'N/A';
+//   useEffect(() => {
+//     if (!selectedRange || (selectedRange.start === 0 && selectedRange.end === 0)) {
+//       setStartTime(initialStartTime);
+//       setEndTime(initialEndTime);
+//     } else if (averagedData && averagedData.length > 0) {
+//       const filteredData = averagedData.slice(selectedRange.start, selectedRange.end + 1);
+//       setStartTime(filteredData[0]?.time || initialStartTime);
+//       setEndTime(filteredData[filteredData.length - 1]?.time || initialEndTime);
+
+//       sendFilteredData(filteredData)
+//         .then(response => {
+//           if (response && response.boxplotStats) {
+//             setCurrentBoxplotStats(response.boxplotStats);
+//           }
+//         })
+//         .catch(error => {
+//           console.error('Failed to send filtered data:', error);
+//         });
+//     }
+//   }, [initialStartTime, initialEndTime, averagedData, selectedRange]);
+
+//   const options = {
+//     chart: { type: 'boxPlot', height: 350 },
+//     title: { text: 'Box Plot', align: 'left' },
+//     xaxis: { categories: ['Box Plot'] },
+//     yaxis: { labels: { formatter: (val) => val.toFixed(0) } },
+//     plotOptions: {
+//       boxPlot: { colors: { upper: '#5C4742', lower: '#A5978B' } }
+//     }
+//   };
+
+//   const series = useMemo(() => [{
+//     name: 'temperature',
+//     type: 'boxPlot',
+//     data: [{
+//       x: 'Temperature',
+//       y: [
+//         currentBoxplotStats.min,
+//         currentBoxplotStats.q1,
+//         currentBoxplotStats.median,
+//         currentBoxplotStats.q3,
+//         currentBoxplotStats.max,
+//         ...currentBoxplotStats.outliers
+//       ]
+//     }]
+//   }], [currentBoxplotStats]);
+
+
+//   const formatNumber = (num) => isNaN(parseFloat(num)) ? 'N/A' : parseFloat(num).toFixed(2);
 
 //   return (
-//     <div className={styles['graphDataWrap']}>
-//       <div className={styles['graphDataSVG']}>
-//         <svg ref={svgRef} width={460} height={400}></svg>
+//     <div className={styles.graphDataWrap}>
+//       <div className={styles.graphDataSVG}>
+//         <ReactApexChart options={options} series={series} type="boxPlot" height={350} />
 //       </div>
-//       <div className={styles['graphDataTable']}>
-//         {boxplotStats && (
-//           <table className={styles.table}>
-//             <thead>
-//               <tr>
-//                 <th className={styles.th}>최소값</th>
-//                 <td className={styles.td}>{formatNumber(boxplotStats.min)}</td>
-//               </tr>
-//               <tr>
-//                 <th className={styles.th}>Q1 (25번째 백분위수)</th>
-//                 <td className={styles.td}>{formatNumber(boxplotStats.q1)}</td>
-//               </tr>
-//               <tr>
-//                 <th className={styles.th}>중앙값</th>
-//                 <td className={styles.td}>{formatNumber(boxplotStats.median)}</td>
-//               </tr>
-//               <tr>
-//                 <th className={styles.th}>Q3 (75번째 백분위수)</th>
-//                 <td className={styles.td}>{formatNumber(boxplotStats.q3)}</td>
-//               </tr>
-//               <tr>
-//                 <th className={styles.th}>최대값</th>
-//                 <td className={styles.td}>{formatNumber(boxplotStats.max)}</td>
-//               </tr>
-//             </thead>
-//           </table>
-//         )}
+//       <div className={styles.graphDataTable}>
+//         <table className={styles.table}>
+//           <thead>
+//             <tr><th className={styles.th}>최대값</th><td className={styles.td}>{formatNumber(currentBoxplotStats.max)}</td></tr>
+//             <tr><th className={styles.th}>Q3 (75번째 백분위수)</th><td className={styles.td}>{formatNumber(currentBoxplotStats.q3)}</td></tr>
+//             <tr><th className={styles.th}>중앙값</th><td className={styles.td}>{formatNumber(currentBoxplotStats.median)}</td></tr>
+//             <tr><th className={styles.th}>Q1 (25번째 백분위수)</th><td className={styles.td}>{formatNumber(currentBoxplotStats.q1)}</td></tr>
+//             <tr><th className={styles.th}>최소값</th><td className={styles.td}>{formatNumber(currentBoxplotStats.min)}</td></tr>
+//           </thead>
+//         </table>
 //       </div>
 //     </div>
 //   );
@@ -341,12 +378,13 @@
 // import {
 //   LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, Tooltip, Brush, ReferenceLine,
 // } from 'recharts';
+// import { sendFilteredData } from '../api';
 // import styles from './LineGraph.module.css'
 
 // function LineGraph({
 //   averagedData, onDetailsChange,
-//   countNumber, dieNumber, wNumber, dwNumber,  
-//   onBrushChange, initialStartTime, initialEndTime
+//   countNumber, dieNumber, wNumber, dwNumber,
+//   onBrushChange, initialStartTime, initialEndTime, setBoxplotStats
 // }) {
 //   const [chartSize, setChartSize] = useState({ width: 600, height: 300 });
 //   const [startTime, setStartTime] = useState(initialStartTime || '');
@@ -369,17 +407,12 @@
 //   }, []);
 
 //   useEffect(() => {
-//     // props로 받은 initialStartTime과 initialEndTime을 사용하여 초기 시간 설정
 //     setStartTime(initialStartTime);
 //     setEndTime(initialEndTime);
 //   }, [initialStartTime, initialEndTime]);
 
-//   const handleBrushChange = (e) => {
+//   const handleBrushChange = async (e) => {
 //     if (!e) {
-//       // Brush 이벤트가 없을 경우 초기 시간으로 설정
-//       setStartTime(initialStartTime);
-//       setEndTime(initialEndTime);
-//       // 초기 인덱스 값으로 onBrushChange 호출
 //       const startIndex = 0;
 //       const endIndex = averagedData.length - 1;
 //       onBrushChange(startIndex, endIndex);
@@ -387,19 +420,25 @@
 //     }
 
 //     const { startIndex, endIndex } = e;
-//     // console.log(`Brush event triggered: startIndex = ${startIndex}, endIndex = ${endIndex}`);
-//     // 변경 사항이 없는 경우도 포함하여 onBrushChange 호출
 //     onBrushChange(startIndex, endIndex);
 
-//     // averagedData의 유효한 인덱스인지 확인하고 Time 속성이 있는지 확인
-//     if (averagedData[startIndex]?.Time && averagedData[endIndex]?.Time) {
-//       const newStartTime = averagedData[startIndex].Time;
-//       const newEndTime = averagedData[endIndex].Time;
+//     if (averagedData[startIndex]?.time && averagedData[endIndex]?.time) {
+//       const newStartTime = averagedData[startIndex].time;
+//       const newEndTime = averagedData[endIndex].time;
 
 //       setStartTime(newStartTime);
 //       setEndTime(newEndTime);
+
+//       const filteredData = averagedData.slice(startIndex, endIndex + 1);
+
+//       try {
+//         const { boxplotStats } = await sendFilteredData(filteredData); // await 사용하여 비동기 처리
+//         setBoxplotStats(boxplotStats); // 상태 업데이트
+//       } catch (error) {
+//         console.error('필터링된 데이터를 처리하는 중 오류 발생:', error);
+//       }
 //     } else {
-//       console.log('averagedData에 유효한 Time 속성이 없습니다.');
+//       console.log('선택된 데이터 범위에 유효한 Time 속성이 없습니다.');
 //     }
 //   };
 
@@ -407,7 +446,7 @@
 
 //   // 중앙값 계산 함수
 //   const calculateMedian = (data) => {
-//     const temps = data.map(item => item.Temperature).sort((a, b) => a - b);
+//     const temps = data.map(item => item.temperature).sort((a, b) => a - b);
 //     const mid = Math.floor(temps.length / 2);
 //     return temps.length % 2 !== 0 ? temps[mid] : (temps[mid - 1] + temps[mid]) / 2;
 //   };
@@ -495,7 +534,7 @@
 //         >
 //           <CartesianGrid strokeDasharray="3 3" />
 //           <Tooltip formatter={temperatureFormatter} />
-//           <XAxis dataKey="Time"
+//           <XAxis dataKey="time"
 //           // label={{ value: '시간', position: 'insideBottomRight', offset: -20 }}
 //           />
 //           <YAxis domain={['auto', 'auto']}
@@ -504,7 +543,7 @@
 //           <Legend />
 //           <Line
 //             type="monotone"
-//             dataKey="Temperature"
+//             dataKey="temperature"
 //             stroke="#8884d8"
 //             dot={false}
 //             activeDot={{ r: 4 }}
@@ -526,22 +565,82 @@
 
 // ```
 // ```
+// // src/components/SaveCsvDataButton.js
+
+// import React from 'react';
+// import styles from './SaveCsvDataButton.module.css'
+// import { saveData } from '../api';
+
+// function SaveCsvDataButton({ data, fileName, onSaveSuccess, startTime, endTime }) {
+//   const downloadCsv = (data, fileName) => {
+//     // numbering 정보가 있는 경우 해당 값을 사용하고, 없는 경우 기본값 사용
+//     const { countNumber = 'N/A', wNumber = 'N/A', dwNumber = 'N/A', dieNumber = 'N/A' } = data.numbering || {};
+//     const graphData = data.graphData;
+
+//     // 파일명에서 날짜 추출
+//     const dateMatch = fileName.match(/\d{4}-\d{2}-\d{2}/);
+//     const dateFromFileName = dateMatch ? dateMatch[0] : new Date().toISOString().split('T')[0];
+
+//     const finalFileName = `${dateFromFileName}-${countNumber}_${wNumber}_${dwNumber}_${dieNumber}.csv`;
+//     // console.log("finalFileName :", finalFileName);
+//     let csvContent = "data:text/csv;charset=utf-8,date,time,temperature\n";
+
+//     // graphData가 정의되지 않았을 경우를 처리
+//     (graphData || []).forEach(row => {
+//       const { date, time, temperature } = row;
+//       csvContent += `${date},${time},${temperature}\n`;
+//     });
+
+//     // CSV 파일 다운로드 로직
+//     const encodedUri = encodeURI(csvContent);
+//     const link = document.createElement('a');
+//     link.setAttribute('href', encodedUri);
+//     link.setAttribute('download', finalFileName);
+//     document.body.appendChild(link);
+//     link.click();
+//     document.body.removeChild(link);
+//   };
+
+//   // 다운로드 핸들 로직
+//   const handleSaveData = async () => {
+//     try {
+//       const dateMatch = fileName.match(/\d{4}-\d{2}-\d{2}/);
+//       const filedate = dateMatch ? dateMatch[0] : new Date().toISOString().split('T')[0]; // 파일명에서 날짜 추출
+//       const { userInput } = data;
+
+//       await saveData({ ...data, filedate, userInput, startTime, endTime });
+//       onSaveSuccess();
+//     } catch (error) {
+//       alert('Error saving data.');
+//     }
+//     downloadCsv(data, fileName);
+//   };
+
+//   return (
+//     <button className={styles['DownloadBtn']} onClick={handleSaveData}>Download CSV</button>
+//   );
+// }
+
+// export default SaveCsvDataButton;
+
+// ```
+// ```
 // // client/src/components/Footer.js
 
 // import React from 'react';
-// import { useNavigate } from 'react-router-dom';
+// // import { useNavigate } from 'react-router-dom';
 // import styles from './Footer.module.css';
 
 // const Footer = () => {
-//   let navigate = useNavigate();
+//   // let navigate = useNavigate();
     
-//     const main = () => {
-//         navigate('/');
-//     };
+//   //   const main = () => {
+//   //       navigate('/');
+//   //   };
 
-//     const goToGraphData = () => {
-//         navigate('/graph-data');
-//     };
+//   //   const goToGraphData = () => {
+//   //       navigate('/graph-data');
+//   //   };
 
 //   return (
 //     <footer>
@@ -589,13 +688,160 @@
 
 // ```
 // ```
+// // src/pages/GraphDataPage.js
+
+// import React, { useState, useEffect } from 'react';
+// import FileUploadButton from '../components/FileUploadButton';
+// import UploadDataButton from '../components/UploadDataButton';
+// import SaveCsvDataButton from '../components/SaveCsvDataButton';
+// import LineGraph from '../components/LineGraph';
+// import BoxGraph from '../components/BoxGraph';
+// import DataListUI from '../components/DataListUI';
+// import TextInputBox from '../components/TextInputBox';
+// import styles from './GraphData.module.css';
+
+// function GraphDataPage() {
+//   const [uploadedFile, setUploadedFile] = useState(null);
+//   const [graphData, setGraphData] = useState([]);
+//   const [selectedRange, setSelectedRange] = useState({ start: 0, end: 0 });
+//   const [startTime, setStartTime] = useState('');
+//   const [endTime, setEndTime] = useState('');
+//   const [initialStartTime, setInitialStartTime] = useState('');
+//   const [initialEndTime, setInitialEndTime] = useState('');
+//   const [boxPlotData, setBoxPlotData] = useState(null);
+//   const [uploadedFileName, setUploadedFileName] = useState('');
+//   const [userInput, setUserInput] = useState('');
+//   const [details, setDetails] = useState({
+//     countNumber: '',
+//     wNumber: '',
+//     dwNumber: '',
+//     dieNumber: '',
+//   });
+
+//   // 그래프 생성 여부를 추적하는 상태 추가
+//   const [isGraphGenerated, setIsGraphGenerated] = useState(false);
+
+//   const handleFileSelect = (file) => {
+//     setUploadedFile(file);
+//     setGraphData([]);
+//     setBoxPlotData(null);
+//     setUserInput('');
+//     setIsGraphGenerated(false);
+//   };
+//   const handleUploadSuccess = async (
+//     averagedData, boxplotStats,
+//     uploadedFileName, startTime, endTime,
+//     uploadedStartTime, uploadedEndTime
+//   ) => {
+//     setGraphData(averagedData);
+//     setBoxPlotData(boxplotStats);
+//     setUploadedFileName(uploadedFileName);
+//     setIsGraphGenerated(true);
+//     setInitialStartTime(startTime);
+//     setInitialEndTime(endTime);
+//     setStartTime(uploadedStartTime);
+//     setEndTime(uploadedEndTime);
+//     console.log("uploadedFileName: ", uploadedFileName)
+//   };
+
+//   useEffect(() => {
+//     // props로 받은 initialStartTime과 initialEndTime을 사용하여 초기 시간 설정
+//     setStartTime(initialStartTime);
+//     setEndTime(initialEndTime);
+//   }, [initialStartTime, initialEndTime]);
+
+//   const handleSaveDataSuccess = () => {
+//     // alert('Data saved successfully!');
+//     // setIsDataSaved(true);
+//   };
+
+//   const handleBrushChange = (startIndex, endIndex) => {
+//     // 시간 UI 상태로 저장
+//     const newStartTime = graphData[startIndex]?.time || '';
+//     const newEndTime = graphData[endIndex]?.time || '';
+//     setStartTime(newStartTime);
+//     setEndTime(newEndTime);
+//     // 선택된 데이터 범위를 상태로 저장
+//     setSelectedRange({ start: startIndex, end: endIndex });
+//   };
+
+//   return (
+//     <div className={styles['graphDataWrap']}>
+//       <div className={styles['graphDataContainer']}>
+//         <div className={styles['leftPanel']}>
+//           <h2 className={styles['headerTitle']}>Graph Data Visualization</h2>
+//           <FileUploadButton className={styles['fileUploadButton']} onFileSelect={handleFileSelect} />
+//           <div className={styles['graphGenerated']}>
+//             <UploadDataButton className={styles['uploadDataButton']} selectedFile={uploadedFile} onUploadSuccess={handleUploadSuccess} isEnabled={!!uploadedFile} />
+//             {isGraphGenerated && (
+//               <>
+//                 <SaveCsvDataButton
+//                   data={{
+//                     graphData: selectedRange.start !== 0 || selectedRange.end !== 0 ?
+//                       graphData.slice(selectedRange.start, selectedRange.end + 1) :
+//                       graphData,
+//                     boxPlotData,
+//                     numbering: details,
+//                     userInput
+//                   }}
+//                   fileName={uploadedFileName}
+//                   onSaveSuccess={handleSaveDataSuccess}
+//                   selectedRange={selectedRange}
+//                   startTime={startTime}
+//                   endTime={endTime}
+//                 />
+//                 <LineGraph
+//                   averagedData={graphData}
+//                   countNumber={details.countNumber}
+//                   wNumber={details.wNumber}
+//                   dwNumber={details.dwNumber}
+//                   dieNumber={details.dieNumber}
+//                   onDetailsChange={(key, value) => setDetails({ ...details, [key]: value })}
+//                   onBrushChange={handleBrushChange}
+//                   initialStartTime={initialStartTime}
+//                   initialEndTime={initialEndTime}
+//                   setBoxplotStats={setBoxPlotData}
+//                 />
+//                 <BoxGraph
+//                   initialStartTime={initialStartTime}
+//                   initialEndTime={initialEndTime}
+//                   averagedData={graphData}
+//                   boxplotStats={boxPlotData}
+//                   selectedRange={selectedRange}
+//                   onBrushChange={handleBrushChange}
+//                   />
+//               </>
+//             )}
+//           </div>
+//         </div>
+//         <div className={styles['rightPanel']}>
+//           <DataListUI />
+//           {isGraphGenerated && (
+//             <TextInputBox
+//               value={userInput}
+//               onTextChange={setUserInput}
+//               showSaveButton={false}
+//             />
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+// export default GraphDataPage;
+
+// ```
+// ```
 // // src\components\UploadDataButton.js
 
-// import React from 'react';
+// import React, { useState } from 'react';
 // import styles from './UploadDataButton.module.css'
 // import { uploadFile } from '../api';
+// import Loader from './Loader';
 
 // function UploadDataButton({ selectedFile, onUploadSuccess, isEnabled }) {
+//   const [isLoading, setIsLoading] = useState(false);
+
 //   const handleUpload = async () => {
 
 //     if (!selectedFile) {
@@ -603,16 +849,16 @@
 //       return;
 //     }
 
+//     setIsLoading(true); // 업로드 시작 시 로딩 상태를 true로 설정
+
 //     try {
 //       // API를 호출하여 파일 업로드
 //       const response = await uploadFile(selectedFile);
+//       setIsLoading(false); // 업로드 성공 또는 실패 시 로딩 상태를 false로 설정
 //       if (response) {
 //         const { averagedData, boxplotStats } = response;
-//         // 파일 업로드 성공 시, handleUploadSuccess 콜백을 호출하고,
-//         // 업로드된 파일의 데이터와 파일 이름을 인자로 전달
-//         // 업로드 성공 후 처리 로직에서 시작 시간과 종료 시간을 설정
-//         const startTime = averagedData[0]?.Time || '';
-//         const endTime = averagedData[averagedData.length - 1]?.Time || '';
+//         const startTime = averagedData[0]?.time || '';
+//         const endTime = averagedData[averagedData.length - 1]?.time || '';
 //         onUploadSuccess(averagedData, boxplotStats, selectedFile.name, startTime, endTime);
 //         // alert('File uploaded successfully!');
 //       } else {
@@ -620,19 +866,37 @@
 //         alert('Failed to upload file.');
 //       }
 //     } catch (error) {
+//       setIsLoading(false); // 오류 발생 시 로딩 상태를 false로 설정
 //       console.error('Error uploading file:', error);
 //       alert('Error uploading file.');
 //     }
 //   };
 
 //   return (
-//     <button className={styles['UploadDataButton']} onClick={handleUpload} disabled={!isEnabled}>
-//       그래프 생성
-//     </button>
+//     <>
+//       {isLoading ? (
+//         <Loader /> // 로딩 중인 경우 로딩 인디케이터(스피너 등)를 표시
+//       ) : (
+//         <button className={styles['UploadDataButton']} onClick={handleUpload} disabled={!isEnabled || isLoading}>
+//           그래프 생성
+//         </button>
+//       )}
+//     </>
 //   );
 // }
 
 // export default UploadDataButton;
+
+// ```
+// ```
+// import React from 'react';
+// import styles from './Loader.module.css'
+
+// function Loader() {
+//   return <div className={styles['loader']}></div>;
+// }
+
+// export default Loader;
 
 // ```
 // ```
@@ -676,63 +940,21 @@
 
 // ```
 // ```
-// // src/components/SaveCsvDataButton.js
+// // server/config/db.js
 
-// import React from 'react';
-// import styles from './SaveCsvDataButton.module.css'
-// import { saveData } from '../api';
+// const mongoose = require('mongoose');
 
-// function SaveCsvDataButton({ data, fileName, onSaveSuccess, startTime, endTime }) {
-//   const downloadCsv = (data, fileName) => {
-//     // numbering 정보가 있는 경우 해당 값을 사용하고, 없는 경우 기본값 사용
-//     const { countNumber = 'N/A', wNumber = 'N/A', dwNumber = 'N/A', dieNumber = 'N/A' } = data.numbering || {};
-//     const graphData = data.graphData;
+// const connectDB = async () => {
+//   try {
+//     await mongoose.connect('mongodb://127.0.0.1:27017/temp_dataset', { useNewUrlParser: true, useUnifiedTopology: true });
+//     console.log('MongoDB 연결됨');
+//   } catch (err) {
+//     console.error('MongoDB 연결 오류:', err);
+//     process.exit(1);
+//   }
+// };
 
-//     // 파일명에서 날짜 추출
-//     const dateMatch = fileName.match(/\d{4}-\d{2}-\d{2}/);
-//     const dateFromFileName = dateMatch ? dateMatch[0] : new Date().toISOString().split('T')[0];
-
-//     const finalFileName = `${dateFromFileName}-${countNumber}_${wNumber}_${dwNumber}_${dieNumber}.csv`;
-//     // console.log("finalFileName :", finalFileName);
-//     let csvContent = "data:text/csv;charset=utf-8,Date,Time,Temperature\n";
-
-//     // graphData가 정의되지 않았을 경우를 처리
-//     (graphData || []).forEach(row => {
-//       const { Date, Time, Temperature } = row;
-//       csvContent += `${Date},${Time},${Temperature}\n`;
-//     });
-
-//     // CSV 파일 다운로드 로직
-//     const encodedUri = encodeURI(csvContent);
-//     const link = document.createElement('a');
-//     link.setAttribute('href', encodedUri);
-//     link.setAttribute('download', finalFileName);
-//     document.body.appendChild(link);
-//     link.click();
-//     document.body.removeChild(link);
-//   };
-
-//   // 다운로드 핸들 로직
-//   const handleSaveData = async () => {
-//     try {
-//       const dateMatch = fileName.match(/\d{4}-\d{2}-\d{2}/);
-//       const filedate = dateMatch ? dateMatch[0] : new Date().toISOString().split('T')[0]; // 파일명에서 날짜 추출
-//       const { userInput } = data;
-
-//       await saveData({ ...data, filedate, userInput, startTime, endTime });
-//       onSaveSuccess();
-//     } catch (error) {
-//       alert('Error saving data.');
-//     }
-//     downloadCsv(data, fileName);
-//   };
-
-//   return (
-//     <button className={styles['DownloadBtn']} onClick={handleSaveData}>Download CSV</button>
-//   );
-// }
-
-// export default SaveCsvDataButton;
+// module.exports = connectDB;
 
 // ```
 // ```
@@ -749,10 +971,33 @@
 //       method: 'POST',
 //       body: formData,
 //     });
-//     const { data: averagedData, boxplotStats } = await response.json();
-//     return { averagedData, boxplotStats }; // 업로드 결과 반환
+//     const { data: averagedData, boxplotStats, temperatureValues } = await response.json();
+//     console.log("boxplotStats: ", boxplotStats)
+//     return { averagedData, boxplotStats, temperatureValues }; // 업로드 결과 반환
 //   } catch (error) {
 //     console.error('Error uploading file:', error);
+//   }
+// }
+
+// // filteredData를 서버로 전송하는 함수(bolplot dynamic data)
+// export async function sendFilteredData(filteredData) {
+//   // console.log("filteredData: ", filteredData);
+
+//   try {
+//     const response = await fetch(`${API_BASE_URL}/process-filtered-data`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({ filteredData }),
+//     });
+//     if (!response.ok) {
+//       throw new Error('Failed to send filtered data');
+//     }
+//     return await response.json(); // 서버 응답 반환
+//   } catch (error) {
+//     console.error('Error sending filtered data:', error);
+//     throw error; // 컴포넌트에서 처리할 수 있게 에러를 다시 던짐
 //   }
 // }
 
@@ -822,7 +1067,6 @@
 
 // // 데이터 삭제
 // export async function deleteData(dataId) {
-//   // console.log("dataId :", dataId)
 //   const response = await fetch(`${API_BASE_URL}/data/${dataId}`, {
 //     method: 'DELETE',
 //   });
@@ -916,7 +1160,6 @@
 //               dwNumber={details.dwNumber}
 //               dieNumber={details.dieNumber}
 //               onDetailsChange={(key, value) => setDetails(prev => ({ ...prev, [key]: value }))}
-//               // onBrushChange에 빈 함수를 전달하여 에러 방지
 //               onBrushChange={() => { }}
 //               initialStartTime={startTime}
 //               initialEndTime={endTime}
@@ -949,332 +1192,34 @@
 
 // ```
 // ```
-// // src/pages/GraphDataPage.js
-
-// import React, { useState, useEffect } from 'react';
-// import FileUploadButton from '../components/FileUploadButton';
-// import UploadDataButton from '../components/UploadDataButton';
-// import SaveCsvDataButton from '../components/SaveCsvDataButton';
-// import LineGraph from '../components/LineGraph';
-// import BoxGraph from '../components/BoxGraph';
-// import DataListUI from '../components/DataListUI';
-// import TextInputBox from '../components/TextInputBox';
-// import styles from './GraphData.module.css';
-
-// function GraphDataPage() {
-//   const [uploadedFile, setUploadedFile] = useState(null);
-//   const [graphData, setGraphData] = useState([]);
-//   const [selectedRange, setSelectedRange] = useState({ start: 0, end: 0 });
-//   const [startTime, setStartTime] = useState('');
-//   const [endTime, setEndTime] = useState('');
-//   const [initialStartTime, setInitialStartTime] = useState('');
-//   const [initialEndTime, setInitialEndTime] = useState('');
-//   const [boxPlotData, setBoxPlotData] = useState(null);
-//   const [uploadedFileName, setUploadedFileName] = useState('');
-//   const [userInput, setUserInput] = useState('');
-//   const [details, setDetails] = useState({
-//     countNumber: '',
-//     wNumber: '',
-//     dwNumber: '',
-//     dieNumber: '',
-//   });
-
-//   // 그래프 생성 여부를 추적하는 상태 추가
-//   const [isGraphGenerated, setIsGraphGenerated] = useState(false);
-
-//   const handleFileSelect = (file) => {
-//     setUploadedFile(file);
-//     setGraphData([]);
-//     setBoxPlotData(null);
-//     setUserInput('');
-//   };
-//   const handleUploadSuccess = async (
-//     averagedData, boxplotStats,
-//     uploadedFileName, startTime, endTime,
-//     uploadedStartTime, uploadedEndTime
-//   ) => {
-//     setGraphData(averagedData);
-//     setBoxPlotData(boxplotStats);
-//     setUploadedFileName(uploadedFileName);
-//     setIsGraphGenerated(true);
-//     setInitialStartTime(startTime);
-//     setInitialEndTime(endTime);
-//     setStartTime(uploadedStartTime);
-//     setEndTime(uploadedEndTime);
-//     console.log("uploadedFileName: ", uploadedFileName)
-//   };
-
-//   useEffect(() => {
-//     // props로 받은 initialStartTime과 initialEndTime을 사용하여 초기 시간 설정
-//     setStartTime(initialStartTime);
-//     setEndTime(initialEndTime);
-//     // console.log(`Initial start time: ${initialStartTime}, Initial end time: ${initialEndTime}`);
-//   }, [initialStartTime, initialEndTime]);
-
-//   const handleSaveDataSuccess = () => {
-//     // alert('Data saved successfully!');
-//     // setIsDataSaved(true);
-//   };
-
-//   const handleBrushChange = (startIndex, endIndex) => {
-//     // 시간 UI 상태로 저장
-//     const newStartTime = graphData[startIndex]?.Time || '';
-//     const newEndTime = graphData[endIndex]?.Time || '';
-//     setStartTime(newStartTime);
-//     setEndTime(newEndTime);
-//     // 선택된 데이터 범위를 상태로 저장
-//     setSelectedRange({ start: startIndex, end: endIndex });
-//   };
-
-//   return (
-//     <div className={styles['graphDataWrap']}>
-//       <div className={styles['graphDataContainer']}>
-//         <div className={styles['leftPanel']}>
-//           <h2 className={styles['headerTitle']}>Graph Data Visualization</h2>
-//           <FileUploadButton className={styles['fileUploadButton']} onFileSelect={handleFileSelect} />
-//           <div className={styles['graphGenerated']}>
-//             <UploadDataButton className={styles['uploadDataButton']} selectedFile={uploadedFile} onUploadSuccess={handleUploadSuccess} isEnabled={!!uploadedFile} />
-//             {isGraphGenerated && (
-//               <>
-//                 <SaveCsvDataButton
-//                   data={{
-//                     graphData: selectedRange.start !== 0 || selectedRange.end !== 0 ?
-//                       graphData.slice(selectedRange.start, selectedRange.end + 1) :
-//                       graphData,
-//                     boxPlotData,
-//                     numbering: details,
-//                     userInput
-//                   }}
-//                   fileName={uploadedFileName}
-//                   onSaveSuccess={handleSaveDataSuccess}
-//                   selectedRange={selectedRange}
-//                   startTime={startTime}
-//                   endTime={endTime}
-//                 />
-//                 <LineGraph
-//                   averagedData={graphData}
-//                   countNumber={details.countNumber}
-//                   wNumber={details.wNumber}
-//                   dwNumber={details.dwNumber}
-//                   dieNumber={details.dieNumber}
-//                   onDetailsChange={(key, value) => setDetails({ ...details, [key]: value })}
-//                   onBrushChange={handleBrushChange}
-//                   initialStartTime={initialStartTime}
-//                   initialEndTime={initialEndTime}
-//                 />
-//                 <BoxGraph boxplotStats={boxPlotData} />
-//               </>
-//             )}
-//           </div>
-//         </div>
-//         <div className={styles['rightPanel']}>
-//           <DataListUI />
-//           {isGraphGenerated && (
-//             <TextInputBox
-//               value={userInput}
-//               onTextChange={setUserInput}
-//               showSaveButton={false}
-//             />
-//           )}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-// export default GraphDataPage;
-
-// ```
-// ```
-// // server/models/FileMetadata.js
-
-// const mongoose = require('mongoose');
-
-// const fileMetadataSchema = new mongoose.Schema({
-//     fileName: String,
-//     uploadDate: { type: Date, default: Date.now },
-//     temperatureData: [{
-//         Date: String,
-//         Time: String,
-//         Temperature: Number
-//     }],
-//     boxplotStats: {
-//         min: Number,
-//         q1: Number,
-//         median: Number,
-//         q3: Number,
-//         max: Number,
-//         outliers: [Number]
-//     },
-//     numbering: {
-//         countNumber: String,
-//         wNumber: String,
-//         dwNumber: String,
-//         dieNumber: String,
-//     },
-//     filedate: String,
-//     userInput: String,
-//     startTime: String, 
-//     endTime: String,
-// });
-
-// const FileMetadata = mongoose.model('FileMetadata', fileMetadataSchema);
-
-// module.exports = FileMetadata;
-
-// ```
-// ```
-// // server/config/db.js
-
-// const mongoose = require('mongoose');
-
-// const connectDB = async () => {
-//   try {
-//     await mongoose.connect('mongodb://127.0.0.1:27017/temp_dataset', { useNewUrlParser: true, useUnifiedTopology: true });
-//     console.log('MongoDB 연결됨');
-//   } catch (err) {
-//     console.error('MongoDB 연결 오류:', err);
-//     process.exit(1);
-//   }
-// };
-
-// module.exports = connectDB;
-
-// ```
-// ```
-// // src\App.js
-
-// import React from 'react';
-// import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-// import Banner from './components/Banner';
-// import GraphDataPage from './pages/GraphDataPage';
-// import ViewDataPage from './pages/ViewDataPage';
-// import Footer from './components/Footer';
-// import './App.css';
-
-// function App() {
-//   return (
-//     <Router>
-//       <Banner />
-//       <Routes>
-//         <Route path="/"  />
-//         <Route path="/graph-data" element={<GraphDataPage />} />
-//         <Route path="/view-data" element={<ViewDataPage />} />
-//       </Routes>
-//       <Footer />
-//     </Router>
-//   );
-// }
-
-// export default App;
-
-// ```
-// ```
-// // server\utils\refining.js
+// // server/utils/averageData.js
 
 // const moment = require('moment');
-// const quartile = require('./quartile');
 
-// function processData(data) {
-//     let dateCounts = {};
-//     let temperatures = [];
-
-//     // 데이터 전처리 최적화: forEach 대신 for-loop 사용
-//     for (const item of data) {
-//         const date = item['date'];
-//         const time = item['time'];
-//         const temperature = parseFloat(item['temperature']);
-
-//         if (!isNaN(temperature)) {
-//             dateCounts[date] = (dateCounts[date] || 0) + 1;
-//             temperatures.push({ date, time, temperature });
-//         } else {
-//             // console.log(`유효하지 않은 온도 값: ${rawTemperature}, 해당 행은 무시.`);
-//         }
-//     }
-
-//     const mostDataDate = Object.keys(dateCounts).reduce((a, b) => dateCounts[a] > dateCounts[b] ? a : b);
-
-//     // 해당 날짜의 데이터만 필터링
-//     temperatures = temperatures.filter(item => item.date === mostDataDate);
-//     const tempValues = temperatures.map(item => item.temperature);
-
-//     const q1 = quartile(tempValues, 0.25);
-//     const q3 = quartile(tempValues, 0.75);
-//     const iqr = q3 - q1;
-//     const lowerBound = q1 - 1.5 * iqr;
-//     const upperBound = q3 + 1.5 * iqr;
-
-//     // 필터링 및 데이터 변환
-//     let filteredData = temperatures.filter(item => item.temperature >= lowerBound && item.temperature <= upperBound)
-//         .map(item => ({
-//             Date: item.date,
-//             Time: moment(item.time, 'HH:mm:ss:SSS').format('HH:mm:ss'),
-//             Temperature: item.temperature
-//         }));
-    
-//     // 데이터 그룹화 및 평균 계산 최적화: 객체 대신 Map 사용
+// const calculateAveragedData = (filteredData) => {
 //     let groupedData = new Map();
 //     filteredData.forEach(item => {
-//         const roundedTime = moment(item.Time, 'HH:mm:ss').startOf('minute').seconds(
-//             Math.floor(moment(item.Time, 'HH:mm:ss').seconds() / 15) * 15
+//         const roundedTime = moment(item.time, 'HH:mm:ss').startOf('minute').seconds(
+//             Math.floor(moment(item.time, 'HH:mm:ss').seconds() / 15) * 15
 //         ).format('HH:mm:ss');
 
-//         const dateTimeKey = `${item.Date} ${roundedTime}`;
+//         const dateTimeKey = `${item.date} ${roundedTime}`;
 //         if (!groupedData.has(dateTimeKey)) {
-//             groupedData.set(dateTimeKey, { sum: 0, count: 0, date: item.Date, time: roundedTime });
+//             groupedData.set(dateTimeKey, { sum: 0, count: 0, date: item.date, time: roundedTime });
 //         }
 //         let entry = groupedData.get(dateTimeKey);
-//         entry.sum += item.Temperature;
+//         entry.sum += item.temperature;
 //         entry.count += 1;
 //     });
 
-//     const averagedData = Array.from(groupedData.values()).map(entry => ({
-//         Date: entry.date,
-//         Time: entry.time,
-//         Temperature: entry.sum / entry.count
+//     return Array.from(groupedData.values()).map(entry => ({
+//         date: entry.date,
+//         time: entry.time,
+//         temperature: entry.sum / entry.count
 //     }));
-
-//     // 여기부터 수정된 부분
-//     const temperatureValues = Array.from(groupedData.values()).map(entry => entry.sum / entry.count);
-
-//     const min = Math.min(...temperatureValues);
-//     const max = Math.max(...temperatureValues);
-//     const median = quartile(temperatureValues, 0.5);
-
-//     const outliers = temperatureValues.filter(t => t < lowerBound || t > upperBound);
-
-//     const boxplotStats = {
-//         min,
-//         q1,
-//         median,
-//         q3,
-//         max,
-//         outliers
-//     };
-
-//     // console.log("Refined Data:", boxplotStats);
-
-//     return { averagedData, boxplotStats };
-// }
-
-// module.exports = processData;
-// ```
-// ```
-// // server\utils\quartile.js
-
-// const quartile = (arr, q) => {
-//     const sorted = arr.slice().sort((a, b) => a - b);
-//     const pos = (sorted.length - 1) * q;
-//     const base = Math.floor(pos);
-//     const rest = pos - base;
-//     if (sorted[base + 1] !== undefined) {
-//         return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
-//     } else {
-//         return sorted[base];
-//     }
 // };
 
-// module.exports = quartile;
+// module.exports = calculateAveragedData;
 
 // ```
 // ```
@@ -1288,7 +1233,7 @@
 // const Papa = require('papaparse');
 // const FileMetadata = require('../models/FileMetadata');
 // const processData = require('../utils/refining');
-
+// const calculateQuartiles = require('../utils/quartileCalculations');
 
 // // 파일 업로드 미들웨어 설정
 // const storage = multer.diskStorage({
@@ -1304,12 +1249,10 @@
 //     return res.status(400).send('No file uploaded.');
 //   }
 
-//   // 파일 경로
 //   const filePath = req.file.path;
 //   let allData = [];
 
 //   try {
-//     // 파일 읽기 및 파싱
 //     const fileContent = await fs.readFile(filePath, 'utf8');
 //     Papa.parse(fileContent, {
 //       header: true,
@@ -1319,11 +1262,9 @@
 //         const { '[Date]': date, '[Time]': time, '[Temperature]': temperature } = row.data;
 //         allData.push({ date, time, temperature });
 //       }
+      
 //     });
-
-//     // 데이터 정제 processData
 //     const { averagedData, boxplotStats } = processData(allData);
-//     // console.log(averagedData);
 
 //     res.json({ success: true, message: 'File processed successfully', data: averagedData, boxplotStats });
 //   } catch (error) {
@@ -1338,12 +1279,24 @@
 //   }
 // });
 
+// // boxplot dynamic data
+// router.post('/process-filtered-data', async (req, res) => {
+//   const { filteredData } = req.body;
+//   console.log("filteredData: ", filteredData)
+//   try {
+//     const { boxplotStats } = processData(filteredData);
+
+//     res.json({ success: true, message: 'Filtered data processed successfully', boxplotStats });
+//   } catch (error) {
+//     console.error('Error processing filtered data:', error);
+//     res.status(500).send('Error processing filtered data');
+//   }
+// });
+
+
 // // 데이터 저장 처리
 // router.post('/save', async (req, res) => {
 //   const { fileName, graphData, boxPlotData, numbering, filedate, userInput, startTime, endTime } = req.body;
-//   console.log("graphData: ", graphData)
-
-//   // console.log("Received numbering:", filedate);
 //   try {
 //     const newFileMetadata = new FileMetadata({
 //       fileName,
@@ -1387,8 +1340,7 @@
 // // 데이터 리스트 조회 
 // router.get('/data-list', async (req, res) => {
 //   try {
-//     const dataList = await FileMetadata.find({}); // 모든 데이터 리스트 조회
-//     // console.log(dataList); // 콘솔에 조회된 데이터 리스트 출력
+//     const dataList = await FileMetadata.find({}); // 모든 데이터 리스트 조회console.log
 //     res.json(dataList); // 클라이언트에 데이터 리스트 응답
 //   } catch (error) {
 //     console.error('Error fetching data list:', error); // 에러 로깅
@@ -1402,7 +1354,6 @@
 //   const { userInput } = req.body;
 //   try {
 //     const dataItem = await FileMetadata.findByIdAndUpdate(id, { $set: { userInput } }, { new: true });
-//     // console.log("dataItem :", dataItem)
 //     if (!dataItem) {
 //       return res.status(404).send('Data not found');
 //     }
@@ -1463,6 +1414,129 @@
 
 // ```
 // ```
+// // server/models/FileMetadata.js
+
+// const mongoose = require('mongoose');
+
+// const fileMetadataSchema = new mongoose.Schema({
+//     fileName: String,
+//     uploadDate: { type: Date, default: Date.now },
+//     temperatureData: [{
+//         date: String,
+//         time: String,
+//         temperature: Number
+//     }],
+//     boxplotStats: {
+//         min: Number,
+//         q1: Number,
+//         median: Number,
+//         q3: Number,
+//         max: Number,
+//         outliers: [Number]
+//     },
+//     numbering: {
+//         countNumber: String,
+//         wNumber: String,
+//         dwNumber: String,
+//         dieNumber: String,
+//     },
+//     filedate: String,
+//     userInput: String,
+//     startTime: String, 
+//     endTime: String,
+// });
+
+// const FileMetadata = mongoose.model('FileMetadata', fileMetadataSchema);
+
+// module.exports = FileMetadata;
+
+// ```
+// ```
+// // server\utils\quartile.js
+
+// const quartile = (arr, q) => {
+//     const sorted = arr.slice().sort((a, b) => a - b);
+//     const pos = (sorted.length - 1) * q;
+//     const base = Math.floor(pos);
+//     const rest = pos - base;
+//     if (sorted[base + 1] !== undefined) {
+//         return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+//     } else {
+//         return sorted[base];
+//     }
+// };
+
+// module.exports = quartile;
+
+// ```
+// ```
+// // server/utils/preprocessData.js
+
+// function preprocessData(data) {
+//     let dateCounts = {};
+//     let temperatures = [];
+
+//     // 데이터 전처리
+//     for (const item of data) {
+//         const date = item['date'];
+//         const time = item['time'];
+//         const temperature = parseFloat(item['temperature']);
+
+//         if (!isNaN(temperature)) {
+//             dateCounts[date] = (dateCounts[date] || 0) + 1;
+//             temperatures.push({ date, time, temperature });
+//         }
+//     }
+//     // console.log("temperatures: ", temperatures);
+
+//     // dateCounts 객체가 비어있는 경우 처리
+//     const mostDataDate = Object.keys(dateCounts).length > 0
+//         ? Object.keys(dateCounts).reduce((a, b) => dateCounts[a] > dateCounts[b] ? a : b)
+//         : null;
+
+//     if (mostDataDate) {
+//         temperatures = temperatures.filter(item => item.date === mostDataDate);
+//     } else {
+//         temperatures = []; // mostDataDate가 없는 경우, temperatures 배열을 비웁니다.
+//     }
+
+//     const tempValues = temperatures.map(item => item.temperature);
+
+//     return { temperatures, tempValues };
+// }
+
+// module.exports = preprocessData;
+
+// ```
+// ```
+// // server/utils/boxplotStats.js
+
+// const quartile = require('./quartile');
+
+// const calculateBoxplotStats = (averagedData) => {
+//     const temperatureValues = averagedData.map(entry => entry.temperature).filter(t => !isNaN(t));
+//     if (temperatureValues.length === 0) {
+//       return { min: null, q1: null, median: null, q3: null, max: null, outliers: [] };
+//     }
+  
+//     const q1 = quartile(temperatureValues, 0.25);
+//     const median = quartile(temperatureValues, 0.5);
+//     const q3 = quartile(temperatureValues, 0.75);
+//     const iqr = q3 - q1;
+//     const lowerBound = q1 - 1.5 * iqr;
+//     const upperBound = q3 + 1.5 * iqr;
+  
+//     const min = Math.min(...temperatureValues);
+//     const max = Math.max(...temperatureValues);
+//     const outliers = temperatureValues.filter(t => t < lowerBound || t > upperBound);
+  
+//     return { min, q1, median, q3, max, outliers };
+//   };
+
+// module.exports = calculateBoxplotStats;
+
+// ```
+// ```
 // // server\app.js
 
 // const express = require('express');
@@ -1496,5 +1570,61 @@
 
 // const PORT = process.env.PORT || 5000;
 // app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// ```
+// ```
+// // server/utils/refining.js
+
+// const moment = require('moment');
+// const calculateQuartiles = require('./quartileCalculations');
+// const calculateAveragedData = require('./averageData');
+// const calculateBoxplotStats = require('./boxplotStats');
+// const preprocessData = require('./preprocessData');
+
+// function processData(data) {
+//     // 데이터 전처리 로직 호출
+//     const { temperatures, tempValues } = preprocessData(data);
+
+//     // Quartile 관련 계산 로직 호출
+//     const { q1, q3, lowerBound, upperBound } = calculateQuartiles(tempValues);
+
+//     // 필터링 및 데이터 변환 로직 호출
+//     let filteredData = temperatures.filter(item => item.temperature >= lowerBound && item.temperature <= upperBound)
+//         .map(item => ({
+//             date: item.date,
+//             time: moment(item.time, 'HH:mm:ss:SSS').format('HH:mm:ss'),
+//             temperature: item.temperature
+//         }));
+
+//     // AveragedData 계산 로직 호출
+//     const averagedData = calculateAveragedData(filteredData);
+
+//     // BoxplotStats 계산 로직 호출
+//     const boxplotStats = calculateBoxplotStats(averagedData, q1, q3, lowerBound, upperBound);
+
+//     console.log("averagedData: ", averagedData);
+//     return { averagedData, boxplotStats };
+// }
+
+// module.exports = processData;
+
+// ```
+// ```
+// // server/utils/quartileCalculations.js
+
+// const quartile = require('./quartile');
+
+
+// const calculateQuartiles = (tempValues) => {
+//     const q1 = quartile(tempValues, 0.25);
+//     const q3 = quartile(tempValues, 0.75);
+//     const iqr = q3 - q1;
+//     const lowerBound = q1 - 1.5 * iqr;
+//     const upperBound = q3 + 1.5 * iqr;
+
+//     return { q1, q3, iqr, lowerBound, upperBound };
+// };
+
+// module.exports = calculateQuartiles;
 
 // ```

@@ -9,7 +9,7 @@ import styles from './LineGraph.module.css'
 
 function LineGraph({
   averagedData, onDetailsChange,
-  countNumber, dieNumber, wNumber, dwNumber,  
+  countNumber, dieNumber, wNumber, dwNumber,
   onBrushChange, initialStartTime, initialEndTime, setBoxplotStats
 }) {
   const [chartSize, setChartSize] = useState({ width: 600, height: 300 });
@@ -46,32 +46,33 @@ function LineGraph({
     }
 
     const { startIndex, endIndex } = e;
-  onBrushChange(startIndex, endIndex);
+    onBrushChange(startIndex, endIndex);
 
-  if (averagedData[startIndex]?.Time && averagedData[endIndex]?.Time) {
-    const newStartTime = averagedData[startIndex].Time;
-    const newEndTime = averagedData[endIndex].Time;
+    if (averagedData[startIndex]?.time && averagedData[endIndex]?.time) {
+      const newStartTime = averagedData[startIndex].time;
+      const newEndTime = averagedData[endIndex].time;
 
-    setStartTime(newStartTime);
-    setEndTime(newEndTime);
+      setStartTime(newStartTime);
+      setEndTime(newEndTime);
 
-    const filteredData = averagedData.slice(startIndex, endIndex + 1);
-    try {
-      const { boxplotStats } = await sendFilteredData(filteredData); // await 사용하여 비동기 처리
-      setBoxplotStats(boxplotStats); // 상태 업데이트
-    } catch (error) {
-      console.error('필터링된 데이터를 처리하는 중 오류 발생:', error);
+      const filteredData = averagedData.slice(startIndex, endIndex + 1);
+
+      try {
+        const { boxplotStats } = await sendFilteredData(filteredData); // await 사용하여 비동기 처리
+        setBoxplotStats(boxplotStats); // 상태 업데이트
+      } catch (error) {
+        console.error('필터링된 데이터를 처리하는 중 오류 발생:', error);
+      }
+    } else {
+      console.log('선택된 데이터 범위에 유효한 Time 속성이 없습니다.');
     }
-  } else {
-    console.log('선택된 데이터 범위에 유효한 Time 속성이 없습니다.');
-  }
   };
 
   const temperatureFormatter = (value) => `${value.toFixed(2)}°C`;
 
   // 중앙값 계산 함수
   const calculateMedian = (data) => {
-    const temps = data.map(item => item.Temperature).sort((a, b) => a - b);
+    const temps = data.map(item => item.temperature).sort((a, b) => a - b);
     const mid = Math.floor(temps.length / 2);
     return temps.length % 2 !== 0 ? temps[mid] : (temps[mid - 1] + temps[mid]) / 2;
   };
@@ -159,7 +160,7 @@ function LineGraph({
         >
           <CartesianGrid strokeDasharray="3 3" />
           <Tooltip formatter={temperatureFormatter} />
-          <XAxis dataKey="Time"
+          <XAxis dataKey="time"
           // label={{ value: '시간', position: 'insideBottomRight', offset: -20 }}
           />
           <YAxis domain={['auto', 'auto']}
@@ -168,7 +169,7 @@ function LineGraph({
           <Legend />
           <Line
             type="monotone"
-            dataKey="Temperature"
+            dataKey="temperature"
             stroke="#8884d8"
             dot={false}
             activeDot={{ r: 4 }}

@@ -37,8 +37,8 @@ router.post('/upload', upload.single('file'), async (req, res) => {
         const { '[Date]': date, '[Time]': time, '[Temperature]': temperature } = row.data;
         allData.push({ date, time, temperature });
       }
+      
     });
-
     const { averagedData, boxplotStats } = processData(allData);
 
     res.json({ success: true, message: 'File processed successfully', data: averagedData, boxplotStats });
@@ -57,9 +57,10 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 // boxplot dynamic data
 router.post('/process-filtered-data', async (req, res) => {
   const { filteredData } = req.body;
-
+  console.log("filteredData: ", filteredData)
   try {
     const { boxplotStats } = processData(filteredData);
+
     res.json({ success: true, message: 'Filtered data processed successfully', boxplotStats });
   } catch (error) {
     console.error('Error processing filtered data:', error);
@@ -71,9 +72,6 @@ router.post('/process-filtered-data', async (req, res) => {
 // 데이터 저장 처리
 router.post('/save', async (req, res) => {
   const { fileName, graphData, boxPlotData, numbering, filedate, userInput, startTime, endTime } = req.body;
-  // console.log("graphData: ", graphData)
-
-  // console.log("Received numbering:", filedate);
   try {
     const newFileMetadata = new FileMetadata({
       fileName,
@@ -117,8 +115,7 @@ router.patch('/data/:id', async (req, res) => {
 // 데이터 리스트 조회 
 router.get('/data-list', async (req, res) => {
   try {
-    const dataList = await FileMetadata.find({}); // 모든 데이터 리스트 조회
-    // console.log(dataList); // 콘솔에 조회된 데이터 리스트 출력
+    const dataList = await FileMetadata.find({}); // 모든 데이터 리스트 조회console.log
     res.json(dataList); // 클라이언트에 데이터 리스트 응답
   } catch (error) {
     console.error('Error fetching data list:', error); // 에러 로깅
@@ -132,7 +129,6 @@ router.get('/data/:id', async (req, res) => {
   const { userInput } = req.body;
   try {
     const dataItem = await FileMetadata.findByIdAndUpdate(id, { $set: { userInput } }, { new: true });
-    // console.log("dataItem :", dataItem)
     if (!dataItem) {
       return res.status(404).send('Data not found');
     }

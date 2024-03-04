@@ -16,9 +16,9 @@ function processData(data) {
     // 필터링 및 데이터 변환 로직 호출
     let filteredData = temperatures.filter(item => item.temperature >= lowerBound && item.temperature <= upperBound)
         .map(item => ({
-            Date: item.date,
-            Time: moment(item.time, 'HH:mm:ss:SSS').format('HH:mm:ss'),
-            Temperature: item.temperature
+            date: item.date,
+            time: moment(item.time, 'HH:mm:ss:SSS').format('HH:mm:ss'),
+            temperature: item.temperature
         }));
 
     // AveragedData 계산 로직 호출
@@ -27,7 +27,7 @@ function processData(data) {
     // BoxplotStats 계산 로직 호출
     const boxplotStats = calculateBoxplotStats(averagedData, q1, q3, lowerBound, upperBound);
 
-    console.log("boxplotStats: ", boxplotStats);
+    console.log("averagedData: ", averagedData);
     return { averagedData, boxplotStats };
 }
 

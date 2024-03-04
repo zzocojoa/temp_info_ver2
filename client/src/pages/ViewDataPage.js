@@ -80,7 +80,6 @@ function ViewDataPage() {
               dwNumber={details.dwNumber}
               dieNumber={details.dieNumber}
               onDetailsChange={(key, value) => setDetails(prev => ({ ...prev, [key]: value }))}
-              // onBrushChange에 빈 함수를 전달하여 에러 방지
               onBrushChange={() => { }}
               initialStartTime={startTime}
               initialEndTime={endTime}

@@ -15,6 +15,7 @@ function preprocessData(data) {
             temperatures.push({ date, time, temperature });
         }
     }
+    // console.log("temperatures: ", temperatures);
 
     // dateCounts 객체가 비어있는 경우 처리
     const mostDataDate = Object.keys(dateCounts).length > 0

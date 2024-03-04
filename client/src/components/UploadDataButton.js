@@ -1,10 +1,13 @@
 // src\components\UploadDataButton.js
 
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './UploadDataButton.module.css'
 import { uploadFile } from '../api';
+import Loader from './Loader';
 
 function UploadDataButton({ selectedFile, onUploadSuccess, isEnabled }) {
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleUpload = async () => {
 
     if (!selectedFile) {
@@ -12,16 +15,16 @@ function UploadDataButton({ selectedFile, onUploadSuccess, isEnabled }) {
       return;
     }
 
+    setIsLoading(true); // 업로드 시작 시 로딩 상태를 true로 설정
+
     try {
       // API를 호출하여 파일 업로드
       const response = await uploadFile(selectedFile);
+      setIsLoading(false); // 업로드 성공 또는 실패 시 로딩 상태를 false로 설정
       if (response) {
         const { averagedData, boxplotStats } = response;
-        // 파일 업로드 성공 시, handleUploadSuccess 콜백을 호출하고,
-        // 업로드된 파일의 데이터와 파일 이름을 인자로 전달
-        // 업로드 성공 후 처리 로직에서 시작 시간과 종료 시간을 설정
-        const startTime = averagedData[0]?.Time || '';
-        const endTime = averagedData[averagedData.length - 1]?.Time || '';
+        const startTime = averagedData[0]?.time || '';
+        const endTime = averagedData[averagedData.length - 1]?.time || '';
         onUploadSuccess(averagedData, boxplotStats, selectedFile.name, startTime, endTime);
         // alert('File uploaded successfully!');
       } else {
@@ -29,15 +32,22 @@ function UploadDataButton({ selectedFile, onUploadSuccess, isEnabled }) {
         alert('Failed to upload file.');
       }
     } catch (error) {
+      setIsLoading(false); // 오류 발생 시 로딩 상태를 false로 설정
       console.error('Error uploading file:', error);
       alert('Error uploading file.');
     }
   };
 
   return (
-    <button className={styles['UploadDataButton']} onClick={handleUpload} disabled={!isEnabled}>
-      그래프 생성
-    </button>
+    <>
+      {isLoading ? (
+        <Loader /> // 로딩 중인 경우 로딩 인디케이터(스피너 등)를 표시
+      ) : (
+        <button className={styles['UploadDataButton']} onClick={handleUpload} disabled={!isEnabled || isLoading}>
+          그래프 생성
+        </button>
+      )}
+    </>
   );
 }
 

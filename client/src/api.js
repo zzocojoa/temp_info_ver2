@@ -12,6 +12,7 @@ export async function uploadFile(file) {
       body: formData,
     });
     const { data: averagedData, boxplotStats, temperatureValues } = await response.json();
+    console.log("boxplotStats: ", boxplotStats)
     return { averagedData, boxplotStats, temperatureValues }; // 업로드 결과 반환
   } catch (error) {
     console.error('Error uploading file:', error);
@@ -20,6 +21,8 @@ export async function uploadFile(file) {
 
 // filteredData를 서버로 전송하는 함수(bolplot dynamic data)
 export async function sendFilteredData(filteredData) {
+  // console.log("filteredData: ", filteredData);
+
   try {
     const response = await fetch(`${API_BASE_URL}/process-filtered-data`, {
       method: 'POST',
@@ -104,7 +107,6 @@ export async function fetchDataDetails(dataId) {
 
 // 데이터 삭제
 export async function deleteData(dataId) {
-  // console.log("dataId :", dataId)
   const response = await fetch(`${API_BASE_URL}/data/${dataId}`, {
     method: 'DELETE',
   });

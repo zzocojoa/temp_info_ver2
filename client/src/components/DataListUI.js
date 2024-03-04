@@ -33,7 +33,6 @@ function DataListUI() {
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
     );
-    // console.log("Filtered data:", filtered);
     setFilteredDataList(filtered); // 필터링된 결과를 저장
     setDisplayCount(10); // 검색 후 보여줄 아이템 수를 초기화
   }, [searchTerm, dataList]);
@@ -84,12 +83,12 @@ function DataListUI() {
 
       selectedDataDetails.forEach((item) => {
         // CSV 헤더
-        const csvHeader = 'Date,Time,Temperature\n';
+        const csvHeader = 'date,time,temperature\n';
 
         // 각 항목의 temperatureData를 CSV 형식의 문자열로 변환
         const csvRows = item.temperatureData.map(tempData => {
-          const { Date, Time, Temperature } = tempData;
-          return `"${Date}","${Time}","${Temperature}"`;
+          const { date, time, temperature } = tempData;
+          return `"${date}","${time}","${temperature}"`;
         }).join("\n");
 
         // 파일명 생성 로직 수정: 각 항목에 대한 고유 파일명 생성

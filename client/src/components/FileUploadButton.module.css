@@ -1,4 +1,4 @@
-/* FileUploadButton.css - 파일 업로드 버튼 컴포넌트 스타일 */
+/* client\src\components\FileUploadButton.module.css */
 
 .fileUploadContainer {
   display: flex;

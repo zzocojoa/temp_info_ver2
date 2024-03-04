@@ -16,12 +16,12 @@ function SaveCsvDataButton({ data, fileName, onSaveSuccess, startTime, endTime }
 
     const finalFileName = `${dateFromFileName}-${countNumber}_${wNumber}_${dwNumber}_${dieNumber}.csv`;
     // console.log("finalFileName :", finalFileName);
-    let csvContent = "data:text/csv;charset=utf-8,Date,Time,Temperature\n";
+    let csvContent = "data:text/csv;charset=utf-8,date,time,temperature\n";
 
     // graphData가 정의되지 않았을 경우를 처리
     (graphData || []).forEach(row => {
-      const { Date, Time, Temperature } = row;
-      csvContent += `${Date},${Time},${Temperature}\n`;
+      const { date, time, temperature } = row;
+      csvContent += `${date},${time},${temperature}\n`;
     });
 
     // CSV 파일 다운로드 로직
