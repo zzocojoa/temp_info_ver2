@@ -95,7 +95,9 @@
 }
 
 .dataItem {
-  font-size: 18px;
+  /* font-size: 18px; */
+  font-size: 1.2rem;
+
   width: auto;
   margin-bottom: 8px;
   white-space: nowrap;

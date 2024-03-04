@@ -17,7 +17,8 @@
   grid-template-areas:
     'leftPanel rightPanel';
   grid-template-columns:
-    auto 25%;
+    65% 25%;
+  gap: 20px;
   align-content: start;
   align-items: start;
   justify-content: space-around;
@@ -46,13 +47,26 @@
 @media (max-width: 1470px) {
 
   .graphDataContainer {
-    /* flex-direction: column; */
-
     display: grid;
     grid-template-areas:
       'leftPanel rightPanel';
     grid-template-columns:
-      60% 25%;
+      65% 25%;
+  }
+
+  .leftPanel,
+  .rightPanel {
+    width: 100%;
+  }
+}
+
+@media (max-width: 1145px) {
+
+  .graphDataContainer {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
   }
 
   .leftPanel,

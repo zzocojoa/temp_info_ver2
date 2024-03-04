@@ -12,23 +12,27 @@ function LineGraph({
   countNumber, dieNumber, wNumber, dwNumber,
   onBrushChange, initialStartTime, initialEndTime, setBoxplotStats
 }) {
-  const [chartSize, setChartSize] = useState({ width: 600, height: 300 });
   const [startTime, setStartTime] = useState(initialStartTime || '');
   const [endTime, setEndTime] = useState(initialEndTime || '');
+  const [chartSize, setChartSize] = useState({ width: 600, height: 300 });
 
   // 그래프 반응형 로직
   useEffect(() => {
     const handleResize = () => {
+      // 창 너비가 1145px 이하일 때는 window.innerWidth * 0.9, 그렇지 않으면 1000을 width로 사용
+      const maxWidth = 1145;
+      const calculatedWidth = window.innerWidth <= maxWidth ? window.innerWidth * 0.9 : Math.min(window.innerWidth * 0.6, 1000);
+  
       setChartSize({
-        // 최대 너비를 1000으로 제한
-        width: Math.min(window.innerWidth * 0.9, 1000),
+        // 최대 너비를 1000으로 제한하되, 창 너비가 1145px 이하일 경우는 90%를 적용
+        width: Math.min(calculatedWidth, 1000),
         height: 400
       });
     };
-
+  
     window.addEventListener('resize', handleResize);
     handleResize(); // 컴포넌트 마운트 시에도 크기 조정
-
+  
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
