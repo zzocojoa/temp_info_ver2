@@ -223,6 +223,10 @@
   margin-right: 10px;
 }
 
+.checkboxText {
+  font-size: 1rem;
+}
+
 .selectAllLabel {
   display: flex;
   margin: 0 5px;
