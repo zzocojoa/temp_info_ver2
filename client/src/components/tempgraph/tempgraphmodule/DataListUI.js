@@ -1,7 +1,9 @@
 // client/src/components/DataListUI.js
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+// 가상 스크롤링을 위해 react-window 사용
+import { FixedSizeList as List } from 'react-window';
 import { fetchDataList, deleteData, fetchDataDetails } from '../../../api';
 import styles from './DataListUI.module.css';
 
@@ -9,7 +11,6 @@ function DataListUI() {
   const [dataList, setDataList] = useState([]);
   const [filteredDataList, setFilteredDataList] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
-  const [displayCount, setDisplayCount] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [isHandleSaveCsvChecked, setIsHandleSaveCsvChecked] = useState(true);
   const csvSaveModeText = isHandleSaveCsvChecked ? "개별" : "복수";
@@ -17,10 +18,15 @@ function DataListUI() {
 
   useEffect(() => {
     const loadDataList = async () => {
-      const response = await fetchDataList();
-      if (response && Array.isArray(response)) { // 응답 확인 및 배열인지 확인
-        setDataList(response);
-        setFilteredDataList(response); // 초기에는 모든 데이터를 보여줌
+      try {
+        const response = await fetchDataList();
+        if (response && Array.isArray(response)) {
+          setDataList(response);
+          setFilteredDataList(response);
+        }
+      } catch (error) {
+        console.error("데이터 로딩 중 오류 발생:", error);
+        alert('데이터를 로드하는데 실패했습니다.');
       }
     };
     loadDataList();
@@ -34,50 +40,40 @@ function DataListUI() {
         .includes(searchTerm.toLowerCase())
     );
     setFilteredDataList(filtered); // 필터링된 결과를 저장
-    setDisplayCount(10); // 검색 후 보여줄 아이템 수를 초기화
+    // setDisplayCount(10); // 검색 후 보여줄 아이템 수를 초기화
   }, [searchTerm, dataList]);
 
-  const handleCheckboxChange = (itemId) => {
+  // useCallback을 사용하여 함수가 필요할 때만 재생성되도록 함
+  const handleCheckboxChange = useCallback((itemId) => {
     setSelectedItems(prev => {
       const newSelectedItems = prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId];
       return newSelectedItems;
     });
-  };
+  }, []);
 
-  const handleScrollDown = () => {
-    setDisplayCount(prev => prev + 10);
-  };
-
-  const handleLoadSelectedData = () => {
+  const handleLoadSelectedData = useCallback(() => {
     navigate('/view-data', { state: { selectedItems } });
-  };
+  }, [navigate, selectedItems]);
 
   const handleRemoveSelectedData = async () => {
-    for (let itemId of selectedItems) {
-      try {
-        await deleteData(itemId);
-      } catch (error) {
-        console.error("Error removing data:", error);
-      }
+    try {
+      await Promise.all(selectedItems.map(itemId => deleteData(itemId)));
+      const updatedDataList = dataList.filter(item => !selectedItems.includes(item._id));
+      setDataList(updatedDataList);
+      setFilteredDataList(updatedDataList);
+      setSelectedItems([]);
+    } catch (error) {
+      console.error("데이터 삭제 중 오류 발생:", error);
+      alert('데이터 삭제에 실패했습니다.');
     }
-    const updatedDataList = dataList.filter(item => !selectedItems.includes(item._id));
-    setDataList(updatedDataList); // 전체 리스트 업데이트
-    setFilteredDataList(updatedDataList); // 필터링된 리스트도 동일하게 업데이트
-    setSelectedItems([]); // 선택된 항목 초기화
   };
 
-  const handleSelectAllChange = (e) => {
-    if (e.target.checked) {
-      // 모든 데이터 항목의 ID를 selectedItems 배열에 추가
-      setSelectedItems(filteredDataList.map(item => item._id));
-    } else {
-      // selectedItems 배열을 비움
-      setSelectedItems([]);
-    }
-  };
+  const handleSelectAllChange = useCallback((e) => {
+    setSelectedItems(e.target.checked ? filteredDataList.map(item => item._id) : []);
+  }, [filteredDataList]);
 
   // DB CSV data save
-  const handleSaveCsv = async () => {
+  const handleSaveCsv = useCallback(async () => {
     if (isHandleSaveCsvChecked) {
       const selectedDataDetails = await Promise.all(selectedItems.map(id => fetchDataDetails(id)));
 
@@ -112,22 +108,17 @@ function DataListUI() {
     } else {
       // 선택된 항목의 상세 정보를 비동기적으로 가져옵니다.
       const selectedDataDetails = await Promise.all(selectedItems.map(id => fetchDataDetails(id)));
-
       // CSV 헤더
       const csvHeader = 'filedate,countNumber,wNumber,dwNumber,dieNumber,median, startTime, endTime\n';
-
       // 각 항목을 CSV 형식의 문자열로 변환
       const csvRows = selectedDataDetails.map(item => {
         const { filedate, numbering: { countNumber, wNumber, dwNumber, dieNumber }, boxplotStats: { median }, startTime, endTime } = item;
         return `"${filedate}","${countNumber}","${wNumber}","${dwNumber}","${dieNumber}","${median}","${startTime}","${endTime}"`;
       });
-
       // CSV 헤더와 모든 행을 결합하여 최종 CSV 내용을 생성
       const csvContent = `data:text/csv;charset=utf-8,${csvHeader}${csvRows.join("\n")}`;
-
       // encodeURI를 사용하여 CSV 내용에 대한 URI를 생성
       const encodedUri = encodeURI(csvContent);
-
       // 임시 링크를 생성하여 프로그램적으로 클릭 이벤트를 발생시켜 파일 다운로드를 트리거
       const link = document.createElement('a');
       link.setAttribute('href', encodedUri);
@@ -136,7 +127,26 @@ function DataListUI() {
       link.click(); // 링크 클릭 이벤트 강제 실행
       document.body.removeChild(link); // 사용 후 링크 제거
     }
-  };
+  }, [isHandleSaveCsvChecked, selectedItems]);
+
+  // 가상 리스트를 통해 대규모 데이터 렌더링 최적화
+  const Row = useCallback(({ index, style }) => {
+    const { _id, filedate, numbering } = filteredDataList[index];
+    const { countNumber, wNumber, dwNumber, dieNumber } = numbering || {};
+    return (
+      <div style={style} key={_id} className={styles['dataItem']}>
+        <label htmlFor={`checkbox-${_id}`} className={styles['dataItemLabel']}>
+          <input
+            type="checkbox"
+            id={`checkbox-${_id}`}
+            checked={selectedItems.includes(_id)}
+            onChange={() => handleCheckboxChange(_id)}
+          />
+          {`${filedate}-${countNumber ?? 'N/A'}_${wNumber ?? 'N/A'}_${dwNumber ?? 'N/A'}_${dieNumber ?? 'N/A'}`}
+        </label>
+      </div>
+    );
+  }, [selectedItems, handleCheckboxChange, filteredDataList]);
 
   return (
     <div className={styles['DataListUIWrap']}>
@@ -172,25 +182,17 @@ function DataListUI() {
         </div>
       </div>
       <div className={`${styles['DataListContainer']} ${styles['scroll']} ${styles['scroll-css']}`}>
-        {filteredDataList.slice(0, displayCount).map((dataItem, index) => (
-          <div key={index} className={styles['dataItem']}>
-            <label htmlFor={`checkbox-${dataItem._id}`} className={styles['dataItemLabel']}>
-              <input
-                type="checkbox"
-                id={`checkbox-${dataItem._id}`}
-                checked={selectedItems.includes(dataItem._id)}
-                onChange={() => handleCheckboxChange(dataItem._id)}
-              />
-              {`${dataItem.filedate}-${dataItem.numbering?.countNumber ?? 'N/A'}_${dataItem.numbering?.wNumber ?? 'N/A'}_${dataItem.numbering?.dwNumber ?? 'N/A'}_${dataItem.numbering?.dieNumber ?? 'N/A'}`}
-            </label>
-          </div>
-        ))}
+        <List
+          height={400} // 적절한 높이 설정
+          itemCount={filteredDataList.length}
+          itemSize={30} // 아이템의 높이
+          width={'100%'} // 컨테이너의 너비
+        >
+          {Row}
+        </List>
       </div>
       <div className={styles['buttonWrap']}>
         <div className={styles['buttonContainer']}>
-          {displayCount < dataList.length && (
-            <button onClick={handleScrollDown} className={styles['loadMoreButton']}>더 보기</button>
-          )}
           {selectedItems.length > 0 && (
             <button onClick={handleRemoveSelectedData} className={styles['removeButton']}>제거</button>
           )}
