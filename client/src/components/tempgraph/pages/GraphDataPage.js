@@ -1,13 +1,13 @@
 // src/pages/GraphDataPage.js
 
 import React, { useState, useEffect } from 'react';
-import FileUploadButton from '../components/FileUploadButton';
-import UploadDataButton from '../components/UploadDataButton';
-import SaveCsvDataButton from '../components/SaveCsvDataButton';
-import LineGraph from '../components/LineGraph';
-import BoxGraph from '../components/BoxGraph';
-import DataListUI from '../components/DataListUI';
-import TextInputBox from '../components/TextInputBox';
+import FileUploadButton from '../tempgraphmodule/FileUploadButton';
+import UploadDataButton from '../tempgraphmodule/UploadDataButton';
+import SaveCsvDataButton from '../tempgraphmodule/SaveCsvDataButton';
+import LineGraph from '../tempgraphmodule/LineGraph';
+import BoxGraph from '../tempgraphmodule/BoxGraph';
+import DataListUI from '../tempgraphmodule/DataListUI';
+import TextInputBox from '../tempgraphmodule/TextInputBox';
 import styles from './GraphData.module.css';
 
 function GraphDataPage() {

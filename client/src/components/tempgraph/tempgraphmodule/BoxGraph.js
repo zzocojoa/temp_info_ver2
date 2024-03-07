@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import ReactApexChart from 'react-apexcharts';
-import { sendFilteredData } from '../api';
+import { sendFilteredData } from '../../../api';
 import styles from './BoxGraph.module.css';
 
 function BoxGraph({ boxplotStats, selectedRange, averagedData, initialStartTime, initialEndTime }) {

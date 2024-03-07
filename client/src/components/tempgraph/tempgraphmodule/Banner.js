@@ -11,46 +11,42 @@ import { faFacebookSquare, faInstagramSquare } from '@fortawesome/free-brands-sv
 function Banner() {
     let navigate = useNavigate();
 
-    const main = () => {
-        navigate('/');
+    // 홈으로 이동
+    const navigateTo = (path) => {
+        navigate(path);
     };
-
-    const goToGraphData = () => {
-        navigate('/graph-data');
-    };
-
-    const programMaker = () => {
-        navigate('/');
-    };
-
 
     return (
         <div className={styles.banner}>
-            <div onClick={main} style={{ cursor: 'pointer' }}>
+            <div onClick={() => navigateTo('/')} style={{ cursor: 'pointer' }}>
                 <div className={styles['banner-logo']}>
                     <img src={`${process.env.PUBLIC_URL}/images/logo.png`} alt="logo" />
                 </div>
             </div>
 
             <ul className={styles['banner-menu']}>
-                <li onClick={goToGraphData} style={{ cursor: 'pointer' }}>
+                <li onClick={() => navigateTo('/graph-data')} style={{ cursor: 'pointer' }}>
                     <FontAwesomeIcon icon={faTemperatureHigh} />
                     온도 그래프
                 </li>
-                <li onClick={goToGraphData} style={{ cursor: 'pointer' }}>
+                <li onClick={() => navigateTo('/graph-data')} style={{ cursor: 'pointer' }}>
+                    <FontAwesomeIcon icon={faTemperatureHigh} />
                     온도 그래프
                 </li>
-                <li onClick={goToGraphData} style={{ cursor: 'pointer' }}>
+                <li onClick={() => navigateTo('/graph-data')} style={{ cursor: 'pointer' }}>
+                    <FontAwesomeIcon icon={faTemperatureHigh} />
                     온도 그래프
                 </li>
-                <li onClick={goToGraphData} style={{ cursor: 'pointer' }}>
+                <li onClick={() => navigateTo('/graph-data')} style={{ cursor: 'pointer' }}>
+                    <FontAwesomeIcon icon={faTemperatureHigh} />
                     온도 그래프
                 </li>
+                {/* 추가적인 메뉴 항목에 대한 경로 설정이 필요하면 여기에 구현 */}
             </ul>
 
             <ul className={styles['banner-icons']}>
                 <li><FontAwesomeIcon icon={faFacebookSquare} /></li>
-                <li onClick={programMaker} style={{ cursor: 'pointer' }}>
+                <li onClick={() => navigateTo('/Card')} style={{ cursor: 'pointer' }}>
                     <FontAwesomeIcon icon={faInstagramSquare} />
                 </li>
             </ul>

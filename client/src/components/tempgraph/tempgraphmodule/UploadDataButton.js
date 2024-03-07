@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import styles from './UploadDataButton.module.css'
-import { uploadFile } from '../api';
+import { uploadFile } from '../../../api';
 import Loader from './Loader';
 
 function UploadDataButton({ selectedFile, onUploadSuccess, isEnabled }) {

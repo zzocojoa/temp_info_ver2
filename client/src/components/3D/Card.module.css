@@ -1,0 +1,90 @@
+/* client\src\components\3D\Card.module.css */
+
+.card-container {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 1000px;
+}
+
+.pokemon-card {
+  width: 300px;
+  height: 420px;
+  border-radius: 20px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+}
+
+/* .pokemon-image-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(105deg,
+      transparent 40%,
+      rgba(255, 219, 112, 0.8) 45%,
+      rgba(132, 50, 255, 0.6) 55%,
+      transparent 54%);
+  filter: brightness(1.1) opacity(0.8);
+  mix-blend-mode: color-dodge;
+  background-size: 150% 150%;
+  background-position: 100%;
+  transition: background-position 0.3s ease, filter 0.3s ease;
+} */
+
+.pokemon-image-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background:
+
+    linear-gradient(105deg,
+      transparent 25%,
+      rgba(0, 255, 157, 0.8) 45%,
+      rgba(0, 0, 255, 0.6) 55%,
+      transparent 60%) 50% 50% / 150% 150%,
+
+    linear-gradient(105deg,
+      transparent 25%,
+      rgba(255, 0, 0, 0.8) 45%,
+      rgba(0, 255, 0, 0.6) 55%,
+      transparent 60%) 50% 50% / 150% 150%,
+
+      linear-gradient(105deg,
+      transparent 25%,
+      rgba(255, 219, 112, 0.8) 45%,
+      rgba(132, 50, 255, 0.6) 55%,
+      transparent 60%) 100% 100% / 150% 150%;
+
+
+  filter: brightness(1.1) opacity(0.8);
+  mix-blend-mode: color-dodge;
+  transition: background-position 0.3s ease, filter 0.3s ease;
+}
+
+.pokemon-image {
+  width: 100%;
+  height: 100%;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  position: relative;
+  z-index: 2;
+  opacity: 0.9;
+  object-fit: cover;
+  /* opacity: 0; */
+}
+
+.pokemon-name {
+  /* margin: 5px 0; */
+  color: black;
+  font-size: 24px;
+  background-color: rgba(132, 50, 255, 0.6);
+  animation: twinkle 2s infinite;
+}

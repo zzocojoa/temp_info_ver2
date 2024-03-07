@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchDataList, deleteData, fetchDataDetails } from '../api';
+import { fetchDataList, deleteData, fetchDataDetails } from '../../../api';
 import styles from './DataListUI.module.css';
 
 function DataListUI() {

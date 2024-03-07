@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, Tooltip, Brush, ReferenceLine,
 } from 'recharts';
-import { sendFilteredData } from '../api';
+import { sendFilteredData } from '../../../api';
 import styles from './LineGraph.module.css'
 
 function LineGraph({

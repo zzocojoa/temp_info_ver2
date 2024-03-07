@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import LineGraph from '../components/LineGraph';
-import BoxGraph from '../components/BoxGraph';
-import DataListUI from '../components/DataListUI';
-import TextInputBox from '../components/TextInputBox';
-import { fetchDataDetails, updateData } from '../api';
+import LineGraph from '../tempgraphmodule/LineGraph';
+import BoxGraph from '../tempgraphmodule/BoxGraph';
+import DataListUI from '../tempgraphmodule/DataListUI';
+import TextInputBox from '../tempgraphmodule/TextInputBox';
+import { fetchDataDetails, updateData } from '../../../api';
 import styles from './GraphData.module.css'
 
 function ViewDataPage() {
