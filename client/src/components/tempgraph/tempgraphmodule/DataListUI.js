@@ -110,11 +110,11 @@ function DataListUI() {
       // 선택된 항목의 상세 정보를 비동기적으로 가져옵니다.
       const selectedDataDetails = await Promise.all(selectedItems.map(id => fetchDataDetails(id)));
       // CSV 헤더
-      const csvHeader = 'filedate,countNumber,wNumber,dwNumber,dieNumber,median, startTime, endTime\n';
+      const csvHeader = 'filedate,countNumber,wNumber,dwNumber,dieNumber,min,median,max,startTime,endTime\n';
       // 각 항목을 CSV 형식의 문자열로 변환
       const csvRows = selectedDataDetails.map(item => {
-        const { filedate, numbering: { countNumber, wNumber, dwNumber, dieNumber }, boxplotStats: { median }, startTime, endTime } = item;
-        return `"${filedate}","${countNumber}","${wNumber}","${dwNumber}","${dieNumber}","${median}","${startTime}","${endTime}"`;
+        const { filedate, numbering: { countNumber, wNumber, dwNumber, dieNumber }, boxplotStats: { min, median, max }, startTime, endTime } = item;
+        return `"${filedate}","${countNumber}","${wNumber}","${dwNumber}","${dieNumber}","${min}","${median}","${max}","${startTime}","${endTime}"`;
       });
       // CSV 헤더와 모든 행을 결합하여 최종 CSV 내용을 생성
       const csvContent = `data:text/csv;charset=utf-8,${csvHeader}${csvRows.join("\n")}`;

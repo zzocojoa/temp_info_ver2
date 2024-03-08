@@ -134,3 +134,25 @@ export async function calculateMedian(data) {
     throw error; // 에러 발생 시, 이를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
   }
 }
+
+// 필터링된 데이터 처리 및 중앙값 계산 API 함수
+export const sendFilteredLinegraphData = async (data, startTime, endTime) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/filtered-linegraph-data`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ data, startTime, endTime }),
+    });
+    if (response.ok) {
+      const result = await response.json();
+      return result;
+    } else {
+      throw new Error('Failed to process filtered data');
+    }
+  } catch (error) {
+    console.error('Error sending filtered data:', error);
+    throw error;
+  }
+};

@@ -9,6 +9,7 @@ const Papa = require('papaparse');
 const FileMetadata = require('../models/FileMetadata');
 const processData = require('../utils/refining');
 const calculateMedian = require('../utils/calculateMedian');
+const processFilteredData = require('../utils/filteredDataProcessor');
 
 
 // 파일 업로드 미들웨어 설정
@@ -65,6 +66,17 @@ router.post('/process-filtered-data', async (req, res) => {
   }
 });
 
+// 필터링된 데이터 처리 및 중앙값 계산 엔드포인트
+router.post('/filtered-linegraph-data', async (req, res) => {
+  const { data, startTime, endTime } = req.body;
+  try {
+      const { filteredData, median } = processFilteredData(data, startTime, endTime);
+      res.json({ success: true, filteredData, median });
+  } catch (error) {
+      console.error('Error processing filtered data:', error);
+      res.status(500).send('Error processing filtered data');
+  }
+});
 
 // 데이터 저장 처리
 router.post('/save', async (req, res) => {
