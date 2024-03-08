@@ -103,8 +103,8 @@ function Card({ selectedImage }) {
     return (
         <div className={styles["cardWrap"]}>
             <div className={styles["cardContainer"]} ref={cardRef}>
-                <div alt="image-title" className={styles["imageOverlay"]}></div>
-                <img src={selectedImage} alt="image-title" className={styles["imageTitle"]} />
+                <div className={styles["imageOverlay"]}></div>
+                <img src={selectedImage} alt="Developer Jeong-Hyeon Oh's Profile" className={styles["imageTitle"]} />
                 <div className={styles["titleWrpa"]}>
                     <span className={styles["titleName"]}>Developer</span><br></br>
                     <span>Jeong-Hyeon Oh</span>
