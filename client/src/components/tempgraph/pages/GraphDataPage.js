@@ -1,6 +1,6 @@
 // src/pages/GraphDataPage.js
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import FileUploadButton from '../tempgraphmodule/FileUploadButton';
 import UploadDataButton from '../tempgraphmodule/UploadDataButton';
 import SaveCsvDataButton from '../tempgraphmodule/SaveCsvDataButton';
@@ -10,7 +10,7 @@ import DataListUI from '../tempgraphmodule/DataListUI';
 import TextInputBox from '../tempgraphmodule/TextInputBox';
 import styles from './GraphData.module.css';
 
-function GraphDataPage() {
+const GraphDataPage = React.memo(() => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [graphData, setGraphData] = useState([]);
   const [selectedRange, setSelectedRange] = useState({ start: 0, end: 0 });
@@ -31,14 +31,15 @@ function GraphDataPage() {
   // 그래프 생성 여부를 추적하는 상태 추가
   const [isGraphGenerated, setIsGraphGenerated] = useState(false);
 
-  const handleFileSelect = (file) => {
+  const handleFileSelect = useCallback((file) => {
     setUploadedFile(file);
     setGraphData([]);
     setBoxPlotData(null);
     setUserInput('');
     setIsGraphGenerated(false);
-  };
-  const handleUploadSuccess = async (
+  }, []);
+
+  const handleUploadSuccess = useCallback((
     averagedData, boxplotStats,
     uploadedFileName, startTime, endTime,
     uploadedStartTime, uploadedEndTime
@@ -51,8 +52,7 @@ function GraphDataPage() {
     setInitialEndTime(endTime);
     setStartTime(uploadedStartTime);
     setEndTime(uploadedEndTime);
-    console.log("uploadedFileName: ", uploadedFileName)
-  };
+  }, []);
 
   useEffect(() => {
     // props로 받은 initialStartTime과 initialEndTime을 사용하여 초기 시간 설정
@@ -60,12 +60,11 @@ function GraphDataPage() {
     setEndTime(initialEndTime);
   }, [initialStartTime, initialEndTime]);
 
-  const handleSaveDataSuccess = () => {
-    // alert('Data saved successfully!');
-    // setIsDataSaved(true);
-  };
+  const handleSaveDataSuccess = useCallback(() => {
+    // 데이터 저장 성공 처리 로직
+  }, []);
 
-  const handleBrushChange = (startIndex, endIndex) => {
+  const handleBrushChange = useCallback((startIndex, endIndex) => {
     // 시간 UI 상태로 저장
     const newStartTime = graphData[startIndex]?.time || '';
     const newEndTime = graphData[endIndex]?.time || '';
@@ -73,7 +72,7 @@ function GraphDataPage() {
     setEndTime(newEndTime);
     // 선택된 데이터 범위를 상태로 저장
     setSelectedRange({ start: startIndex, end: endIndex });
-  };
+  }, [graphData]);
 
   return (
     <div className={styles['graphDataWrap']}>
@@ -119,7 +118,7 @@ function GraphDataPage() {
                   boxplotStats={boxPlotData}
                   selectedRange={selectedRange}
                   onBrushChange={handleBrushChange}
-                  />
+                />
               </>
             )}
           </div>
@@ -137,6 +136,7 @@ function GraphDataPage() {
       </div>
     </div>
   );
-}
+});
+
 export default GraphDataPage;
 

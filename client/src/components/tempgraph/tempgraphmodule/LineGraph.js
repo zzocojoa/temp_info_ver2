@@ -1,20 +1,30 @@
 // src\components\LineGraph.js
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, Tooltip, Brush, ReferenceLine,
 } from 'recharts';
-import { sendFilteredData } from '../../../api';
+import { useLineGraphData } from './hooks/useLineGraphData';
+import { calculateMedian } from '../../../api';
+// import useCalculateMedian from './hooks/useCalculateMedian';
+
 import styles from './LineGraph.module.css'
 
-function LineGraph({
-  averagedData, onDetailsChange,
-  countNumber, dieNumber, wNumber, dwNumber,
-  onBrushChange, initialStartTime, initialEndTime, setBoxplotStats
-}) {
-  const [startTime, setStartTime] = useState(initialStartTime || '');
-  const [endTime, setEndTime] = useState(initialEndTime || '');
+const LineGraph = React.memo(({
+  averagedData,
+  onDetailsChange,
+  countNumber,
+  dieNumber,
+  wNumber,
+  dwNumber,
+  onBrushChange,
+  initialStartTime,
+  initialEndTime,
+  setBoxplotStats
+}) => {
+  const { startTime, endTime, handleBrushChange } = useLineGraphData(averagedData, initialStartTime, initialEndTime, onBrushChange, setBoxplotStats);
   const [chartSize, setChartSize] = useState({ width: 600, height: 300 });
+  const [medianValue, setMedianValue] = useState(0);
 
   // 그래프 반응형 로직
   useEffect(() => {
@@ -31,57 +41,26 @@ function LineGraph({
     };
   
     window.addEventListener('resize', handleResize);
-    handleResize(); // 컴포넌트 마운트 시에도 크기 조정
-  
+    // 컴포넌트 마운트 시에도 크기 조정
+    handleResize();
+
+    // 이벤트 리스너 제거를 통한 메모리 누수 방지
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // useCallback을 사용하여 함수 재생성 방지
+  const temperatureFormatter = useCallback((value) => `${value.toFixed(2)}°C`, []);
+
+  // useCalculateMedian 커스텀 훅을 사용하여 중앙값 계산 최적화
   useEffect(() => {
-    setStartTime(initialStartTime);
-    setEndTime(initialEndTime);
-  }, [initialStartTime, initialEndTime]);
+    const fetchMedian = async () => {
+      const temperatures = averagedData.map(item => item.temperature);
+      const median = await calculateMedian(temperatures); // Call the API to calculate median
+      setMedianValue(median);
+    };
 
-  const handleBrushChange = async (e) => {
-    if (!e) {
-      const startIndex = 0;
-      const endIndex = averagedData.length - 1;
-      onBrushChange(startIndex, endIndex);
-      return;
-    }
-
-    const { startIndex, endIndex } = e;
-    onBrushChange(startIndex, endIndex);
-
-    if (averagedData[startIndex]?.time && averagedData[endIndex]?.time) {
-      const newStartTime = averagedData[startIndex].time;
-      const newEndTime = averagedData[endIndex].time;
-
-      setStartTime(newStartTime);
-      setEndTime(newEndTime);
-
-      const filteredData = averagedData.slice(startIndex, endIndex + 1);
-
-      try {
-        const { boxplotStats } = await sendFilteredData(filteredData); // await 사용하여 비동기 처리
-        setBoxplotStats(boxplotStats); // 상태 업데이트
-      } catch (error) {
-        console.error('필터링된 데이터를 처리하는 중 오류 발생:', error);
-      }
-    } else {
-      console.log('선택된 데이터 범위에 유효한 Time 속성이 없습니다.');
-    }
-  };
-
-  const temperatureFormatter = (value) => `${value.toFixed(2)}°C`;
-
-  // 중앙값 계산 함수
-  const calculateMedian = (data) => {
-    const temps = data.map(item => item.temperature).sort((a, b) => a - b);
-    const mid = Math.floor(temps.length / 2);
-    return temps.length % 2 !== 0 ? temps[mid] : (temps[mid - 1] + temps[mid]) / 2;
-  };
-
-  const medianValue = calculateMedian(averagedData);
+    fetchMedian();
+  }, [averagedData]);
 
   return (
     <>
@@ -165,10 +144,8 @@ function LineGraph({
           <CartesianGrid strokeDasharray="3 3" />
           <Tooltip formatter={temperatureFormatter} />
           <XAxis dataKey="time"
-          // label={{ value: '시간', position: 'insideBottomRight', offset: -20 }}
           />
           <YAxis domain={['auto', 'auto']}
-          // label={{ value: '온도', angle: -90, position: 'insideLeft' }}
           />
           <Legend />
           <Line
@@ -189,6 +166,6 @@ function LineGraph({
       </div>
     </>
   );
-}
+});
 
 export default LineGraph;

@@ -53,6 +53,7 @@ function DataListUI() {
 
   const handleLoadSelectedData = useCallback(() => {
     navigate('/view-data', { state: { selectedItems } });
+    setSelectedItems([]); // 추가: 불러오기 후 선택된 아이템 상태 초기화
   }, [navigate, selectedItems]);
 
   const handleRemoveSelectedData = async () => {
@@ -148,6 +149,20 @@ function DataListUI() {
     );
   }, [selectedItems, handleCheckboxChange, filteredDataList]);
 
+  // 검색 결과 및 선택된 아이템 개수 표시
+  const displayCounts = (
+    <div className={styles['dataCountsWrap']}>
+      <div className={styles['dataCountsContainer']}>
+        <div className={styles['dataCounts']}>
+          <span>총: {filteredDataList.length}</span>
+        </div>
+        <div className={styles['dataSelectCount']}>
+          <span>선택: {selectedItems.length}</span>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className={styles['DataListUIWrap']}>
       <div className={styles['searchWrap']}>
@@ -160,6 +175,7 @@ function DataListUI() {
           onChange={e => setSearchTerm(e.target.value)}
         />
       </div>
+      {displayCounts}
       <div className={styles['selectAllCheckbox']}>
         <div className={styles['selectAllLabel']}>
           <label className={styles['checkboxLabel']}>
@@ -177,12 +193,12 @@ function DataListUI() {
               checked={isHandleSaveCsvChecked}
               onChange={e => setIsHandleSaveCsvChecked(e.target.checked)}
             />
-            <label>{`저장 유형 선택: ${csvSaveModeText}`}</label>
+            <label>{`저장 유형: ${csvSaveModeText}`}</label>
           </label>
         </div>
       </div>
-      <div className={`${styles['DataListContainer']} ${styles['scroll']} ${styles['scroll-css']}`}>
-        <List
+      <div className={styles['DataListContainer']}>
+        <List className={` ${styles['scroll']} ${styles['scroll-css']}`}
           height={400} // 적절한 높이 설정
           itemCount={filteredDataList.length}
           itemSize={30} // 아이템의 높이

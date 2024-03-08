@@ -21,8 +21,6 @@ export async function uploadFile(file) {
 
 // filteredData를 서버로 전송하는 함수(bolplot dynamic data)
 export async function sendFilteredData(filteredData) {
-  // console.log("filteredData: ", filteredData);
-
   try {
     const response = await fetch(`${API_BASE_URL}/process-filtered-data`, {
       method: 'POST',
@@ -114,4 +112,25 @@ export async function deleteData(dataId) {
     throw new Error('Network response was not ok');
   }
   return await response.json();
+}
+
+// 중앙값 계산 API 함수
+export async function calculateMedian(data) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/calculate-median`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ data }), // 전송할 데이터
+    });
+    if (!response.ok) {
+      throw new Error('Failed to calculate median');
+    }
+    const result = await response.json(); // 서버 응답으로부터 결과 받기
+    return result.median; // 중앙값 반환
+  } catch (error) {
+    console.error('Error calculating median:', error);
+    throw error; // 에러 발생 시, 이를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+  }
 }

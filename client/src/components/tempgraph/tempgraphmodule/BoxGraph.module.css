@@ -30,7 +30,7 @@
   width: 30%;
 }
 
-table {
+.boxTable {
   border-collapse: collapse;
   text-align: left;
   line-height: 1.5;
@@ -38,7 +38,28 @@ table {
   border-left: 3px solid #369;
   margin : 20px 10px;
 }
-table th {
+
+.boxTable td {
+  width: 11rem;
+  font-size: .9rem;
+  font-weight: bold;
+  padding: 10px;
+  vertical-align: top;
+  border-right: 1px solid #a8a8a8;
+  border-bottom: 1px solid #a8a8a8;
+}
+
+.boxTable tbody tr:nth-child(3) {
+  background-color: rgb(136, 132, 216, .5);
+}
+
+.boxTable td:last-child {
+  width: 6rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.boxTable th {
   width: 200px;
   padding: 10px;
   vertical-align: top;
@@ -46,11 +67,4 @@ table th {
   border-right: 1px solid #a8a8a8;
   border-bottom: 1px solid #a8a8a8;
   font-weight: bold;
-}
-table td {
-  width: 150px;
-  padding: 10px;
-  vertical-align: top;
-  border-right: 1px solid #a8a8a8;
-  border-bottom: 1px solid #a8a8a8;
 }

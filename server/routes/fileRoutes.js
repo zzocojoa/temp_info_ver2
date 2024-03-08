@@ -8,7 +8,8 @@ const router = express.Router();
 const Papa = require('papaparse');
 const FileMetadata = require('../models/FileMetadata');
 const processData = require('../utils/refining');
-const calculateQuartiles = require('../utils/quartileCalculations');
+const calculateMedian = require('../utils/calculateMedian');
+
 
 // 파일 업로드 미들웨어 설정
 const storage = multer.diskStorage({
@@ -23,10 +24,8 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
   }
-
   const filePath = req.file.path;
   let allData = [];
-
   try {
     const fileContent = await fs.readFile(filePath, 'utf8');
     Papa.parse(fileContent, {
@@ -37,7 +36,6 @@ router.post('/upload', upload.single('file'), async (req, res) => {
         const { '[Date]': date, '[Time]': time, '[Temperature]': temperature } = row.data;
         allData.push({ date, time, temperature });
       }
-      
     });
     const { averagedData, boxplotStats } = processData(allData);
 
@@ -60,7 +58,6 @@ router.post('/process-filtered-data', async (req, res) => {
   console.log("filteredData: ", filteredData)
   try {
     const { boxplotStats } = processData(filteredData);
-
     res.json({ success: true, message: 'Filtered data processed successfully', boxplotStats });
   } catch (error) {
     console.error('Error processing filtered data:', error);
@@ -80,11 +77,10 @@ router.post('/save', async (req, res) => {
       numbering: numbering,
       filedate,
       userInput,
-      startTime, 
+      startTime,
       endTime,
     });
     await newFileMetadata.save();
-
     res.json({ message: 'Data saved successfully', data: newFileMetadata });
   } catch (error) {
     console.error('Error saving data:', error);
@@ -96,15 +92,13 @@ router.post('/save', async (req, res) => {
 router.patch('/data/:id', async (req, res) => {
   const { id } = req.params;
   const { userInput } = req.body; // 요청 본문에서 수정된 userInput 값을 받기
-  
   try {
     // findByIdAndUpdate 메서드를 사용하여 해당 ID의 문서를 찾고, userInput 필드를 업데이트
     const updatedItem = await FileMetadata.findByIdAndUpdate(id, { $set: { userInput: userInput } }, { new: true });
-    
+
     if (!updatedItem) {
       return res.status(404).send('Data not found');
     }
-
     res.json({ message: 'Data updated successfully', data: updatedItem });
   } catch (error) {
     console.error('Error updating data:', error);
@@ -132,7 +126,6 @@ router.get('/data/:id', async (req, res) => {
     if (!dataItem) {
       return res.status(404).send('Data not found');
     }
-
     res.json(dataItem);
   } catch (error) {
     console.error('Error fetching data item:', error);
@@ -169,7 +162,6 @@ const objectToCsv = (data) => {
 // 선택된 데이터를 CSV로 변환하여 반환하는 엔드포인트
 router.post('/export-csv', async (req, res) => {
   const { ids } = req.body; // 클라이언트에서 전송한 데이터 ID 배열
-
   try {
     const data = await FileMetadata.find({ '_id': { $in: ids } });
     if (!data.length) {
@@ -182,6 +174,21 @@ router.post('/export-csv', async (req, res) => {
   } catch (error) {
     console.error('Error exporting to CSV:', error);
     return res.status(500).send('Internal Server Error');
+  }
+});
+
+// 중앙값 계산 엔드포인트
+router.post('/calculate-median', (req, res) => {
+  const { data } = req.body; // 클라이언트에서 전송한 데이터 배열
+  if (!Array.isArray(data)) {
+    return res.status(400).json({ message: 'Invalid data format' });
+  }
+  try {
+    const median = calculateMedian(data);
+    res.json({ success: true, median });
+  } catch (error) {
+    console.error('Error calculating median:', error);
+    res.status(500).json({ message: 'Error calculating median' });
   }
 });
 

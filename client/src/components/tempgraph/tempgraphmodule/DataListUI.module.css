@@ -23,7 +23,7 @@
   align-items: stretch;
   border-radius: 0.375rem;
   box-shadow: 4px 4px 6px 0 rgb(189, 175, 167, .5),
-  -4px -4px 6px 0 rgb(189, 175, 167, .2)
+    -4px -4px 6px 0 rgb(189, 175, 167, .2)
 }
 
 .searchText {
@@ -64,6 +64,35 @@
   transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 
+.dataCountsWrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 5px 10px 10px 5px;
+  align-items: stretch;
+}
+
+.dataCountsContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.dataCounts {
+  display: flex;
+  margin: 0 10px;
+  user-select: none;
+}
+
+.dataSelectCount {
+  display: flex;
+  margin: 0 5px;
+  user-select: none;
+}
+
 .DataListContainer {
   width: inherit;
   max-height: 500px;
@@ -96,7 +125,7 @@
 
 .dataItem {
   font-size: 18px;
-  /* font-size: 1.2rem; */
+  font-size: 1.1rem;
   height: 20px;
   white-space: nowrap;
   overflow: hidden;
@@ -109,6 +138,8 @@
 
 .dataItemLabel {
   display: inline-block;
+  cursor: pointer;
+
   margin-left: 8px;
 }
 
@@ -215,7 +246,6 @@
   justify-content: center;
   width: 100%;
   cursor: pointer;
-
 }
 
 .selectAllCheckbox input[type="checkbox"] {
