@@ -25,9 +25,9 @@ function Banner() {
             </div>
 
             <ul className={styles['banner-menu']}>
-                <li onClick={() => navigateTo('/graph-data')} style={{ cursor: 'pointer' }}>
+                <li onClick={() => navigateTo('/line-bar')} style={{ cursor: 'pointer' }}>
                     <FontAwesomeIcon icon={faTemperatureHigh} />
-                    온도 그래프
+                    Line/Bar
                 </li>
                 <li onClick={() => navigateTo('/graph-data')} style={{ cursor: 'pointer' }}>
                     <FontAwesomeIcon icon={faTemperatureHigh} />
