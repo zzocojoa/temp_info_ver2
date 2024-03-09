@@ -19,6 +19,8 @@ const calculateBoxplotStats = (averagedData) => {
     const max = Math.max(...temperatureValues);
     const outliers = temperatureValues.filter(t => t < lowerBound || t > upperBound);
   
+    // console.log("min: ", min)
+
     return { min, q1, median, q3, max, outliers };
   };
 

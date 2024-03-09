@@ -19,6 +19,29 @@ export async function uploadFile(file) {
   }
 }
 
+// 정제 파일 업로드 API (CSV 파일)
+export async function uploadCsvFile(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/upload-csv`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const data = await response.json();
+    return data; // 성공적으로 업로드된 경우 서버 응답 반환
+  } catch (error) {
+    console.error('Error uploading CSV file:', error);
+    throw error; // 컴포넌트에서 처리할 수 있게 에러를 다시 던짐
+  }
+}
+
 // filteredData를 서버로 전송하는 함수(bolplot dynamic data)
 export async function sendFilteredData(filteredData) {
   try {

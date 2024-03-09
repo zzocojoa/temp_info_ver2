@@ -10,7 +10,7 @@ const FileMetadata = require('../models/FileMetadata');
 const processData = require('../utils/refining');
 const calculateMedian = require('../utils/calculateMedian');
 const processFilteredData = require('../utils/filteredDataProcessor');
-
+const calculateBoxplotStats = require('../utils/boxplotStats');
 
 // 파일 업로드 미들웨어 설정
 const storage = multer.diskStorage({
@@ -53,6 +53,69 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
+// 정제된 파일 업로드 처리 엔드포인트 (다중 파일 지원)
+router.post('/upload-csv', upload.array('files'), async (req, res) => {
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).send('No files uploaded.');
+  }
+
+  const uploadResults = await Promise.all(req.files.map(async (file) => {
+    const filePath = file.path;
+    const fileName = file.originalname;
+
+    // 파일 이름에서 정보 추출
+    const match = fileName.match(/(\d{4}-\d{2}-\d{2})-(\d+)_(\d+)_(\d+)_(\d+)\.csv/);
+    if (!match) {
+      // 파일 삭제 로직을 에러 처리 전에 배치하여, 파일이 올바르게 삭제되도록 함
+      await fs.unlink(filePath);
+      return { fileName, error: 'Invalid file name format.' };
+    }
+
+    const [, filedate, countNumber, wNumber, dwNumber, dieNumber] = match;
+
+    try {
+      const fileContent = await fs.readFile(filePath, 'utf8');
+      const parsedData = Papa.parse(fileContent, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      });
+
+      const temperatureValues = parsedData.data.map(row => row.temperature).filter(t => !isNaN(t));
+      if (temperatureValues.length === 0) {
+        throw new Error('No valid temperature data found.');
+      }
+
+      // 박스플롯 통계 계산
+      const boxplotStats = calculateBoxplotStats(temperatureValues);
+
+      // 파일 메타데이터 객체 생성 및 저장
+      const newFileMetadata = new FileMetadata({
+        fileName,
+        temperatureData: parsedData.data,
+        boxplotStats,
+        numbering: { countNumber, wNumber, dwNumber, dieNumber },
+        filedate,
+      });
+      await newFileMetadata.save();
+
+      return { fileName, message: 'File uploaded and data saved successfully', boxplotStats };
+    } catch (error) {
+      console.error('Error processing file:', error);
+      return { fileName, error: error.message };
+    } finally {
+      try {
+        await fs.unlink(filePath); // 임시 업로드 파일 삭제
+      } catch (error) {
+        console.error('Error deleting file:', error);
+      }
+    }
+  }));
+
+  // 모든 파일 처리 결과 반환
+  res.json(uploadResults);
+});
+
 // boxplot dynamic data
 router.post('/process-filtered-data', async (req, res) => {
   const { filteredData } = req.body;
@@ -70,11 +133,11 @@ router.post('/process-filtered-data', async (req, res) => {
 router.post('/filtered-linegraph-data', async (req, res) => {
   const { data, startTime, endTime } = req.body;
   try {
-      const { filteredData, median } = processFilteredData(data, startTime, endTime);
-      res.json({ success: true, filteredData, median });
+    const { filteredData, median } = processFilteredData(data, startTime, endTime);
+    res.json({ success: true, filteredData, median });
   } catch (error) {
-      console.error('Error processing filtered data:', error);
-      res.status(500).send('Error processing filtered data');
+    console.error('Error processing filtered data:', error);
+    res.status(500).send('Error processing filtered data');
   }
 });
 

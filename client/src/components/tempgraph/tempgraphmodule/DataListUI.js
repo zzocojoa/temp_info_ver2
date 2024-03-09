@@ -1,10 +1,11 @@
-// client/src/components/DataListUI.js
+// client/src/components/tempgraph/tempgraphmodule/DataListUI.js
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 // 가상 스크롤링을 위해 react-window 사용
 import { FixedSizeList as List } from 'react-window';
 import { fetchDataList, deleteData, fetchDataDetails } from '../../../api';
+import DataUploadComponent from './DataUploadComponent';
 import styles from './DataListUI.module.css';
 
 function DataListUI() {
@@ -159,6 +160,7 @@ function DataListUI() {
         <div className={styles['dataSelectCount']}>
           <span>선택: {selectedItems.length}</span>
         </div>
+        <DataUploadComponent />
       </div>
     </div>
   );
