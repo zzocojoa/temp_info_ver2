@@ -65,22 +65,23 @@ function Card({ selectedImage }) {
         // 마우스 엔터 시 전환 효과 제거
         const handleMouseEnter = () => {
             card.style.transition = 'none';
+            if (!overlay) overlay = card.querySelector('.' + styles['imageOverlay']);
+            // 마우스 엔터 시 오버레이 투명도 증가
+            if (overlay) {
+                overlay.style.opacity = 0.8; // 투명도 조절
+            }
         };
         const handleMouseLeave = () => {
-            // overlay 존재 확인
             if (!overlay) overlay = card.querySelector('.' + styles['imageOverlay']);
-            // overlay가 존재할 때만 스타일 적용
+            // 마우스 리브 시 오버레이 투명도 감소
             if (overlay) {
-                // 마우스 리브 시 전환 효과 설정
-                card.style.transition = 'transform 0.5s ease-out';
-                // 원래 상태로 회전 초기화
-                card.style.transform = 'rotateY(0deg) rotateX(0deg)';
-                card.style.opacity = 1;
-                cancelAnimationFrame(frameId.current);
-                overlay.style.backgroundPosition = 'initial';
+              overlay.style.opacity = 0; // 투명도 초기화
             }
-            // 마우스가 벗어났을 때 원래 트랜지션으로 복구
             card.style.transition = 'transform 0.5s ease-out, opacity 0.5s ease-out';
+            card.style.transform = 'rotateY(0deg) rotateX(0deg)';
+            card.style.opacity = 1;
+            cancelAnimationFrame(frameId.current);
+            overlay.style.backgroundPosition = 'initial';
             glossEffect.style.left = '50%';
             glossEffect.style.top = '50%';
         };
