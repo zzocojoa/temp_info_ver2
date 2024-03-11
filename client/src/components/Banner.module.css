@@ -14,6 +14,13 @@
     font-family: 'Montserrat', sans-serif;
 }
 
+.bannerWrap {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
 .banner {
     width: 100%;
     display: flex;
@@ -33,18 +40,21 @@
 
 .banner-menu {
     display: flex;
+    border-radius: 5px;
+
 }
 
 .banner-menu li {
     padding: 8px 12px;
+    border-radius: 5px;
     font-size: 20px;
     color: var(--accent-color);
     font-weight: 700;
+    transition: background-color 0.3s ease;
 }
 
 .banner-menu li:hover {
     background-color: var(--accent-color);
-    border-radius: 5px;
     color: #f0f4f5;
 }
 
@@ -58,16 +68,12 @@
     font-size: 30px;
 }
 
-/* @media (max-width: 768px) {
-    .banner h1 {
-        font-size: 1.5em;
-    }
+.developer-icon {
+    width: 1.5rem;
+    filter: drop-shadow(10px 7px 10px #d49466);
+    transition: transform 0.3s ease-in-out;
+}
 
-    .banner p {
-        font-size: 0.9em;
-    }
-
-    .banner button {
-        padding: 8px 16px;
-    }
-} */
+.developer-icon:hover {
+    transform: scale(1.2);
+}

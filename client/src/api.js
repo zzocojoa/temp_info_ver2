@@ -20,9 +20,12 @@ export async function uploadFile(file) {
 }
 
 // 정제 파일 업로드 API (CSV 파일)
-export async function uploadCsvFile(file) {
+export async function uploadCsvFile(files) {
   const formData = new FormData();
-  formData.append('file', file);
+  // formData.append('file', file);
+  for (let i = 0; i < files.length; i++) {
+    formData.append('files', files[i]);
+  }
 
   try {
     const response = await fetch(`${API_BASE_URL}/upload-csv`, {

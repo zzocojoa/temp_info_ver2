@@ -75,34 +75,32 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
 
     try {
       const fileContent = await fs.readFile(filePath, 'utf8');
-      const parsedData = Papa.parse(fileContent, {
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
+      return new Promise((resolve, reject) => {
+        Papa.parse(fileContent, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+          complete: async (result) => {
+            const temperatureValues = result.data;
+            const boxplotStats = calculateBoxplotStats(temperatureValues);
+            const newFileMetadata = new FileMetadata({
+              fileName,
+              temperatureData: result.data,
+              boxplotStats,
+              numbering: { countNumber, wNumber, dwNumber, dieNumber },
+              filedate,
+            });
+            await newFileMetadata.save();
+            resolve({ fileName, message: 'File uploaded and data saved successfully', boxplotStats });
+          },
+          error: (error) => {
+            reject(error.message);
+          }
+        });
       });
-
-      const temperatureValues = parsedData.data.map(row => row.temperature).filter(t => !isNaN(t));
-      if (temperatureValues.length === 0) {
-        throw new Error('No valid temperature data found.');
-      }
-
-      // 박스플롯 통계 계산
-      const boxplotStats = calculateBoxplotStats(temperatureValues);
-
-      // 파일 메타데이터 객체 생성 및 저장
-      const newFileMetadata = new FileMetadata({
-        fileName,
-        temperatureData: parsedData.data,
-        boxplotStats,
-        numbering: { countNumber, wNumber, dwNumber, dieNumber },
-        filedate,
-      });
-      await newFileMetadata.save();
-
-      return { fileName, message: 'File uploaded and data saved successfully', boxplotStats };
     } catch (error) {
       console.error('Error processing file:', error);
-      return { fileName, error: error.message };
+      return { fileName, error: error.toString() };
     } finally {
       try {
         await fs.unlink(filePath); // 임시 업로드 파일 삭제
@@ -111,6 +109,7 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
       }
     }
   }));
+
 
   // 모든 파일 처리 결과 반환
   res.json(uploadResults);

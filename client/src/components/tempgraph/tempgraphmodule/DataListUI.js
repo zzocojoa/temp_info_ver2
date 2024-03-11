@@ -160,7 +160,6 @@ function DataListUI() {
         <div className={styles['dataSelectCount']}>
           <span>선택: {selectedItems.length}</span>
         </div>
-        <DataUploadComponent />
       </div>
     </div>
   );
@@ -177,6 +176,7 @@ function DataListUI() {
           onChange={e => setSearchTerm(e.target.value)}
         />
       </div>
+      <DataUploadComponent />
       {displayCounts}
       <div className={styles['selectAllCheckbox']}>
         <div className={styles['selectAllLabel']}>

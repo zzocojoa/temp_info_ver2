@@ -64,7 +64,7 @@
   /* opacity: 0; */
 }
 
-.titleWrpa {
+.titleWrap {
   padding: 10px 20px;
   color: rgba(0, 255, 157, 0.8) 45%;
   font-size: 16px;
@@ -75,6 +75,12 @@
   animation: twinkle 2s infinite;
   user-select: none;
   display: inline-block;
+}
+
+.developer-icon {
+  width: 1.5rem;
+  filter: drop-shadow(10px 7px 10px #d49466);
+  margin-right: 3px;
 }
 
 .titleName {

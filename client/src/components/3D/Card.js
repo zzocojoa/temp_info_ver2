@@ -75,7 +75,7 @@ function Card({ selectedImage }) {
             if (!overlay) overlay = card.querySelector('.' + styles['imageOverlay']);
             // 마우스 리브 시 오버레이 투명도 감소
             if (overlay) {
-              overlay.style.opacity = 0; // 투명도 초기화
+                overlay.style.opacity = 0; // 투명도 초기화
             }
             card.style.transition = 'transform 0.5s ease-out, opacity 0.5s ease-out';
             card.style.transform = 'rotateY(0deg) rotateX(0deg)';
@@ -106,9 +106,15 @@ function Card({ selectedImage }) {
             <div className={styles["cardContainer"]} ref={cardRef}>
                 <div className={styles["imageOverlay"]}></div>
                 <img src={selectedImage} alt="Developer Jeong-Hyeon Oh's Profile" className={styles["imageTitle"]} />
-                <div className={styles["titleWrpa"]}>
-                    <span className={styles["titleName"]}>Developer</span><br></br>
-                    <span>Jeong-Hyeon Oh</span>
+                <div className={styles["titleWrap"]}>
+                    <div className={styles["imgContainer"]}>
+                        <img className={styles['developer-icon']} src={`${process.env.PUBLIC_URL}/images/Beatlefeed.png`} alt="logo" />
+                        <span className={styles["titleName"]}>Developer</span><br></br>
+
+                    </div>
+                    <div className={styles["textContainer"]}>
+                        <span>Jeong-Hyeon Oh</span>
+                    </div>
                 </div>
             </div>
         </div>

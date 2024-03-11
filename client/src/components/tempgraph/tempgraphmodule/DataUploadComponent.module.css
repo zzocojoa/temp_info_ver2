@@ -1,0 +1,129 @@
+.DataUploadWrap {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: inherit;
+    margin: 10px;
+    align-items: stretch;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 0.375rem;
+    box-shadow: 4px 4px 6px 0 rgb(189, 175, 167, .5),
+        -4px -4px 6px 0 rgb(189, 175, 167, .2)
+}
+
+.DataUploadContainer {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    align-content: center;
+    justify-content: space-around;
+    padding: 6px 0;
+}
+
+.DataUploadSelect {
+    width: 10rem;
+    font-size: .9rem;
+}
+
+.DataUpload-sct {
+    display: none;
+}
+
+.DataUploadbutton {
+    width: 5rem;
+    font-size: .9rem;
+}
+
+.DataUploadResultWrap {
+    padding: 0 10px;
+}
+
+.DataUploadResultContainer {
+    display: flex;
+}
+
+.DataUploadResult-set {
+    width: inherit;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.DataUploadResult {
+    width: inherit;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 5rem;
+}
+
+.fileNameList {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    font-size: 0.8rem;
+}
+
+.DataUploadSuccess,
+.DataUploadError {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    align-items: flex-start;
+    width: 3rem;
+    font-size: 0.8rem;
+    display: inline-block;
+}
+
+.DataUploadSelect,
+.DataUploadbutton {
+    display: inline-block;
+    /* margin: 10px 10px;
+    padding: 8px 16px; */
+    /* font-size: 16px; */
+    border: 2px solid #263343;
+    border-radius: 10px;
+    padding: 5px 0;
+    text-align: center;
+    background: #263343;
+    background: linear-gradient(0deg, rgb(38, 51, 67) 0%, rgb(29, 39, 51) 100%);
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+.DataUploadSelect:before {
+    height: 0%;
+    width: 2px;
+}
+
+.DataUploadbutton:before {
+    height: 0%;
+    width: 2px;
+}
+
+.DataUploadSelect:hover {
+    font-weight: 700;
+    box-shadow: 4px 4px 6px 0 rgba(255, 255, 255, .5),
+        -4px -4px 6px 0 rgba(116, 125, 136, .5),
+        inset -4px -4px 6px 0 rgba(255, 255, 255, .2),
+        inset 4px 4px 6px 0 rgba(0, 0, 0, .4);
+}
+
+.DataUploadbutton:hover {
+    font-weight: 700;
+    box-shadow: 4px 4px 6px 0 rgba(255, 255, 255, .5),
+        -4px -4px 6px 0 rgba(116, 125, 136, .5),
+        inset -4px -4px 6px 0 rgba(255, 255, 255, .2),
+        inset 4px 4px 6px 0 rgba(0, 0, 0, .4);
+}
