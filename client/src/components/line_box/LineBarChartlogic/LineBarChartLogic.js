@@ -29,7 +29,7 @@ const TemperatureChart = ({ fileMetadata }) => {
     useEffect(() => {
         const transformedData = transformData(fileMetadata);
         setChartData(transformedData);
-        setChartTitle(`DW Number: ${transformedData[0]?.dwNumber}`);
+        setChartTitle(`DW-Number: ${transformedData[0]?.dwNumber}`);
     }, [fileMetadata]);
 
     const CustomTooltip = ({ active, payload }) => {

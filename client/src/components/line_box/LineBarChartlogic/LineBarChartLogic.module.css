@@ -6,6 +6,8 @@
 
 .chart-LineBarTitle {
     display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .custom-tooltip {

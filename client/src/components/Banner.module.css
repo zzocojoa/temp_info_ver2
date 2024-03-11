@@ -15,10 +15,15 @@
 }
 
 .bannerWrap {
+    background-color: #263343;
     position: fixed;
     top: 0;
     width: 100%;
     z-index: 1000;
+}
+
+.bannerContainer {
+    padding: 0 20px;
 }
 
 .banner {
@@ -26,12 +31,25 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #263343;
     padding: 8px 12px;
 }
 
+.banner-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.banner-title {
+    margin-left: 5px;
+    color: #f0f4f5;
+    font-weight: 700;
+    font-size: 1.7rem;
+}
+
 .banner-logo img {
-    width: 120px;
+    width: 7rem;
+    filter: drop-shadow(10px 7px 10px #d49466);
 }
 
 .banner-logo div {
