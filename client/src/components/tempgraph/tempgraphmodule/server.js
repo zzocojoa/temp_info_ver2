@@ -65,7 +65,9 @@
 // const Papa = require('papaparse');
 // const FileMetadata = require('../models/FileMetadata');
 // const processData = require('../utils/refining');
-// const calculateQuartiles = require('../utils/quartileCalculations');
+// const calculateMedian = require('../utils/calculateMedian');
+// const processFilteredData = require('../utils/filteredDataProcessor');
+// const calculateBoxplotStats = require('../utils/boxplotStats');
 
 // // 파일 업로드 미들웨어 설정
 // const storage = multer.diskStorage({
@@ -80,10 +82,8 @@
 //   if (!req.file) {
 //     return res.status(400).send('No file uploaded.');
 //   }
-
 //   const filePath = req.file.path;
 //   let allData = [];
-
 //   try {
 //     const fileContent = await fs.readFile(filePath, 'utf8');
 //     Papa.parse(fileContent, {
@@ -94,7 +94,6 @@
 //         const { '[Date]': date, '[Time]': time, '[Temperature]': temperature } = row.data;
 //         allData.push({ date, time, temperature });
 //       }
-      
 //     });
 //     const { averagedData, boxplotStats } = processData(allData);
 
@@ -111,13 +110,74 @@
 //   }
 // });
 
+// // 정제된 파일 업로드 처리 엔드포인트 (다중 파일 지원)
+// router.post('/upload-csv', upload.array('files'), async (req, res) => {
+//   if (!req.files || req.files.length === 0) {
+//     return res.status(400).send('No files uploaded.');
+//   }
+
+//   const uploadResults = await Promise.all(req.files.map(async (file) => {
+//     const filePath = file.path;
+//     const fileName = file.originalname;
+
+//     // 파일 이름에서 정보 추출
+//     const match = fileName.match(/(\d{4}-\d{2}-\d{2})-(\d+)_(\d+)_(\d+)_(\d+)\.csv/);
+//     if (!match) {
+//       // 파일 삭제 로직을 에러 처리 전에 배치하여, 파일이 올바르게 삭제되도록 함
+//       await fs.unlink(filePath);
+//       return { fileName, error: 'Invalid file name format.' };
+//     }
+
+//     const [, filedate, countNumber, wNumber, dwNumber, dieNumber] = match;
+
+//     try {
+//       const fileContent = await fs.readFile(filePath, 'utf8');
+//       return new Promise((resolve, reject) => {
+//         Papa.parse(fileContent, {
+//           header: true,
+//           dynamicTyping: true,
+//           skipEmptyLines: true,
+//           complete: async (result) => {
+//             const temperatureValues = result.data;
+//             const boxplotStats = calculateBoxplotStats(temperatureValues);
+//             const newFileMetadata = new FileMetadata({
+//               fileName,
+//               temperatureData: result.data,
+//               boxplotStats,
+//               numbering: { countNumber, wNumber, dwNumber, dieNumber },
+//               filedate,
+//             });
+//             await newFileMetadata.save();
+//             resolve({ fileName, message: 'File uploaded and data saved successfully', boxplotStats });
+//           },
+//           error: (error) => {
+//             reject(error.message);
+//           }
+//         });
+//       });
+//     } catch (error) {
+//       console.error('Error processing file:', error);
+//       return { fileName, error: error.toString() };
+//     } finally {
+//       try {
+//         await fs.unlink(filePath); // 임시 업로드 파일 삭제
+//       } catch (error) {
+//         console.error('Error deleting file:', error);
+//       }
+//     }
+//   }));
+
+
+//   // 모든 파일 처리 결과 반환
+//   res.json(uploadResults);
+// });
+
 // // boxplot dynamic data
 // router.post('/process-filtered-data', async (req, res) => {
 //   const { filteredData } = req.body;
 //   console.log("filteredData: ", filteredData)
 //   try {
 //     const { boxplotStats } = processData(filteredData);
-
 //     res.json({ success: true, message: 'Filtered data processed successfully', boxplotStats });
 //   } catch (error) {
 //     console.error('Error processing filtered data:', error);
@@ -125,6 +185,17 @@
 //   }
 // });
 
+// // 필터링된 데이터 처리 및 중앙값 계산 엔드포인트
+// router.post('/filtered-linegraph-data', async (req, res) => {
+//   const { data, startTime, endTime } = req.body;
+//   try {
+//     const { filteredData, median } = processFilteredData(data, startTime, endTime);
+//     res.json({ success: true, filteredData, median });
+//   } catch (error) {
+//     console.error('Error processing filtered data:', error);
+//     res.status(500).send('Error processing filtered data');
+//   }
+// });
 
 // // 데이터 저장 처리
 // router.post('/save', async (req, res) => {
@@ -137,11 +208,10 @@
 //       numbering: numbering,
 //       filedate,
 //       userInput,
-//       startTime, 
+//       startTime,
 //       endTime,
 //     });
 //     await newFileMetadata.save();
-
 //     res.json({ message: 'Data saved successfully', data: newFileMetadata });
 //   } catch (error) {
 //     console.error('Error saving data:', error);
@@ -153,15 +223,13 @@
 // router.patch('/data/:id', async (req, res) => {
 //   const { id } = req.params;
 //   const { userInput } = req.body; // 요청 본문에서 수정된 userInput 값을 받기
-  
 //   try {
 //     // findByIdAndUpdate 메서드를 사용하여 해당 ID의 문서를 찾고, userInput 필드를 업데이트
 //     const updatedItem = await FileMetadata.findByIdAndUpdate(id, { $set: { userInput: userInput } }, { new: true });
-    
+
 //     if (!updatedItem) {
 //       return res.status(404).send('Data not found');
 //     }
-
 //     res.json({ message: 'Data updated successfully', data: updatedItem });
 //   } catch (error) {
 //     console.error('Error updating data:', error);
@@ -189,7 +257,6 @@
 //     if (!dataItem) {
 //       return res.status(404).send('Data not found');
 //     }
-
 //     res.json(dataItem);
 //   } catch (error) {
 //     console.error('Error fetching data item:', error);
@@ -226,7 +293,6 @@
 // // 선택된 데이터를 CSV로 변환하여 반환하는 엔드포인트
 // router.post('/export-csv', async (req, res) => {
 //   const { ids } = req.body; // 클라이언트에서 전송한 데이터 ID 배열
-
 //   try {
 //     const data = await FileMetadata.find({ '_id': { $in: ids } });
 //     if (!data.length) {
@@ -242,7 +308,143 @@
 //   }
 // });
 
+// // 중앙값 계산 엔드포인트
+// router.post('/calculate-median', (req, res) => {
+//   const { data } = req.body; // 클라이언트에서 전송한 데이터 배열
+//   if (!Array.isArray(data)) {
+//     return res.status(400).json({ message: 'Invalid data format' });
+//   }
+//   try {
+//     const median = calculateMedian(data);
+//     res.json({ success: true, median });
+//   } catch (error) {
+//     console.error('Error calculating median:', error);
+//     res.status(500).json({ message: 'Error calculating median' });
+//   }
+// });
+
 // module.exports = router;
+
+// ```
+// ```
+// // server/utils/boxplotStats.js
+
+// const quartile = require('./quartile');
+
+// const calculateBoxplotStats = (averagedData) => {
+//   console.log("averagedData: ", averagedData)
+//   const temperatureValues = averagedData.map(entry => entry.temperature).filter(t => !isNaN(t));
+//   if (temperatureValues.length === 0) {
+//     return { min: null, q1: null, median: null, q3: null, max: null, outliers: [] };
+//   }
+
+//   const q1 = quartile(temperatureValues, 0.25);
+//   const median = quartile(temperatureValues, 0.5);
+//   const q3 = quartile(temperatureValues, 0.75);
+//   const iqr = q3 - q1;
+//   const lowerBound = q1 - 1.5 * iqr;
+//   const upperBound = q3 + 1.5 * iqr;
+
+//   const min = Math.min(...temperatureValues);
+//   const max = Math.max(...temperatureValues);
+//   const outliers = temperatureValues.filter(t => t < lowerBound || t > upperBound);
+
+//   return { min, q1, median, q3, max, outliers };
+// };
+
+// module.exports = calculateBoxplotStats;
+
+// ```
+// ```
+// // server/utils/averageData.js
+
+// const moment = require('moment');
+
+// const calculateAveragedData = (filteredData) => {
+//     let groupedData = new Map();
+//     filteredData.forEach(item => {
+//         const roundedTime = moment(item.time, 'HH:mm:ss').startOf('minute').seconds(
+//             Math.floor(moment(item.time, 'HH:mm:ss').seconds() / 15) * 15
+//         ).format('HH:mm:ss');
+
+//         const dateTimeKey = `${item.date} ${roundedTime}`;
+//         if (!groupedData.has(dateTimeKey)) {
+//             groupedData.set(dateTimeKey, { sum: 0, count: 0, date: item.date, time: roundedTime });
+//         }
+//         let entry = groupedData.get(dateTimeKey);
+//         entry.sum += item.temperature;
+//         entry.count += 1;
+//     });
+
+//     return Array.from(groupedData.values()).map(entry => ({
+//         date: entry.date,
+//         time: entry.time,
+//         temperature: entry.sum / entry.count
+//     }));
+// };
+
+// module.exports = calculateAveragedData;
+
+// ```
+// ```
+// // server/utils/filteredDataProcessor.js
+
+// const calculateMedian = require('./calculateMedian');
+
+// // 데이터 필터링 및 중앙값 계산 함수
+// const processFilteredData = (data, startTime, endTime) => {
+//     // 주어진 시간 범위에 맞는 데이터만 필터링
+//     const filteredData = data.filter(item => {
+//         const itemTime = new Date(`1970/01/01 ${item.time}`);
+//         const startTimeDate = new Date(`1970/01/01 ${startTime}`);
+//         const endTimeDate = new Date(`1970/01/01 ${endTime}`);
+//         return itemTime >= startTimeDate && itemTime <= endTimeDate;
+//     });
+
+//     // 중앙값 계산
+//     const temperatures = filteredData.map(item => item.temperature);
+//     const median = calculateMedian(temperatures);
+
+//     return { filteredData, median };
+// };
+
+// module.exports = processFilteredData;
+
+// ```
+// ```
+// // server/utils/calculateMedian.js
+
+// const calculateMedian = (data) => {
+//   if (!data || data.length === 0) return 0;
+
+//   const sortedData = data.slice().sort((a, b) => a - b);
+//   const midIndex = Math.floor(sortedData.length / 2);
+
+//   if (sortedData.length % 2 === 0) {
+//     return (sortedData[midIndex - 1] + sortedData[midIndex]) / 2;
+//   } else {
+//     return sortedData[midIndex];
+//   }
+// };
+
+// module.exports = calculateMedian;
+// ```
+// ```
+// // server\utils\quartile.js
+
+// const quartile = (arr, q) => {
+//     const sorted = arr.slice().sort((a, b) => a - b);
+//     const pos = (sorted.length - 1) * q;
+//     const base = Math.floor(pos);
+//     const rest = pos - base;
+//     if (sorted[base + 1] !== undefined) {
+//         return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+//     } else {
+//         return sorted[base];
+//     }
+// };
+
+// module.exports = quartile;
 
 // ```
 // ```
@@ -282,65 +484,6 @@
 // }
 
 // module.exports = preprocessData;
-
-// ```
-// ```
-// // server/utils/boxplotStats.js
-
-// const quartile = require('./quartile');
-
-// const calculateBoxplotStats = (averagedData) => {
-//     const temperatureValues = averagedData.map(entry => entry.temperature).filter(t => !isNaN(t));
-//     if (temperatureValues.length === 0) {
-//       return { min: null, q1: null, median: null, q3: null, max: null, outliers: [] };
-//     }
-  
-//     const q1 = quartile(temperatureValues, 0.25);
-//     const median = quartile(temperatureValues, 0.5);
-//     const q3 = quartile(temperatureValues, 0.75);
-//     const iqr = q3 - q1;
-//     const lowerBound = q1 - 1.5 * iqr;
-//     const upperBound = q3 + 1.5 * iqr;
-  
-//     const min = Math.min(...temperatureValues);
-//     const max = Math.max(...temperatureValues);
-//     const outliers = temperatureValues.filter(t => t < lowerBound || t > upperBound);
-  
-//     return { min, q1, median, q3, max, outliers };
-//   };
-
-// module.exports = calculateBoxplotStats;
-
-// ```
-// ```
-// // server/utils/averageData.js
-
-// const moment = require('moment');
-
-// const calculateAveragedData = (filteredData) => {
-//     let groupedData = new Map();
-//     filteredData.forEach(item => {
-//         const roundedTime = moment(item.time, 'HH:mm:ss').startOf('minute').seconds(
-//             Math.floor(moment(item.time, 'HH:mm:ss').seconds() / 15) * 15
-//         ).format('HH:mm:ss');
-
-//         const dateTimeKey = `${item.date} ${roundedTime}`;
-//         if (!groupedData.has(dateTimeKey)) {
-//             groupedData.set(dateTimeKey, { sum: 0, count: 0, date: item.date, time: roundedTime });
-//         }
-//         let entry = groupedData.get(dateTimeKey);
-//         entry.sum += item.temperature;
-//         entry.count += 1;
-//     });
-
-//     return Array.from(groupedData.values()).map(entry => ({
-//         date: entry.date,
-//         time: entry.time,
-//         temperature: entry.sum / entry.count
-//     }));
-// };
-
-// module.exports = calculateAveragedData;
 
 // ```
 // ```
@@ -397,24 +540,6 @@
 // };
 
 // module.exports = calculateQuartiles;
-
-// ```
-// ```
-// // server\utils\quartile.js
-
-// const quartile = (arr, q) => {
-//     const sorted = arr.slice().sort((a, b) => a - b);
-//     const pos = (sorted.length - 1) * q;
-//     const base = Math.floor(pos);
-//     const rest = pos - base;
-//     if (sorted[base + 1] !== undefined) {
-//         return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
-//     } else {
-//         return sorted[base];
-//     }
-// };
-
-// module.exports = quartile;
 
 // ```
 // ```

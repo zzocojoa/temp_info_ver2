@@ -1,6 +1,6 @@
 /* client\src\components\line_box\LineBarChartlogic\LineBarChartLogic.module.css */
 
-.DwNumberSelector {
+.DwNumberSelectorBox {
     background-color: #263343;
     width: 11rem;
     position: fixed;
@@ -9,7 +9,6 @@
     height: 100%;
     z-index: 1;
 }
-
 
 .SelectedDwCharts {
     margin-top: 70px;

@@ -61,7 +61,7 @@
     overflow-y: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    height: 696px;
+    max-height: 60rem;
 }
 
 .DwNumberButtonContainer {

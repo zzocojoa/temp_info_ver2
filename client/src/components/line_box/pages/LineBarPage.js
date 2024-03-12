@@ -24,7 +24,7 @@ const SelectorPage = () => {
   return (
     <div className={styles['selectorWrap']}>
       <div className={styles['selectorContainer']}>
-        <div className={styles['DwNumberSelector']}>
+        <div className={styles['DwNumberSelectorBox']}>
           <DwNumberSelector
             dwNumbers={dwNumbers}
             selectedDwNumbers={selectedDwNumbers}
