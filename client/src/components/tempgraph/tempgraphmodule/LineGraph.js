@@ -71,6 +71,7 @@ const LineGraph = React.memo(({
               <div className={styles['ExWrap']}>
                 <span className={styles['ExNumber']}>C_Number</span>
                 <input
+                  pattern='\d+'
                   type="text"
                   placeholder="0000"
                   className={styles['ExInfo']}
@@ -81,6 +82,7 @@ const LineGraph = React.memo(({
               <div className={styles['ExWrap']}>
                 <span className={styles['ExNumber']}>W_Number</span>
                 <input
+                  pattern='\d+'
                   type="text"
                   placeholder="0000"
                   className={styles['ExInfo']}
@@ -91,6 +93,7 @@ const LineGraph = React.memo(({
               <div className={styles['ExWrap']}>
                 <span className={styles['ExNumber']}>DW_Number</span>
                 <input
+                  pattern='\d+'
                   type="text"
                   placeholder="0000"
                   className={styles['ExInfo']}
@@ -101,6 +104,7 @@ const LineGraph = React.memo(({
               <div className={styles['ExWrap']}>
                 <span className={styles['ExNumber']}>Die_Number</span>
                 <input
+                  pattern='\d+'
                   type="text"
                   placeholder="0000"
                   className={styles['ExInfo']}

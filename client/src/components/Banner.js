@@ -35,11 +35,11 @@ function Banner() {
                         </li>
                         <li onClick={() => navigateTo('/graph-data')} style={{ cursor: 'pointer' }}>
                             <FontAwesomeIcon icon={faTemperatureHigh} />
-                            온도 그래프
+                            Temp.Graph
                         </li>
-                        <li onClick={() => navigateTo('/graph-data')} style={{ cursor: 'pointer' }}>
+                        <li onClick={() => navigateTo('/cluster-data')} style={{ cursor: 'pointer' }}>
                             <FontAwesomeIcon icon={faTemperatureHigh} />
-                            준비중
+                            Cluster
                         </li>
                         <li onClick={() => navigateTo('/graph-data')} style={{ cursor: 'pointer' }}>
                             <FontAwesomeIcon icon={faTemperatureHigh} />
