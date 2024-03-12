@@ -1,11 +1,71 @@
 /* client\src\components\line_box\DWSelector\DwNumberSelector.module.css */
 
-
-.DwNumberSelectorContainer {
-    margin: 100px 0;
+.DwNumberSelectorWrap {
+    position: relative;
 }
 
-.DwNumberSelector {
+.DwNumberSelectorContainer {
+    margin-top: 100px;
+}
+
+.searchWrap {
+    display: flex;
+    justify-content: center;
+    width: inherit;
+    margin: 10px;
+    align-items: stretch;
+    border-radius: 0.375rem;
+    box-shadow: 4px 4px 6px 0 rgb(189, 175, 167, .5),
+        -4px -4px 6px 0 rgb(189, 175, 167, .2)
+}
+
+.searchText {
+    width: 20%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700 !important;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    text-align: center;
+    white-space: nowrap;
+    background-color: #e6c8b6;
+    border: 1px solid #dee2e6;
+    border-top-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
+    /* border-radius: 0.375rem; */
+}
+
+.searchContainer {
+    width: 80%;
+    display: block;
+    padding: 0.375rem 0.75rem;
+    font-size: .8rem;
+    font-weight: 400;
+    line-height: 1.5;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: #e4dad4;
+    background-clip: padding-box;
+    border: 1px solid #dee2e6;
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.DwNumberButtonWrap {
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    height: 696px;
+}
+
+.DwNumberButtonContainer {
+    top: 100px;
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
@@ -14,10 +74,11 @@
     align-items: center;
     gap: 10px;
     padding: 10px;
+
 }
 
-.DwNumberButton {
-    width: 10rem;
+.DwNumberButtonWrap::-webkit-scrollbar {
+    display: none;
 }
 
 .DwNumberButton {
@@ -50,8 +111,8 @@
 .selectedDwNumberButton {
     font-weight: 700;
     box-shadow: 4px 4px 6px 0 rgba(255, 255, 255, .5),
-                -4px -4px 6px 0 rgba(116, 125, 136, .5),
-                inset -4px -4px 6px 0 rgba(255, 255, 255, .2),
-                inset 4px 4px 6px 0 rgba(0, 0, 0, .4);
+        -4px -4px 6px 0 rgba(116, 125, 136, .5),
+        inset -4px -4px 6px 0 rgba(255, 255, 255, .2),
+        inset 4px 4px 6px 0 rgba(0, 0, 0, .4);
     background-color: lightgreen;
 }

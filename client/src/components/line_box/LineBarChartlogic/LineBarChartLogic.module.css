@@ -1,7 +1,14 @@
 /* client\src\components\line_box\LineBarChartlogic\Banner.module.css */
 
+.chart-LineBarWrap {
+    width: 100%;
+}
+
 .chart-LineBarContainer {
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .chart-LineBarTitle {

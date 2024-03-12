@@ -28,3 +28,26 @@ body {
 .button.disabled {
   background-color: #cccccc;
 }
+
+.scroll {
+  overflow-y: scroll;
+  box-sizing: border-box;
+  font-family: 'Nanum Gothic';
+}
+
+/* 스크롤바 설정*/
+.scroll-css::-webkit-scrollbar {
+  width: 20px;
+}
+
+/* 스크롤바 막대 설정*/
+.scroll-css::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 10px;
+  border: 7px solid #e2d1c7;
+}
+
+/* 스크롤바 뒷 배경 설정*/
+.scroll-css::-webkit-scrollbar-track {
+  background-color: #e2d1c7;
+}

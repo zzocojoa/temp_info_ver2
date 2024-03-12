@@ -71,7 +71,7 @@ const TemperatureChart = ({ fileMetadata }) => {
                             <Bar yAxisId="left" dataKey="medianMinusMin" stackId="a" fill="#82ca9d" name="Median" />
                             <Bar yAxisId="left" dataKey="maxMinusMedian" stackId="a" fill="#ffc658" name="Max" />
                             <Line yAxisId="right" type="monotone" dataKey="median" stroke="#00008B" name="Median Line" dot={false} activeDot={{ r: 4 }} />
-                            <Brush dataKey="filedate" height={30} stroke="#8884d8" />
+                            <Brush dataKey="filedate" height={20} stroke="#8884d8" />
                         </ComposedChart>
                     </ResponsiveContainer>
                 </div>

@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import styles from './DwNumberSelector.module.css';
+import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const DwNumberSelector = ({ dwNumbers, selectedDwNumbers, setSelectedDwNumbers }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -18,25 +20,29 @@ const DwNumberSelector = ({ dwNumbers, selectedDwNumbers, setSelectedDwNumbers }
         setSearchTerm(e.target.value);
     };
 
-    // 검색 텍스트를 기반으로 dwNumbers 필터링
-    const filteredDwNumbers = dwNumbers.filter(dwNumber => 
+    const filteredDwNumbers = dwNumbers.filter(dwNumber =>
         dwNumber.toString().toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
-        <div className={styles.DwNumberSelectorWrap}>
-            <div className={styles.DwNumberSelectorContainer}>
-                <input
-                    type="text"
-                    placeholder="Search DW Number..."
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    className={styles.SearchInput}
-                />
-                <div className={styles.DwNumberSelector}>
+        <div className={styles['DwNumberSelectorWrap']}>
+            <div className={styles['DwNumberSelectorContainer']}>
+                <div className={styles['searchWrap']}>
+                    <span className={styles['searchText']}><FontAwesomeIcon icon={faSearch} /></span>
+                    <input
+                        type="text"
+                        placeholder="Search DW..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        className={styles['searchContainer']}
+                    />
+                </div>
+            </div>
+            <div className={styles['DwNumberButtonWrap']}>
+                <div className={styles['DwNumberButtonContainer']}>
                     {filteredDwNumbers.map((dwNumber, index) => (
                         <button
-                            className={`${styles.DwNumberButton} ${selectedDwNumbers.includes(dwNumber) ? styles.selectedDwNumberButton : ''}`}
+                            className={`${styles['DwNumberButton']} ${selectedDwNumbers.includes(dwNumber) ? styles['selectedDwNumberButton'] : ''}`}
                             key={index}
                             onClick={() => toggleDwNumber(dwNumber)}
                             style={{ backgroundColor: selectedDwNumbers.includes(dwNumber) ? 'lightgreen' : '' }}

@@ -7,15 +7,9 @@
     top: 0;
     left: 0;
     height: 100%;
-    overflow-y: auto;
     z-index: 1;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* Internet Explorer 10+ */
 }
 
-.DwNumberSelector::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
-}
 
 .SelectedDwCharts {
     margin-top: 70px;

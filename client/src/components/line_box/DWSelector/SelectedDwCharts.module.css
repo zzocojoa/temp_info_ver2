@@ -1,3 +1,13 @@
+/* client\src\components\line_box\DWSelector\SelectedDwCharts.module.css */
+
+.filteredData {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+}
 
 .filteredData > p {
     line-height: 500px;
