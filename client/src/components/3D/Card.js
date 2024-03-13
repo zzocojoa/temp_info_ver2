@@ -108,7 +108,7 @@ function Card({ selectedImage }) {
                 <img src={selectedImage} alt="Developer Jeong-Hyeon Oh's Profile" className={styles["imageTitle"]} />
                 <div className={styles["titleWrap"]}>
                     <div className={styles["imgContainer"]}>
-                        <img className={styles['developer-icon']} src={`${process.env.PUBLIC_URL}/images/Beatlefeed.png`} alt="logo" />
+                        <img className={styles['developer-icon']} src={`${process.env.PUBLIC_URL}/images/Beatlefeed_2.png`} alt="logo" />
                         <span className={styles["titleName"]}>Developer</span><br></br>
 
                     </div>

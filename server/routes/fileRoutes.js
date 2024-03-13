@@ -273,20 +273,21 @@ router.get('/clustered-data', async (req, res) => {
     const files = await FileMetadata.find({});
     const dataForClustering = files.map(file => ({
       median: file.boxplotStats.median,
-      dieNumber: file.numbering.dieNumber
+      dieNumber: file.numbering.dieNumber,
     })).filter(item => !isNaN(parseFloat(item.dieNumber)));
 
-    const k = 3; // 클러스터의 수를 예로 3으로 설정
-    const clusteringResult = await performClustering(dataForClustering, k);
+    const k = 3; // 예시로 클러스터의 수를 3으로 설정
+    const { clusters, centroids } = await performClustering(dataForClustering, k);
 
-    // 클러스터링 결과를 클라이언트에 보내기 적합한 형태로 변환
-    const clusteredData = clusteringResult.clusters.map((clusterIdx, i) => ({
+    // 클러스터링 결과와 centroids 정보를 클라이언트에 전송
+    const clusteredData = clusters.map((clusterIdx, i) => ({
       cluster: clusterIdx,
       median: dataForClustering[i].median,
-      dieNumber: dataForClustering[i].dieNumber
+      dieNumber: dataForClustering[i].dieNumber,
     }));
 
-    res.json({ success: true, data: clusteredData });
+    // 성공 응답에 clusteredData와 centroids 포함
+    res.json({ success: true, data: clusteredData, centroids });
   } catch (error) {
     console.error('Error fetching clustered data:', error);
     res.status(500).send('Error fetching clustered data');

@@ -1,0 +1,18 @@
+
+
+.clusterWrap {
+  margin-top: 80px;
+  margin-bottom: 80px;
+
+}
+
+.clusterContainer {
+  padding: 0 80px;
+}
+
+.clusterBox {
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+}

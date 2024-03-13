@@ -59,7 +59,7 @@
 .banner-menu {
     display: flex;
     border-radius: 5px;
-
+    gap: 25px;
 }
 
 .banner-menu li {

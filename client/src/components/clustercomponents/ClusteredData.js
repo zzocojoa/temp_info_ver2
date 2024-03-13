@@ -11,6 +11,7 @@ import {
   Legend,
 } from 'chart.js';
 import { fetchClusteredData } from '../../api';
+import styles from './ClusteredData.module.css';
 
 ChartJS.register(
   CategoryScale,
@@ -31,7 +32,6 @@ const ClusteredDataVisualization = () => {
     const fetchData = async () => {
       try {
         const { data: clusteredData, centroids } = await fetchClusteredData();
-        console.log("centroids: ", centroids)
 
         // 데이터셋을 클러스터 번호로 그룹화
         const clusterGroups = clusteredData.reduce((groups, dataPoint) => {
@@ -46,9 +46,10 @@ const ClusteredDataVisualization = () => {
         // 클러스터 데이터셋 생성
         const datasets = Object.keys(clusterGroups).map(cluster => {
           return {
-            label: `클러스터 ${cluster}`,
+            label: `Cluster ${cluster}`,
             data: clusterGroups[cluster],
-            backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.5)`,
+            backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 2)`,
+            radius: 4, // 크기를 조정
           };
         });
 
@@ -57,16 +58,17 @@ const ClusteredDataVisualization = () => {
           datasets.push({
             label: '중심점',
             data: centroids.map(centroid => ({
-              x: centroid[0],
-              y: centroid[1],
+              x: centroid.x,
+              y: centroid.y,
             })),
-            backgroundColor: 'red', // 중심점을 빨간색으로 표시
-            pointStyle: 'rectRot', // 중심점을 X 모양으로 표시
-            radius: 10, // 중심점의 크기 설정
+            backgroundColor: 'gray', // 중심점을 빨간색으로 표시
+            pointStyle: 'rectRot', // X 모양으로 표시, 'rectRot' 대신 'cross'를 사용해도 됨
+            radius: 15, // 크기를 조정
           });
         }
 
         setChartData({ datasets });
+        console.log("datasets: ", datasets)
       } catch (error) {
         console.error('데이터 로딩 실패:', error);
       }
@@ -82,29 +84,62 @@ const ClusteredDataVisualization = () => {
         type: 'linear',
         title: {
           display: true,
-          text: 'Median Temperature',
+          text: 'Median Temperature(℃)',
+          font: {
+            size: 18 // x축 제목 폰트 크기 설정
+          }
         },
+        ticks: {
+          font: {
+            size: 14 // x축 눈금 폰트 크기 설정
+          }
+        }
       },
       y: {
         type: 'linear',
         title: {
           display: true,
-          text: 'Die Number',
+          text: 'Die Number(no.)',
+          font: {
+            size: 18 // y축 제목 폰트 크기 설정
+          }
         },
+        ticks: {
+          font: {
+            size: 14 // y축 눈금 폰트 크기 설정
+          }
+        }
       },
     },
     plugins: {
       legend: {
         position: 'top',
+        labels: {
+          font: {
+            size: 14 // 범례 폰트 크기 설정
+          }
+        }
       },
+      title: {
+        display: true,
+        text: 'Clustering Visualization',
+        font: {
+          size: 22 // 차트 제목 폰트 크기 설정
+        }
+      }
     },
   };
 
   return (
-    <div>
-      <h2>클러스터링 결과 시각화</h2>
-      <Scatter data={chartData} options={options} />
+    <div className={styles['clusterWrap']}>
+      <div className={styles['clusterContainer']}>
+        <div className={styles['clusterBox']}>
+          {/* <h2>Clustering Visualization</h2> */}
+          <Scatter data={chartData} options={options} />
+        </div>
+      </div>
     </div>
+
   );
 };
 

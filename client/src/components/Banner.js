@@ -29,13 +29,13 @@ function Banner() {
                         </div>
                     </div>
                     <ul className={styles['banner-menu']}>
-                        <li onClick={() => navigateTo('/line-bar')} style={{ cursor: 'pointer' }}>
-                            <FontAwesomeIcon icon={faTemperatureHigh} />
-                            Line/Bar
-                        </li>
                         <li onClick={() => navigateTo('/graph-data')} style={{ cursor: 'pointer' }}>
                             <FontAwesomeIcon icon={faTemperatureHigh} />
                             Temp.Graph
+                        </li>
+                        <li onClick={() => navigateTo('/line-bar')} style={{ cursor: 'pointer' }}>
+                            <FontAwesomeIcon icon={faTemperatureHigh} />
+                            Line/Bar
                         </li>
                         <li onClick={() => navigateTo('/cluster-data')} style={{ cursor: 'pointer' }}>
                             <FontAwesomeIcon icon={faTemperatureHigh} />
