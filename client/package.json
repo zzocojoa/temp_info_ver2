@@ -15,6 +15,7 @@
     "chart.js": "^4.4.2",
     "d3": "^7.8.5",
     "lodash": "^4.17.21",
+    "ml-kmeans": "^6.0.0",
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.1",
     "react-chartjs-2": "^5.2.0",
@@ -22,7 +23,7 @@
     "react-router-dom": "^6.22.0",
     "react-scripts": "5.0.1",
     "react-window": "^1.8.10",
-    "recharts": "^2.11.0",
+    "recharts": "^2.12.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

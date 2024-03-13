@@ -11,6 +11,7 @@ const processData = require('../utils/refining');
 const calculateMedian = require('../utils/calculateMedian');
 const processFilteredData = require('../utils/filteredDataProcessor');
 const calculateBoxplotStats = require('../utils/boxplotStats');
+const performClustering = require('../utils/performClustering');
 
 // 파일 업로드 미들웨어 설정
 const storage = multer.diskStorage({
@@ -263,6 +264,32 @@ router.post('/calculate-median', (req, res) => {
   } catch (error) {
     console.error('Error calculating median:', error);
     res.status(500).json({ message: 'Error calculating median' });
+  }
+});
+
+// 클러스터링된 데이터를 제공하는 엔드포인트
+router.get('/clustered-data', async (req, res) => {
+  try {
+    const files = await FileMetadata.find({});
+    const dataForClustering = files.map(file => ({
+      median: file.boxplotStats.median,
+      dieNumber: file.numbering.dieNumber
+    })).filter(item => !isNaN(parseFloat(item.dieNumber)));
+
+    const k = 3; // 클러스터의 수를 예로 3으로 설정
+    const clusteringResult = await performClustering(dataForClustering, k);
+
+    // 클러스터링 결과를 클라이언트에 보내기 적합한 형태로 변환
+    const clusteredData = clusteringResult.clusters.map((clusterIdx, i) => ({
+      cluster: clusterIdx,
+      median: dataForClustering[i].median,
+      dieNumber: dataForClustering[i].dieNumber
+    }));
+
+    res.json({ success: true, data: clusteredData });
+  } catch (error) {
+    console.error('Error fetching clustered data:', error);
+    res.status(500).send('Error fetching clustered data');
   }
 });
 

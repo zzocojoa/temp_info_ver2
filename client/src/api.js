@@ -110,6 +110,8 @@ export async function fetchDataList() {
     const response = await fetch(`${API_BASE_URL}/data-list`);
     if (response.ok) {
       const dataList = await response.json();
+      // console.log("dataList: ", dataList)
+
       return dataList;
     } else {
       console.error('Failed to fetch data list');
@@ -182,3 +184,17 @@ export const sendFilteredLinegraphData = async (data, startTime, endTime) => {
     throw error;
   }
 };
+
+// 클러스터링된 데이터를 가져오는 API 함수
+export async function fetchClusteredData() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/clustered-data`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch clustered data');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching clustered data:', error);
+    throw error;
+  }
+}
