@@ -1,49 +1,74 @@
-// client/src/components/clustercomponents/ClusteredData.js
-
 import React, { useEffect, useState } from 'react';
 import { Scatter } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 import { fetchClusteredData } from '../../api';
 
-// 필요한 차트 구성 요소를 등록
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const ClusteredDataVisualization = () => {
-  const [data, setData] = useState({
+  const [chartData, setChartData] = useState({
     datasets: [],
   });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetchClusteredData();
-        console.log("Response from fetchClusteredData: ", response);
-        let clusteredData = response.data; // 서버 응답에서 실제 데이터 접근 경로를 확인하고 수정해야 할 수 있음
+        const { data: clusteredData, centroids } = await fetchClusteredData();
+        console.log("centroids: ", centroids)
 
-        // clusteredData가 배열인지 확인하고, 배열이 아니라면 적절히 처리
-        if (!Array.isArray(clusteredData)) {
-          console.error("Fetched data is not an array:", clusteredData);
-          clusteredData = []; // 예시 처리: 데이터를 빈 배열로 설정
-        }
+        // 데이터셋을 클러스터 번호로 그룹화
+        const clusterGroups = clusteredData.reduce((groups, dataPoint) => {
+          groups[dataPoint.cluster] = groups[dataPoint.cluster] || [];
+          groups[dataPoint.cluster].push({
+            x: dataPoint.median,
+            y: parseFloat(dataPoint.dieNumber),
+          });
+          return groups;
+        }, {});
 
-        // 클러스터별로 데이터 그룹화
-        const clusters = {};
-        clusteredData.forEach(point => {
-          const { cluster, median, dieNumber } = point;
-          clusters[cluster] = clusters[cluster] || [];
-          clusters[cluster].push({ x: median, y: parseFloat(dieNumber) });
+        // 클러스터 데이터셋 생성
+        const datasets = Object.keys(clusterGroups).map(cluster => {
+          return {
+            label: `클러스터 ${cluster}`,
+            data: clusterGroups[cluster],
+            backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.5)`,
+          };
         });
 
-        // 각 클러스터에 대한 데이터셋 생성
-        const datasets = Object.keys(clusters).map(clusterId => ({
-          label: `Cluster ${clusterId}`,
-          data: clusters[clusterId],
-          backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.5)`,
-        }));
+        // 중심점 데이터셋 생성
+        if (centroids) {
+          datasets.push({
+            label: '중심점',
+            data: centroids.map(centroid => ({
+              x: centroid[0],
+              y: centroid[1],
+            })),
+            backgroundColor: 'red', // 중심점을 빨간색으로 표시
+            pointStyle: 'rectRot', // 중심점을 X 모양으로 표시
+            radius: 10, // 중심점의 크기 설정
+          });
+        }
 
-        setData({ datasets });
+        setChartData({ datasets });
       } catch (error) {
-        console.error("Error loading data: ", error);
+        console.error('데이터 로딩 실패:', error);
       }
     };
 
@@ -51,15 +76,26 @@ const ClusteredDataVisualization = () => {
   }, []);
 
   const options = {
+    responsive: true,
     scales: {
       x: {
         type: 'linear',
-        position: 'bottom',
-        title: { display: true, text: 'Median' },
+        title: {
+          display: true,
+          text: 'Median Temperature',
+        },
       },
       y: {
         type: 'linear',
-        title: { display: true, text: 'Die Number' },
+        title: {
+          display: true,
+          text: 'Die Number',
+        },
+      },
+    },
+    plugins: {
+      legend: {
+        position: 'top',
       },
     },
   };
@@ -67,7 +103,7 @@ const ClusteredDataVisualization = () => {
   return (
     <div>
       <h2>클러스터링 결과 시각화</h2>
-      <Scatter data={data} options={options} />
+      <Scatter data={chartData} options={options} />
     </div>
   );
 };
