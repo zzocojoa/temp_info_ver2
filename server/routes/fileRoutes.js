@@ -269,32 +269,52 @@ router.post('/calculate-median', (req, res) => {
 
 // 클러스터링된 데이터를 제공하는 엔드포인트
 router.post('/clustered-data', async (req, res) => {
-  const { dwNumber, k } = req.body; // 클라이언트로부터 dwNumber와 k 값을 받음
+  const { dwNumber, k } = req.body;
 
   try {
-    // 모든 파일 메타데이터를 조회하되, 특정 dwNumber에 해당하는 데이터만 필터링
+    if (typeof k !== 'number' || k <= 0) {
+      return res.status(400).json({ message: 'k는 양의 정수이며 데이터 포인트 수보다 작아야 합니다.' });
+    }
+
     const files = await FileMetadata.find({ "numbering.dwNumber": dwNumber });
 
+    if (!files || files.length === 0) {
+      return res.status(404).json({ message: '입력한 DW 번호에 해당하는 데이터가 없습니다.' });
+    }
+
+    // 클러스터링에 사용될 데이터를 추출 및 필터링하고 dieNumber 값이 있는지 확인
     const dataForClustering = files.map(file => ({
       median: file.boxplotStats.median,
       dieNumber: file.numbering.dieNumber,
-    })).filter(item => !isNaN(parseFloat(item.dieNumber)));
+    })).filter(item => {
+      const isValidMedian = !isNaN(parseFloat(item.median));
+      const hasDieNumber = item.dieNumber && item.dieNumber.trim() !== '';
+      if (!hasDieNumber) {
+        console.log(`Die number missing for median: ${item.median}`);
+      }
+      return isValidMedian && hasDieNumber;
+    });
 
-    // 클라이언트로부터 받은 k 값을 사용하여 클러스터링 수행
-    const { clusters, centroids } = await performClustering(dataForClustering, Number(k));
+    if (dataForClustering.length === 0) {
+      return res.status(400).json({ message: 'dieNumber에 대한 값이 없습니다.' });
+    }
 
-    // 클러스터링 결과와 centroids 정보를 클라이언트에 전송
+    if (k >= dataForClustering.length) {
+      return res.status(400).json({ message: `입력한 k 값 (${k})은 데이터 포인트의 수 (${dataForClustering.length})보다 작아야 합니다.` });
+    }
+
+    const { clusters, centroids } = await performClustering(dataForClustering, k);
+
     const clusteredData = clusters.map((clusterIdx, i) => ({
       cluster: clusterIdx,
       median: dataForClustering[i].median,
       dieNumber: dataForClustering[i].dieNumber,
     }));
 
-    // 성공 응답에 clusteredData와 centroids 포함하여 반환
     res.json({ success: true, data: clusteredData, centroids });
   } catch (error) {
-    console.error('Error fetching clustered data:', error);
-    res.status(500).send('Error fetching clustered data');
+    console.error('클러스터링 데이터 조회 중 오류 발생:', error);
+    res.status(500).json({ message: '클러스터링 작업을 수행하는 동안 서버에서 오류가 발생했습니다.' });
   }
 });
 

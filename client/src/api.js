@@ -186,30 +186,31 @@ export const sendFilteredLinegraphData = async (data, startTime, endTime) => {
 };
 
 // 클러스터링된 데이터를 가져오는 API 함수
+// client/src/api.js 내의 fetchClusteredData 함수 수정
 export async function fetchClusteredData(dwNumber, k) {
   try {
-    // 클라이언트에서 dwNumber와 k 값이 제공되었는지 확인, 해당 값이 있는 경우에만 body에 포함하여 요청을 전송
     const requestBody = dwNumber !== undefined && k !== undefined ? JSON.stringify({ dwNumber, k }) : null;
 
     const response = await fetch(`${API_BASE_URL}/clustered-data`, {
-      // 데이터를 서버로 전송하기 위해 메소드를 POST로 변경
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      // 사용자로부터 받은 dwNumber와 k 값을 요청 본문에 포함
       body: requestBody,
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch clustered data');
+      const errorResponse = await response.json(); // 서버로부터의 에러 메시지를 받습니다.
+      throw new Error(errorResponse.message || 'Failed to fetch clustered data'); // 에러 메시지를 사용하여 예외를 던집니다.
     }
     return await response.json();
   } catch (error) {
     console.error('Error fetching clustered data:', error);
-    throw error;
+    throw error; // 이제 여기서 던진 예외는 호출하는 측에서 처리합니다.
   }
 }
+
+
 
 // DW 번호 검색 API 함수
 export async function searchDwNumber(query) {

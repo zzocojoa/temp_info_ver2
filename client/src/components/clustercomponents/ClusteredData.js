@@ -12,7 +12,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { fetchClusteredData, fetchDataList, searchDwNumber } from '../../api';
+import { fetchClusteredData, searchDwNumber } from '../../api';
 import styles from './ClusteredData.module.css';
 
 ChartJS.register(
@@ -77,7 +77,7 @@ const ClusteredDataVisualization = () => {
       setShowSuggestions(true); // 항상 드롭다운을 보여줍니다.
     };
     loadSuggestions();
-  }, [dwNumber]); 
+  }, [dwNumber]);
 
   const validateInputs = () => {
     if (!dwNumber.trim() || k <= 0 || isNaN(k)) {
@@ -91,12 +91,21 @@ const ClusteredDataVisualization = () => {
     if (!validateInputs()) return;
 
     try {
-      const { data: clusteredData, centroids } = await fetchClusteredData(dwNumber, k);
+      const response = await fetchClusteredData(dwNumber, k);
+      // 서버로부터의 응답을 구조 분해 할당을 통해 분리합니다.
+      const { data: clusteredData, centroids, message } = await fetchClusteredData(dwNumber, k);
+    if (!clusteredData || !centroids) {
+      alert('데이터를 불러오는 데 실패했습니다.');
+      return;
+    }
+
+      // 클러스터링 데이터나 중심점 데이터가 없을 경우, 서버에서 전달한 메시지를 사용하여 사용자에게 알립니다.
       if (!clusteredData || !centroids) {
-        alert('데이터를 불러오는데 실패했습니다.');
+        alert(`데이터를 불러오는 데 실패했습니다: ${message}`);
         return;
       }
 
+      // 클러스터링 데이터를 기반으로 차트 데이터셋을 구성합니다.
       const clusterGroups = clusteredData.reduce((groups, dataPoint) => {
         const cluster = dataPoint.cluster;
         if (!groups[cluster]) groups[cluster] = [];
@@ -107,6 +116,7 @@ const ClusteredDataVisualization = () => {
         return groups;
       }, {});
 
+      // 차트에 표시할 데이터셋 배열을 구성합니다.
       const datasets = Object.entries(clusterGroups).map(([cluster, dataPoints]) => ({
         label: `Cluster ${cluster}`,
         data: dataPoints,
@@ -114,6 +124,7 @@ const ClusteredDataVisualization = () => {
         radius: 4,
       }));
 
+      // 중심점 데이터가 있을 경우, 해당 데이터를 차트 데이터셋에 추가합니다.
       if (centroids.length) {
         datasets.push({
           label: 'Centroids',
@@ -124,29 +135,36 @@ const ClusteredDataVisualization = () => {
         });
       }
 
+      // 구성된 데이터셋을 차트 데이터로 설정합니다.
       setChartData({ datasets });
     } catch (error) {
-      console.error('Failed to load clustered data:', error);
-      alert('데이터 로딩 중 에러가 발생했습니다.');
+      // 오류 발생 시, 서버로부터 받은 오류 메시지 또는 기본 오류 메시지를 사용하여 알립니다.
+      alert(error.message);
     }
-  };
+};
 
   const handleSuggestionClick = (suggestion) => {
-    setDwNumber(suggestion);
-    setShowSuggestions(false);
+    setDwNumber(suggestion); // 사용자가 선택한 값으로 dwNumber 상태 업데이트
+    setTimeout(() => setShowSuggestions(false), 100); // 드롭다운 리스트를 숨김
   };
+
+// 입력 필드의 onBlur 이벤트 핸들러
+const handleBlur = () => {
+  // onBlur 이벤트가 너무 빠르게 발생하여 onClick 이벤트를 방해하지 않도록 setTimeout 사용
+  setTimeout(() => setShowSuggestions(false), 100);
+};
 
   return (
     <div className={styles['clusterWrap']}>
       <div className={styles['clusterContainer']}>
         <div className={styles['clusterInputBox']}>
-          <input
+        <input
             type="text"
             placeholder="Enter DW Number"
             value={dwNumber}
             onChange={(e) => setDwNumber(e.target.value)}
             onFocus={() => setShowSuggestions(true)}
-            onBlur={() => setShowSuggestions(false)}
+            onBlur={handleBlur}
           />
           {showSuggestions && suggestions.length > 0 && (
             <ul className={styles['suggestions']}>
