@@ -1,9 +1,8 @@
-
+/* client\src\components\clustercomponents\ClusteredData.module.css */
 
 .clusterWrap {
   margin-top: 80px;
   margin-bottom: 80px;
-
 }
 
 .clusterContainer {
@@ -15,4 +14,22 @@
   align-content: center;
   justify-content: center;
   align-items: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.suggestions {
+  max-height: 152px;
+  /* 최대 높이 설정 */
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0;
+  list-style: none;
+  position: absolute;
+  width: 100%;
+  z-index: 1000;
+}
+
+.suggestions li {
+  cursor: pointer;
 }

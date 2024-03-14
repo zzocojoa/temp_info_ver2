@@ -84,14 +84,17 @@
 .banner-icons li {
     padding: 8px 12px;
     font-size: 30px;
+    display: flex;
 }
 
+
+
 .developer-icon {
-    width: 1.5rem;
+    width: 2.1rem;
     filter: drop-shadow(10px 7px 10px #d49466);
     transition: transform 0.3s ease-in-out;
 }
 
 .developer-icon:hover {
-    transform: scale(1.2);
+    transform: scale(1.3);
 }

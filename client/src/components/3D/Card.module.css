@@ -79,10 +79,14 @@
   display: inline-block;
 }
 
+.imgContainer {
+  display: flex;
+  gap: 3px;
+}
+
 .developer-icon {
-  width: 1.5rem;
+  width: 2rem;
   filter: drop-shadow(10px 7px 10px #d49466);
-  margin-right: 3px;
 }
 
 .titleName {

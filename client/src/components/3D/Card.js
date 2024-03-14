@@ -100,6 +100,8 @@ function Card({ selectedImage }) {
         };
     }, []);
 
+    const cacheBustingUrl = `${process.env.PUBLIC_URL}/images/hoihou-icon-1.png?${new Date().getTime()}`;
+
     // 카드 컴포넌트 렌더링
     return (
         <div className={styles["cardWrap"]}>
@@ -108,9 +110,8 @@ function Card({ selectedImage }) {
                 <img src={selectedImage} alt="Developer Jeong-Hyeon Oh's Profile" className={styles["imageTitle"]} />
                 <div className={styles["titleWrap"]}>
                     <div className={styles["imgContainer"]}>
-                        <img className={styles['developer-icon']} src={`${process.env.PUBLIC_URL}/images/Beatlefeed_2.png`} alt="logo" />
+                        <img className={styles['developer-icon']} src={cacheBustingUrl} alt="logo" />
                         <span className={styles["titleName"]}>Developer</span><br></br>
-
                     </div>
                     <div className={styles["textContainer"]}>
                         <span>Jeong-Hyeon Oh</span>

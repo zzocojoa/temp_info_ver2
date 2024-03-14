@@ -12,7 +12,7 @@ import Footer from './components/Footer';
 import './App.css';
 
 function App() {
-  const profileImage = process.env.PUBLIC_URL + "/images/jeonghyeon.jpg";
+  const profileImage = process.env.PUBLIC_URL + "/images/jeonghyeon-1.jpg";
   return (
     <Router>
       <Banner />

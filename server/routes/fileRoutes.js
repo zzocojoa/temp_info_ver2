@@ -268,16 +268,20 @@ router.post('/calculate-median', (req, res) => {
 });
 
 // 클러스터링된 데이터를 제공하는 엔드포인트
-router.get('/clustered-data', async (req, res) => {
+router.post('/clustered-data', async (req, res) => {
+  const { dwNumber, k } = req.body; // 클라이언트로부터 dwNumber와 k 값을 받음
+
   try {
-    const files = await FileMetadata.find({});
+    // 모든 파일 메타데이터를 조회하되, 특정 dwNumber에 해당하는 데이터만 필터링
+    const files = await FileMetadata.find({ "numbering.dwNumber": dwNumber });
+
     const dataForClustering = files.map(file => ({
       median: file.boxplotStats.median,
       dieNumber: file.numbering.dieNumber,
     })).filter(item => !isNaN(parseFloat(item.dieNumber)));
 
-    const k = 3; // 예시로 클러스터의 수를 3으로 설정
-    const { clusters, centroids } = await performClustering(dataForClustering, k);
+    // 클라이언트로부터 받은 k 값을 사용하여 클러스터링 수행
+    const { clusters, centroids } = await performClustering(dataForClustering, Number(k));
 
     // 클러스터링 결과와 centroids 정보를 클라이언트에 전송
     const clusteredData = clusters.map((clusterIdx, i) => ({
@@ -286,11 +290,36 @@ router.get('/clustered-data', async (req, res) => {
       dieNumber: dataForClustering[i].dieNumber,
     }));
 
-    // 성공 응답에 clusteredData와 centroids 포함
+    // 성공 응답에 clusteredData와 centroids 포함하여 반환
     res.json({ success: true, data: clusteredData, centroids });
   } catch (error) {
     console.error('Error fetching clustered data:', error);
     res.status(500).send('Error fetching clustered data');
+  }
+});
+
+// cluster dwnumber search endpoint
+router.get('/search-dw', async (req, res) => {
+  const searchQuery = req.query.q;
+  try {
+    // 검색 쿼리가 없는 경우 빈 배열을 반환하여 아무런 결과도 표시하지 않습니다.
+    if (!searchQuery) {
+      return res.json([]);
+    }
+
+    // 검색 쿼리에 맞는 모든 파일 메타데이터를 조회합니다.
+    const results = await FileMetadata.find({
+      'numbering.dwNumber': { $regex: searchQuery, $options: 'i' }
+    }, 'numbering.dwNumber');
+
+    // 조회된 결과에서 중복된 dwNumber를 제거합니다.
+    const uniqueResults = Array.from(new Set(results.map(result => result.numbering.dwNumber)));
+
+    // 최종적으로 중복이 제거된 dwNumber 목록을 클라이언트에 반환합니다.
+    res.json(uniqueResults.slice(0, 10)); // 결과를 최대 10개까지 제한합니다.
+  } catch (error) {
+    console.error('DW 번호 검색 중 오류 발생:', error);
+    res.status(500).json({ message: '서버에서 DW 번호 검색 중 오류가 발생했습니다.' });
   }
 });
 

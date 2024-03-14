@@ -51,7 +51,7 @@ function Banner() {
                     <ul className={styles['banner-icons']}>
                         <li><FontAwesomeIcon icon={faFacebookSquare} /></li>
                         <li onClick={() => navigateTo('/Card')} style={{ cursor: 'pointer' }}>
-                            <img className={styles['developer-icon']} src={`${process.env.PUBLIC_URL}/images/Beatlefeed.png`} alt="logo" />
+                            <img className={styles['developer-icon']} src={`${process.env.PUBLIC_URL}/images/hoihou-icon-1.png`} alt="logo" />
                             {/* <FontAwesomeIcon icon={faInstagramSquare} /> */}
                         </li>
                     </ul>

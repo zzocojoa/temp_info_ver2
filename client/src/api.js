@@ -186,15 +186,42 @@ export const sendFilteredLinegraphData = async (data, startTime, endTime) => {
 };
 
 // 클러스터링된 데이터를 가져오는 API 함수
-export async function fetchClusteredData() {
+export async function fetchClusteredData(dwNumber, k) {
   try {
-    const response = await fetch(`${API_BASE_URL}/clustered-data`);
+    // 클라이언트에서 dwNumber와 k 값이 제공되었는지 확인, 해당 값이 있는 경우에만 body에 포함하여 요청을 전송
+    const requestBody = dwNumber !== undefined && k !== undefined ? JSON.stringify({ dwNumber, k }) : null;
+
+    const response = await fetch(`${API_BASE_URL}/clustered-data`, {
+      // 데이터를 서버로 전송하기 위해 메소드를 POST로 변경
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // 사용자로부터 받은 dwNumber와 k 값을 요청 본문에 포함
+      body: requestBody,
+    });
+
     if (!response.ok) {
       throw new Error('Failed to fetch clustered data');
     }
     return await response.json();
   } catch (error) {
     console.error('Error fetching clustered data:', error);
+    throw error;
+  }
+}
+
+// DW 번호 검색 API 함수
+export async function searchDwNumber(query) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/search-dw?q=${encodeURIComponent(query || '')}`); // 빈 쿼리에 대해 모든 DW 번호 검색을 허용
+    if (!response.ok) {
+      throw new Error('Failed to fetch DW number suggestions');
+    }
+    const dwNumbers = await response.json();
+    return dwNumbers;
+  } catch (error) {
+    console.error('Error searching DW numbers:', error);
     throw error;
   }
 }
