@@ -200,7 +200,7 @@ function DataListUI() {
         </div>
       </div>
       <div className={styles['DataListContainer']}>
-        <List className={` ${styles['scroll']} ${styles['scroll-css']}`}
+        <List className={`${styles['scroll']} ${styles['scroll-css']}`}
           height={400} // 적절한 높이 설정
           itemCount={filteredDataList.length}
           itemSize={30} // 아이템의 높이
