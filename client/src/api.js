@@ -5,13 +5,13 @@ const API_BASE_URL = 'http://localhost:5000/api';
 function createFetchRequest(method, body = null) {
   const headers = new Headers();
   headers.append('Content-Type', 'application/json');
-  headers.append('Cache-Control', 'no-cache'); // 캐시를 사용하지 않도록 설정합니다.
+  headers.append('Cache-Control', 'no-cache');
 
   const requestInit = {
     method,
     headers,
     body: body ? JSON.stringify(body) : null,
-    cache: 'no-cache', // 브라우저가 캐시를 사용하지 않도록 설정합니다.
+    cache: 'no-cache',
   };
 
   return requestInit;
@@ -26,18 +26,17 @@ export async function uploadFile(file) {
     const response = await fetch(`${API_BASE_URL}/upload`, {
       method: 'POST',
       body: formData,
-      // 'Content-Type': 'multipart/form-data'는 자동으로 설정되므로 명시하지 않아도 됩니다.
-      cache: 'no-cache', // 브라우저가 캐시를 사용하지 않도록 설정합니다.
+      cache: 'no-cache',
     });
     if (!response.ok) {
       throw new Error('Server responded with an error');
     }
     const { data: averagedData, boxplotStats, temperatureValues } = await response.json();
     console.log("boxplotStats: ", boxplotStats);
-    return { averagedData, boxplotStats, temperatureValues }; // 업로드 결과 반환
+    return { averagedData, boxplotStats, temperatureValues };
   } catch (error) {
     console.error('Error uploading file:', error);
-    throw error; // 에러를 throw하여 호출한 곳에서 처리할 수 있도록 합니다.
+    throw error;
   }
 }
 

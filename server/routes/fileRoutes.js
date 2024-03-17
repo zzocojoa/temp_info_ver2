@@ -184,10 +184,12 @@ router.patch('/data/:id', async (req, res) => {
 // 데이터 리스트 조회 
 router.get('/data-list', async (req, res) => {
   try {
-    const dataList = await FileMetadata.find({}); // 모든 데이터 리스트 조회console.log
-    res.json(dataList); // 클라이언트에 데이터 리스트 응답
+    const dataList = await FileMetadata.find({});
+    // 데이터가 자주 변경되지 않을 경우 캐시 허용 (예: 60초)
+    res.set('Cache-Control', 'public, max-age=60');
+    res.json(dataList);
   } catch (error) {
-    console.error('Error fetching data list:', error); // 에러 로깅
+    console.error('Error fetching data list:', error);
     res.status(500).send('Error fetching data list');
   }
 });
@@ -212,15 +214,17 @@ router.get('/data/:id', async (req, res) => {
 router.delete('/data/:id', async (req, res) => {
   try {
     const id = req.params.id;
-    const deletedItem = await FileMetadata.findByIdAndDelete(id); // 데이터 삭제
-
+    const deletedItem = await FileMetadata.findByIdAndDelete(id);
+    
     if (!deletedItem) {
+      console.log(`Data with id ${id} not found for deletion.`);
       return res.status(404).send({ message: 'Data not found' });
     }
 
-    res.send({ message: 'Data successfully removed' }); // 성공 메시지 반환
+    console.log(`Data with id ${id} successfully deleted.`);
+    res.send({ message: 'Data successfully removed' });
   } catch (error) {
-    console.error('Error removing data:', error);
+    console.error(`Error removing data with id ${req.params.id}:`, error);
     res.status(500).send('Internal server error');
   }
 });

@@ -15,7 +15,7 @@ function UploadDataButton({ selectedFile, onUploadSuccess, isEnabled }) {
       return;
     }
 
-    setIsLoading(true); // 업로드 시작 시 로딩 상태를 true로 설정
+    setIsLoading(true);
 
     try {
       // API를 호출하여 파일 업로드
@@ -26,13 +26,11 @@ function UploadDataButton({ selectedFile, onUploadSuccess, isEnabled }) {
         const startTime = averagedData[0]?.time || '';
         const endTime = averagedData[averagedData.length - 1]?.time || '';
         onUploadSuccess(averagedData, boxplotStats, selectedFile.name, startTime, endTime);
-        // alert('File uploaded successfully!');
       } else {
-        // 서버 응답이 없거나 업로드 실패 시
         alert('Failed to upload file.');
       }
     } catch (error) {
-      setIsLoading(false); // 오류 발생 시 로딩 상태를 false로 설정
+      setIsLoading(false);
       console.error('Error uploading file:', error);
       alert('Error uploading file.');
     }
@@ -41,7 +39,7 @@ function UploadDataButton({ selectedFile, onUploadSuccess, isEnabled }) {
   return (
     <>
       {isLoading ? (
-        <Loader /> // 로딩 중인 경우 로딩 인디케이터(스피너 등)를 표시
+        <Loader />
       ) : (
         <button className={styles['UploadDataButton']} onClick={handleUpload} disabled={!isEnabled || isLoading}>
           그래프 생성
