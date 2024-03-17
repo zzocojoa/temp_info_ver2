@@ -8,6 +8,7 @@ import ViewDataPage from './components/tempgraph/pages/ViewDataPage';
 import LineBarPage from './components/line_box/pages/LineBarPage';
 import AnalysisPage from './components/clustercomponents/pages/analysisPage';
 import ClusteredDataVisualization from './components/clustercomponents/ClusteredData';
+import DieTemperatureProfileChart from './components/clustercomponents/DieTempProfile';
 import Card from './components/3D/Card'
 import Footer from './components/Footer';
 import './App.css';
@@ -24,6 +25,7 @@ function App() {
         <Route path="/line-bar" element={<LineBarPage />} />
         <Route path="/Analysis-page" element={<AnalysisPage />} />
         <Route path="/cluster-data" element={<ClusteredDataVisualization />} />
+        <Route path="/dietemp-data" element={<DieTemperatureProfileChart />} />
         <Route path="/Card" element={<Card selectedImage={profileImage} />} />
       </Routes>
       <Footer />

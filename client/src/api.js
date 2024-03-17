@@ -210,8 +210,6 @@ export async function fetchClusteredData(dwNumber, k) {
   }
 }
 
-
-
 // DW 번호 검색 API 함수
 export async function searchDwNumber(query) {
   try {
@@ -223,6 +221,21 @@ export async function searchDwNumber(query) {
     return dwNumbers;
   } catch (error) {
     console.error('Error searching DW numbers:', error);
+    throw error;
+  }
+}
+
+// 다이별 온도 프로필 데이터 제공
+export async function fetchDieTemperatureProfile() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/die-temperature-profile`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch die temperature profile');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching die temperature profile:', error);
     throw error;
   }
 }

@@ -30,16 +30,14 @@ const DwNumberSelector = ({ dwNumbers, selectedDwNumbers, setSelectedDwNumbers }
                 <div className={styles['searchWrap']}>
                     <span className={styles['searchText']}><FontAwesomeIcon icon={faSearch} /></span>
                     <input
+                        className={styles['searchContainer']}
                         type="text"
                         placeholder="Search DW..."
                         value={searchTerm}
                         onChange={handleSearchChange}
-                        className={styles['searchContainer']}
                     />
                 </div>
-            </div>
-            <div className={styles['DwNumberButtonWrap']}>
-                <div className={styles['DwNumberButtonContainer']}>
+                <div className={styles['DwNumberButtonWrap']}>
                     {filteredDwNumbers.map((dwNumber, index) => (
                         <button
                             className={`${styles['DwNumberButton']} ${selectedDwNumbers.includes(dwNumber) ? styles['selectedDwNumberButton'] : ''}`}

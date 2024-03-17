@@ -1,17 +1,17 @@
 /* client\src\components\line_box\LineBarChartlogic\LineBarChartLogic.module.css */
 
+.selectorContainer {
+    /* padding-top: 80px; */
+    display: flex;
+}
+
 .DwNumberSelectorBox {
     background-color: #263343;
-    width: 11rem;
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    z-index: 1;
+    height: 56rem;
 }
 
 .SelectedDwCharts {
+    width: 100%;
     margin-top: 70px;
-    margin-left: 11rem;
     margin-bottom: 80px;
 }

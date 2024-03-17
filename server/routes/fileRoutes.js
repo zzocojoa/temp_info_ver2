@@ -322,25 +322,60 @@ router.post('/clustered-data', async (req, res) => {
 router.get('/search-dw', async (req, res) => {
   const searchQuery = req.query.q;
   try {
-    // 검색 쿼리가 없는 경우 빈 배열을 반환하여 아무런 결과도 표시하지 않습니다.
     if (!searchQuery) {
       return res.json([]);
     }
 
-    // 검색 쿼리에 맞는 모든 파일 메타데이터를 조회합니다.
     const results = await FileMetadata.find({
       'numbering.dwNumber': { $regex: searchQuery, $options: 'i' }
     }, 'numbering.dwNumber');
 
-    // 조회된 결과에서 중복된 dwNumber를 제거합니다.
+    // 조회된 결과에서 중복된 dwNumber를 제거
     const uniqueResults = Array.from(new Set(results.map(result => result.numbering.dwNumber)));
 
-    // 최종적으로 중복이 제거된 dwNumber 목록을 클라이언트에 반환합니다.
-    res.json(uniqueResults.slice(0, 10)); // 결과를 최대 10개까지 제한합니다.
+    // 중복이 제거된 dwNumber 목록을 클라이언트에 반환
+    res.json(uniqueResults.slice(0, 10));
   } catch (error) {
     console.error('DW 번호 검색 중 오류 발생:', error);
     res.status(500).json({ message: '서버에서 DW 번호 검색 중 오류가 발생했습니다.' });
   }
 });
+
+// 다이별 온도 프로필 데이터 제공
+router.get('/die-temperature-profile', async (req, res) => {
+  try {
+    const allData = await FileMetadata.find({});
+    const aggregatedData = {};
+
+    allData.forEach(entry => {
+      const dieNumber = entry.numbering.dieNumber;
+      if (!aggregatedData[dieNumber]) {
+        aggregatedData[dieNumber] = { min: [], median: [], max: [] };
+      }
+
+      entry.temperatureData.forEach(data => {
+        aggregatedData[dieNumber].min.push(data.temperature);
+        aggregatedData[dieNumber].median.push(data.temperature);
+        aggregatedData[dieNumber].max.push(data.temperature);
+      });
+    });
+
+    const result = Object.keys(aggregatedData).map(dieNumber => {
+      const min = Math.min(...aggregatedData[dieNumber].min);
+      const median = aggregatedData[dieNumber].median.sort((a, b) => a - b)[Math.floor(aggregatedData[dieNumber].median.length / 2)];
+      const max = Math.max(...aggregatedData[dieNumber].max);
+
+      return { dieNumber, min, median, max };
+    });
+    console.log("result: ", result)
+
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching die temperature profile:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
 
 module.exports = router;

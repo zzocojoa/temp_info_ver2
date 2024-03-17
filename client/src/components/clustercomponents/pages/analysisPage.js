@@ -14,6 +14,10 @@ const AnalysisPage = () => {
         navigate('/cluster-data');
     };
 
+    const DieTemperatureProfileChart = () => {
+        navigate('/dietemp-data');
+    };
+
     const cluster_img = process.env.PUBLIC_URL + "/images/cluster.png";
 
     return (
@@ -35,7 +39,7 @@ const AnalysisPage = () => {
                         <i><FontAwesomeIcon icon={faChartLine} /></i>
                     </div>
                     <figure className={styles['back']}>
-                        <img src={cluster_img} alt="cluster_img" className={styles['analysisData']} onClick={goToClusteredDataPage}></img>
+                        <img src={cluster_img} alt="cluster_img" className={styles['analysisData']} onClick={DieTemperatureProfileChart}></img>
                     </figure>
                 </div>
                 <div className={styles['analysisBox']}>
