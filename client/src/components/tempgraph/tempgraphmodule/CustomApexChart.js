@@ -1,4 +1,4 @@
-// src/components/CustomApexChart.js
+// client/src/components/tempgraph/tempgraphmodule/CustomApexChart.js
 
 import React from 'react';
 import ReactApexChart from 'react-apexcharts';

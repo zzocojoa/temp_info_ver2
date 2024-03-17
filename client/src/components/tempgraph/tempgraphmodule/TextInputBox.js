@@ -1,4 +1,4 @@
-// src/components/TextInputBox.js
+// client/src/components/tempgraph/tempgraphmodule/TextInputBox.js
 
 import React from 'react';
 import styles from './TextInputBox.module.css';

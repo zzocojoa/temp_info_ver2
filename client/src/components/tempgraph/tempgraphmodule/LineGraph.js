@@ -52,15 +52,23 @@ const LineGraph = React.memo(({
   const temperatureFormatter = useCallback((value) => `${value.toFixed(2)}°C`, []);
 
   // useCalculateMedian 커스텀 훅을 사용하여 중앙값 계산 최적화
-  useEffect(() => {
-    const fetchMedian = async () => {
-      const temperatures = averagedData.map(item => item.temperature);
-      const median = await calculateMedian(temperatures); // Call the API to calculate median
+  const fetchMedian = useCallback(async (averagedData) => {
+    const temperatures = averagedData.map(item => item.temperature);
+    try {
+      const median = await calculateMedian(temperatures);
       setMedianValue(median);
-    };
+    } catch (error) {
+      console.error('Error calculating median:', error);
+      // 에러 처리 로직을 추가하거나, 상태를 업데이트하지 않습니다.
+    }
+  }, []);
 
-    fetchMedian();
-  }, [averagedData]);
+  // 로드된 데이터에 대한 중앙값을 계산합니다.
+  useEffect(() => {
+    if (averagedData.length > 0) {
+      fetchMedian(averagedData);
+    }
+  }, [averagedData, fetchMedian]);
 
   return (
     <>

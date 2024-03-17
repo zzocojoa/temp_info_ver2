@@ -1,0 +1,10 @@
+/* client/src/components/clustercomponents/DieTempProfile.module.css */
+
+.DieTempProfileWrap {
+  margin: 0 auto;
+  width: 80%;
+}
+
+.DieTempProfileContainer {
+  margin-top: 80px;
+}

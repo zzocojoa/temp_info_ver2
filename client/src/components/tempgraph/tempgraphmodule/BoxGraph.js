@@ -1,4 +1,4 @@
-// src/components/BoxGraph.js
+// client/src/components/tempgraph/tempgraphmodule/BoxGraph.js
 
 import React from 'react';
 import CustomApexChart from './CustomApexChart'; // 차트 컴포넌트

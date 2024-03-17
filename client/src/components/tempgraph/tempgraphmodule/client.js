@@ -1,230 +1,54 @@
 // ```
-// // client\src\pages\ViewDataPage.js
+// // client/src/components/tempgraph/tempgraphmodule/BoxGraph.js
 
-// import React, { useEffect, useState } from 'react';
-// import { useLocation } from 'react-router-dom';
-// import LineGraph from '../tempgraphmodule/LineGraph';
-// import BoxGraph from '../tempgraphmodule/BoxGraph';
-// import DataListUI from '../tempgraphmodule/DataListUI';
-// import TextInputBox from '../tempgraphmodule/TextInputBox';
-// import { fetchDataDetails, updateData } from '../../../api';
-// import styles from './GraphData.module.css'
+// import React from 'react';
+// import CustomApexChart from './CustomApexChart'; // 차트 컴포넌트
+// import StatisticsTable from './StatisticsTable'; // 통계 테이블 컴포넌트
+// import styles from './BoxGraph.module.css';
 
-// function ViewDataPage() {
-//   const location = useLocation();
-//   const { selectedItems } = location.state || {};
-//   const [graphData, setGraphData] = useState([]);
-//   const [boxPlotData, setBoxPlotData] = useState([]);
-//   const [userInput, setUserInput] = useState('');
-//   const [startTime, setstartTime] = useState('');
-//   const [endTime, setendTime] = useState('');
-//   const [details, setDetails] = useState({
-//     countNumber: '',
-//     wNumber: '',
-//     dwNumber: '',
-//     dieNumber: '',
-//   });
-
-//   useEffect(() => {
-//     const fetchDetails = async () => {
-//       if (selectedItems && selectedItems.length > 0) {
-//         const detailsPromises = selectedItems.map(id => fetchDataDetails(id));
-//         const results = await Promise.all(detailsPromises);
-//         // MongoDB 스키마에 따라 수정된 데이터 접근 로직
-//         const allGraphData = results.flatMap(detail => detail.temperatureData || []);
-//         const allBoxPlotData = results.map(detail => detail.boxplotStats).filter(data => data);
-//         // 사용자 입력 데이터 처리를 위해 첫 번째 선택된 항목의 userInput을 사용
-//         const firstUserInput = results[0]?.userInput || '';
-//         const firstItemDetails = results[0]?.numbering || {};
-//         const { countNumber, wNumber, dwNumber, dieNumber } = firstItemDetails;
-//         const setInitialStartTime = results[0]?.startTime || '';
-//         const setInitialEndTime = results[0]?.endTime || '';
-
-//         // 상태에 Die_Number, DW_Number, W_Number 저장
-//         setDetails({ countNumber, wNumber, dwNumber, dieNumber });
-//         setGraphData(allGraphData);
-//         setBoxPlotData(allBoxPlotData);
-//         setUserInput(firstUserInput);
-//         setstartTime(setInitialStartTime);
-//         setendTime(setInitialEndTime);
-//       }
-//     };
-
-//     fetchDetails();
-//   }, [selectedItems]);
-
-//   // textBox Update logic
-//   const handleSaveData = async () => {
-//     if (selectedItems && selectedItems.length > 0) {
-//       const itemId = selectedItems[0];
-//       try {
-//         // 수정된 userInput을 서버에 업데이트
-//         await updateData(itemId, { userInput });
-//         alert('데이터가 성공적으로 업데이트 되었습니다.');
-//       } catch (error) {
-//         console.error('데이터 업데이트 실패:', error);
-//         alert('데이터 업데이트에 실패했습니다.');
-//       }
-//     }
+// const BoxGraph = ({ boxplotStats }) => {
+//   const chartOptions = {
+//     chart: { type: 'boxPlot', height: 350 },
+//     title: { text: 'Temperature Box Plot', align: 'left' },
+//     xaxis: { categories: ['Temperature'] },
+//     yaxis: { labels: { formatter: (val) => val.toFixed(0) }, title: { text: 'Temperature (°C)' } },
+//     plotOptions: { boxPlot: { colors: { upper: '#5C4742', lower: '#A5978B' } } }
 //   };
+
+//   const chartSeries = [{
+//     name: 'Temperature',
+//     data: [{
+//       x: 'Temperature Distribution',
+//       y: [boxplotStats.min, boxplotStats.q1, boxplotStats.median, boxplotStats.q3, boxplotStats.max, ...boxplotStats.outliers]
+//     }]
+//   }];
 
 //   return (
 //     <div className={styles['graphDataWrap']}>
-//       <div className={styles['graphDataContainer']}>
-//         <div className={styles['leftPanel']}>
-//           <h2 className={styles['headerTitle']}>Graph Data Visualization</h2>
-//           {graphData.length > 0 ? (
-//             <LineGraph
-//               averagedData={graphData}
-//               countNumber={details.countNumber}
-//               wNumber={details.wNumber}
-//               dwNumber={details.dwNumber}
-//               dieNumber={details.dieNumber}
-//               onDetailsChange={(key, value) => setDetails(prev => ({ ...prev, [key]: value }))}
-//               onBrushChange={() => { }}
-//               initialStartTime={startTime}
-//               initialEndTime={endTime}
-//             />
-//           ) : (
-//             <p>Line graph 데이터를 불러오는 중...</p>
-//           )}
-//           {boxPlotData.length > 0 ? (
-//             boxPlotData.map((data, index) => <BoxGraph key={index} boxplotStats={data} />)
-//           ) : (
-//             <p>Box plot graph 데이터를 불러오는 중...</p>
-//           )}
-//         </div>
-//         <div className={styles['rightPanel']}>
-//           <DataListUI />
-//           <TextInputBox
-//             // className={styles['textBox']}
-//             value={userInput}
-//             onTextChange={setUserInput}
-//             onSave={handleSaveData}
-//             showSaveButton={true}
-//           />
-//         </div>
+//       <div className={styles['graphDataSVG']}>
+//         <CustomApexChart options={chartOptions} series={chartSeries} />
+//       </div>
+//       <div className={styles['graphDataTable']}>
+//         <StatisticsTable stats={boxplotStats} />
 //       </div>
 //     </div>
 //   );
-// }
+// };
 
-// export default ViewDataPage;
+// export default BoxGraph;
 
 // ```
 // ```
-// // client\src\pages\ViewDataPage.js
+// // client/src/components/tempgraph/tempgraphmodule/CustomApexChart.js
 
-// import React, { useEffect, useState } from 'react';
-// import { useLocation } from 'react-router-dom';
-// import LineGraph from '../tempgraphmodule/LineGraph';
-// import BoxGraph from '../tempgraphmodule/BoxGraph';
-// import DataListUI from '../tempgraphmodule/DataListUI';
-// import TextInputBox from '../tempgraphmodule/TextInputBox';
-// import { fetchDataDetails, updateData } from '../../../api';
-// import styles from './GraphData.module.css'
+// import React from 'react';
+// import ReactApexChart from 'react-apexcharts';
 
-// function ViewDataPage() {
-//   const location = useLocation();
-//   const { selectedItems } = location.state || {};
-//   const [graphData, setGraphData] = useState([]);
-//   const [boxPlotData, setBoxPlotData] = useState([]);
-//   const [userInput, setUserInput] = useState('');
-//   const [startTime, setstartTime] = useState('');
-//   const [endTime, setendTime] = useState('');
-//   const [details, setDetails] = useState({
-//     countNumber: '',
-//     wNumber: '',
-//     dwNumber: '',
-//     dieNumber: '',
-//   });
+// const CustomApexChart = ({ options, series }) => {
+// return <ReactApexChart options={options} series={series} type="boxPlot" width={320} height={320} />;
+// };
 
-//   useEffect(() => {
-//     const fetchDetails = async () => {
-//       if (selectedItems && selectedItems.length > 0) {
-//         const detailsPromises = selectedItems.map(id => fetchDataDetails(id));
-//         const results = await Promise.all(detailsPromises);
-//         // MongoDB 스키마에 따라 수정된 데이터 접근 로직
-//         const allGraphData = results.flatMap(detail => detail.temperatureData || []);
-//         const allBoxPlotData = results.map(detail => detail.boxplotStats).filter(data => data);
-//         // 사용자 입력 데이터 처리를 위해 첫 번째 선택된 항목의 userInput을 사용
-//         const firstUserInput = results[0]?.userInput || '';
-//         const firstItemDetails = results[0]?.numbering || {};
-//         const { countNumber, wNumber, dwNumber, dieNumber } = firstItemDetails;
-//         const setInitialStartTime = results[0]?.startTime || '';
-//         const setInitialEndTime = results[0]?.endTime || '';
-
-//         // 상태에 Die_Number, DW_Number, W_Number 저장
-//         setDetails({ countNumber, wNumber, dwNumber, dieNumber });
-//         setGraphData(allGraphData);
-//         setBoxPlotData(allBoxPlotData);
-//         setUserInput(firstUserInput);
-//         setstartTime(setInitialStartTime);
-//         setendTime(setInitialEndTime);
-//       }
-//     };
-
-//     fetchDetails();
-//   }, [selectedItems]);
-
-//   // textBox Update logic
-//   const handleSaveData = async () => {
-//     if (selectedItems && selectedItems.length > 0) {
-//       const itemId = selectedItems[0];
-//       try {
-//         // 수정된 userInput을 서버에 업데이트
-//         await updateData(itemId, { userInput });
-//         alert('데이터가 성공적으로 업데이트 되었습니다.');
-//       } catch (error) {
-//         console.error('데이터 업데이트 실패:', error);
-//         alert('데이터 업데이트에 실패했습니다.');
-//       }
-//     }
-//   };
-
-//   return (
-//     <div className={styles['graphDataWrap']}>
-//       <div className={styles['graphDataContainer']}>
-//         <div className={styles['leftPanel']}>
-//           <h2 className={styles['headerTitle']}>Graph Data Visualization</h2>
-//           {graphData.length > 0 ? (
-//             <LineGraph
-//               averagedData={graphData}
-//               countNumber={details.countNumber}
-//               wNumber={details.wNumber}
-//               dwNumber={details.dwNumber}
-//               dieNumber={details.dieNumber}
-//               onDetailsChange={(key, value) => setDetails(prev => ({ ...prev, [key]: value }))}
-//               onBrushChange={() => { }}
-//               initialStartTime={startTime}
-//               initialEndTime={endTime}
-//             />
-//           ) : (
-//             <p>Line graph 데이터를 불러오는 중...</p>
-//           )}
-//           {boxPlotData.length > 0 ? (
-//             boxPlotData.map((data, index) => <BoxGraph key={index} boxplotStats={data} />)
-//           ) : (
-//             <p>Box plot graph 데이터를 불러오는 중...</p>
-//           )}
-//         </div>
-//         <div className={styles['rightPanel']}>
-//           <DataListUI />
-//           <TextInputBox
-//             // className={styles['textBox']}
-//             value={userInput}
-//             onTextChange={setUserInput}
-//             onSave={handleSaveData}
-//             showSaveButton={true}
-//           />
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default ViewDataPage;
-
+// export default CustomApexChart;
 // ```
 // ```
 // // client/src/components/tempgraph/tempgraphmodule/DataListUI.js
@@ -429,7 +253,7 @@
 //         </div>
 //       </div>
 //       <div className={styles['DataListContainer']}>
-//         <List className={` ${styles['scroll']} ${styles['scroll-css']}`}
+//         <List className={`${styles['scroll']} ${styles['scroll-css']}`}
 //           height={400} // 적절한 높이 설정
 //           itemCount={filteredDataList.length}
 //           itemSize={30} // 아이템의 높이
@@ -461,268 +285,7 @@
 
 // ```
 // ```
-// // src/components/CustomApexChart.js
-
-// import React from 'react';
-// import ReactApexChart from 'react-apexcharts';
-
-// const CustomApexChart = ({ options, series }) => {
-// return <ReactApexChart options={options} series={series} type="boxPlot" width={320} height={320} />;
-// };
-
-// export default CustomApexChart;
-// ```
-// ```
-// // src/components/BoxGraph.js
-
-// import React from 'react';
-// import CustomApexChart from './CustomApexChart'; // 차트 컴포넌트
-// import StatisticsTable from './StatisticsTable'; // 통계 테이블 컴포넌트
-// import styles from './BoxGraph.module.css';
-
-// const BoxGraph = ({ boxplotStats }) => {
-//   const chartOptions = {
-//     chart: { type: 'boxPlot', height: 350 },
-//     title: { text: 'Temperature Box Plot', align: 'left' },
-//     xaxis: { categories: ['Temperature'] },
-//     yaxis: { labels: { formatter: (val) => val.toFixed(0) }, title: { text: 'Temperature (°C)' } },
-//     plotOptions: { boxPlot: { colors: { upper: '#5C4742', lower: '#A5978B' } } }
-//   };
-
-//   const chartSeries = [{
-//     name: 'Temperature',
-//     data: [{
-//       x: 'Temperature Distribution',
-//       y: [boxplotStats.min, boxplotStats.q1, boxplotStats.median, boxplotStats.q3, boxplotStats.max, ...boxplotStats.outliers]
-//     }]
-//   }];
-
-//   return (
-//     <div className={styles['graphDataWrap']}>
-//       <div className={styles['graphDataSVG']}>
-//         <CustomApexChart options={chartOptions} series={chartSeries} />
-//       </div>
-//       <div className={styles['graphDataTable']}>
-//         <StatisticsTable stats={boxplotStats} />
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default BoxGraph;
-
-// ```
-// ```
-// // src\components\LineGraph.js
-
-// import React, { useState, useEffect, useCallback } from 'react';
-// import {
-//   LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, Tooltip, Brush, ReferenceLine,
-// } from 'recharts';
-// import { useLineGraphData } from './hooks/useLineGraphData';
-// import { calculateMedian } from '../../../api';
-// // import useCalculateMedian from './hooks/useCalculateMedian';
-
-// import styles from './LineGraph.module.css'
-
-// const LineGraph = React.memo(({
-//   averagedData,
-//   onDetailsChange,
-//   countNumber,
-//   dieNumber,
-//   wNumber,
-//   dwNumber,
-//   onBrushChange,
-//   initialStartTime,
-//   initialEndTime,
-//   setBoxplotStats
-// }) => {
-//   const { startTime, endTime, handleBrushChange } = useLineGraphData(averagedData, initialStartTime, initialEndTime, onBrushChange, setBoxplotStats);
-//   const [chartSize, setChartSize] = useState({ width: 600, height: 300 });
-//   const [medianValue, setMedianValue] = useState(0);
-
-//   // 그래프 반응형 로직
-//   useEffect(() => {
-//     const handleResize = () => {
-//       // 창 너비가 1145px 이하일 때는 window.innerWidth * 0.9, 그렇지 않으면 1000을 width로 사용
-//       const maxWidth = 1145;
-//       const calculatedWidth = window.innerWidth <= maxWidth ? window.innerWidth * 0.9 : Math.min(window.innerWidth * 0.6, 1000);
-  
-//       setChartSize({
-//         // 최대 너비를 1000으로 제한하되, 창 너비가 1145px 이하일 경우는 90%를 적용
-//         width: Math.min(calculatedWidth, 1000),
-//         height: 400
-//       });
-//     };
-  
-//     window.addEventListener('resize', handleResize);
-//     // 컴포넌트 마운트 시에도 크기 조정
-//     handleResize();
-
-//     // 이벤트 리스너 제거를 통한 메모리 누수 방지
-//     return () => window.removeEventListener('resize', handleResize);
-//   }, []);
-
-//   // useCallback을 사용하여 함수 재생성 방지
-//   const temperatureFormatter = useCallback((value) => `${value.toFixed(2)}°C`, []);
-
-//   // useCalculateMedian 커스텀 훅을 사용하여 중앙값 계산 최적화
-//   useEffect(() => {
-//     const fetchMedian = async () => {
-//       const temperatures = averagedData.map(item => item.temperature);
-//       const median = await calculateMedian(temperatures); // Call the API to calculate median
-//       setMedianValue(median);
-//     };
-
-//     fetchMedian();
-//   }, [averagedData]);
-
-//   return (
-//     <>
-//       <div className={styles['lineGrahpWrap']}>
-//         <div className={styles['textWrap']}>
-//           <div className={styles['textContainer']}>
-//             <div className={styles['NumberWrap']}>
-//               <div className={styles['ExWrap']}>
-//                 <span className={styles['ExNumber']}>C_Number</span>
-//                 <input
-//                   type="text"
-//                   placeholder="0000"
-//                   className={styles['ExInfo']}
-//                   value={countNumber || ''}
-//                   onChange={(e) => onDetailsChange('countNumber', e.target.value)}
-//                 />
-//               </div>
-//               <div className={styles['ExWrap']}>
-//                 <span className={styles['ExNumber']}>W_Number</span>
-//                 <input
-//                   type="text"
-//                   placeholder="0000"
-//                   className={styles['ExInfo']}
-//                   value={wNumber || ''}
-//                   onChange={(e) => onDetailsChange('wNumber', e.target.value)}
-//                 />
-//               </div>
-//               <div className={styles['ExWrap']}>
-//                 <span className={styles['ExNumber']}>DW_Number</span>
-//                 <input
-//                   type="text"
-//                   placeholder="0000"
-//                   className={styles['ExInfo']}
-//                   value={dwNumber || ''}
-//                   onChange={(e) => onDetailsChange('dwNumber', e.target.value)}
-//                 />
-//               </div>
-//               <div className={styles['ExWrap']}>
-//                 <span className={styles['ExNumber']}>Die_Number</span>
-//                 <input
-//                   type="text"
-//                   placeholder="0000"
-//                   className={styles['ExInfo']}
-//                   value={dieNumber || ''}
-//                   onChange={(e) => onDetailsChange('dieNumber', e.target.value)}
-//                 />
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//         <div className={styles['timeInputWrap']}>
-//           <div className={styles['timeInputContainer']}>
-//             <div className={styles['startTimeBox']}>
-//               <span className={styles['startTimeTitle']}>Start Time</span>
-//               <input
-//                 className={styles['startTimeInput']}
-//                 type="time"
-//                 value={startTime || ''}
-//                 readOnly
-//               />
-//             </div>
-//             <div className={styles['endTimeBox']}>
-//               <span className={styles['endTimeTitle']}>End Time</span>
-//               <input
-//                 className={styles['endTimeInput']}
-//                 type="time"
-//                 value={endTime || ''}
-//                 readOnly
-//               />
-//             </div>
-//           </div>
-//         </div>
-//         <LineChart className={styles['lineChart']}
-//           width={chartSize.width}
-//           height={chartSize.height}
-//           data={averagedData}
-//           margin={{
-//             top: 20, right: 45, left: -10, bottom: 10,
-//           }}
-//         >
-//           <CartesianGrid strokeDasharray="3 3" />
-//           <Tooltip formatter={temperatureFormatter} />
-//           <XAxis dataKey="time"
-//           />
-//           <YAxis domain={['auto', 'auto']}
-//           />
-//           <Legend />
-//           <Line
-//             type="monotone"
-//             dataKey="temperature"
-//             stroke="#8884d8"
-//             dot={false}
-//             activeDot={{ r: 4 }}
-//           />
-//           <Brush
-//             dataKey="Time"
-//             height={30}
-//             stroke="#8884d8"
-//             onChange={handleBrushChange}
-//           />
-//           <ReferenceLine y={medianValue} label="Median" stroke="red" strokeDasharray="3 3" />
-//         </LineChart>
-//       </div>
-//     </>
-//   );
-// });
-
-// export default LineGraph;
-
-// ```
-// ```
-// // src\components\FileUploadButton.js
-
-// import React, { useState } from 'react';
-// import styles from './FileUploadButton.module.css'
-
-// function FileUploadButton({ onFileSelect }) {
-//   const [selectedFile, setSelectedFile] = useState(null);
-
-//   const handleFileChange = (event) => {
-//     const file = event.target.files[0];
-//     setSelectedFile(file);
-//     onFileSelect(file); // 부모 컴포넌트로 파일 데이터 전달
-//   };
-
-//   return (
-//     <div className={styles["fileUploadWrap"]}>
-//       <div className={styles["fileUploadContainer"]}>
-//         <div className={styles["fileUploadButton"]}>
-//           <label htmlFor="file">
-//             <div className={styles["fileUpload"]}>파일 업로드하기</div>
-//           </label>
-//           <input className={styles['fileUpload-btn']} type="file" id='file' onChange={handleFileChange} accept=".csv" />
-//         </div>
-//         <div className={styles["fileUploadName"]}>
-//           {selectedFile && <p className={styles['fileName']}>File name: {selectedFile.name}</p>}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default FileUploadButton;
-
-// ```
-// ```
-// // src/components/DataUploadComponent.js
+// // client/src/components/tempgraph/tempgraphmodule/DataUploadComponent.js
 
 // import React, { useState } from 'react';
 // import { uploadCsvFile } from '../../../api';
@@ -801,46 +364,233 @@
 // export default DataUploadComponent;
 // ```
 // ```
-// // src/components/StatisticsTable.js
+// // client/src/components/tempgraph/tempgraphmodule/FileUploadButton.js
+
+// import React, { useState } from 'react';
+// import styles from './FileUploadButton.module.css'
+
+// function FileUploadButton({ onFileSelect }) {
+//   const [selectedFile, setSelectedFile] = useState(null);
+
+//   const handleFileChange = (event) => {
+//     const file = event.target.files[0];
+//     setSelectedFile(file);
+//     onFileSelect(file); // 부모 컴포넌트로 파일 데이터 전달
+//   };
+
+//   return (
+//     <div className={styles["fileUploadWrap"]}>
+//       <div className={styles["fileUploadContainer"]}>
+//         <div className={styles["fileUploadButton"]}>
+//           <label htmlFor="file">
+//             <div className={styles["fileUpload"]}>파일 업로드하기</div>
+//           </label>
+//           <input className={styles['fileUpload-btn']} type="file" id='file' onChange={handleFileChange} accept=".csv" />
+//         </div>
+//         <div className={styles["fileUploadName"]}>
+//           {selectedFile && <p className={styles['fileName']}>File name: {selectedFile.name}</p>}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default FileUploadButton;
+
+// ```
+// ```
+// // client\src\components\tempgraph\tempgraphmodule\LineGraph.js
+
+// import React, { useState, useEffect, useCallback } from 'react';
+// import {
+//   LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, Tooltip, Brush, ReferenceLine,
+// } from 'recharts';
+// import { useLineGraphData } from './hooks/useLineGraphData';
+// import { calculateMedian } from '../../../api';
+// // import useCalculateMedian from './hooks/useCalculateMedian';
+
+// import styles from './LineGraph.module.css'
+
+// const LineGraph = React.memo(({
+//   averagedData,
+//   onDetailsChange,
+//   countNumber,
+//   dieNumber,
+//   wNumber,
+//   dwNumber,
+//   onBrushChange,
+//   initialStartTime,
+//   initialEndTime,
+//   setBoxplotStats
+// }) => {
+//   const { startTime, endTime, handleBrushChange } = useLineGraphData(averagedData, initialStartTime, initialEndTime, onBrushChange, setBoxplotStats);
+//   const [chartSize, setChartSize] = useState({ width: 600, height: 300 });
+//   const [medianValue, setMedianValue] = useState(0);
+
+//   // 그래프 반응형 로직
+//   useEffect(() => {
+//     const handleResize = () => {
+//       // 창 너비가 1145px 이하일 때는 window.innerWidth * 0.9, 그렇지 않으면 1000을 width로 사용
+//       const maxWidth = 1145;
+//       const calculatedWidth = window.innerWidth <= maxWidth ? window.innerWidth * 0.9 : Math.min(window.innerWidth * 0.6, 1000);
+  
+//       setChartSize({
+//         // 최대 너비를 1000으로 제한하되, 창 너비가 1145px 이하일 경우는 90%를 적용
+//         width: Math.min(calculatedWidth, 1000),
+//         height: 400
+//       });
+//     };
+  
+//     window.addEventListener('resize', handleResize);
+//     // 컴포넌트 마운트 시에도 크기 조정
+//     handleResize();
+
+//     // 이벤트 리스너 제거를 통한 메모리 누수 방지
+//     return () => window.removeEventListener('resize', handleResize);
+//   }, []);
+
+//   // useCallback을 사용하여 함수 재생성 방지
+//   const temperatureFormatter = useCallback((value) => `${value.toFixed(2)}°C`, []);
+
+//   // useCalculateMedian 커스텀 훅을 사용하여 중앙값 계산 최적화
+//   useEffect(() => {
+//     const fetchMedian = async () => {
+//       const temperatures = averagedData.map(item => item.temperature);
+//       const median = await calculateMedian(temperatures); // Call the API to calculate median
+//       setMedianValue(median);
+//     };
+
+//     fetchMedian();
+//   }, [averagedData]);
+
+//   return (
+//     <>
+//       <div className={styles['lineGrahpWrap']}>
+//         <div className={styles['textWrap']}>
+//           <div className={styles['textContainer']}>
+//             <div className={styles['NumberWrap']}>
+//               <div className={styles['ExWrap']}>
+//                 <span className={styles['ExNumber']}>C_Number</span>
+//                 <input
+//                   pattern='\d+'
+//                   type="text"
+//                   placeholder="0000"
+//                   className={styles['ExInfo']}
+//                   value={countNumber || ''}
+//                   onChange={(e) => onDetailsChange('countNumber', e.target.value)}
+//                 />
+//               </div>
+//               <div className={styles['ExWrap']}>
+//                 <span className={styles['ExNumber']}>W_Number</span>
+//                 <input
+//                   pattern='\d+'
+//                   type="text"
+//                   placeholder="0000"
+//                   className={styles['ExInfo']}
+//                   value={wNumber || ''}
+//                   onChange={(e) => onDetailsChange('wNumber', e.target.value)}
+//                 />
+//               </div>
+//               <div className={styles['ExWrap']}>
+//                 <span className={styles['ExNumber']}>DW_Number</span>
+//                 <input
+//                   pattern='\d+'
+//                   type="text"
+//                   placeholder="0000"
+//                   className={styles['ExInfo']}
+//                   value={dwNumber || ''}
+//                   onChange={(e) => onDetailsChange('dwNumber', e.target.value)}
+//                 />
+//               </div>
+//               <div className={styles['ExWrap']}>
+//                 <span className={styles['ExNumber']}>Die_Number</span>
+//                 <input
+//                   pattern='\d+'
+//                   type="text"
+//                   placeholder="0000"
+//                   className={styles['ExInfo']}
+//                   value={dieNumber || ''}
+//                   onChange={(e) => onDetailsChange('dieNumber', e.target.value)}
+//                 />
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//         <div className={styles['timeInputWrap']}>
+//           <div className={styles['timeInputContainer']}>
+//             <div className={styles['startTimeBox']}>
+//               <span className={styles['startTimeTitle']}>Start Time</span>
+//               <input
+//                 className={styles['startTimeInput']}
+//                 type="time"
+//                 value={startTime || ''}
+//                 readOnly
+//               />
+//             </div>
+//             <div className={styles['endTimeBox']}>
+//               <span className={styles['endTimeTitle']}>End Time</span>
+//               <input
+//                 className={styles['endTimeInput']}
+//                 type="time"
+//                 value={endTime || ''}
+//                 readOnly
+//               />
+//             </div>
+//           </div>
+//         </div>
+//         <LineChart className={styles['lineChart']}
+//           width={chartSize.width}
+//           height={chartSize.height}
+//           data={averagedData}
+//           margin={{
+//             top: 20, right: 45, left: -10, bottom: 10,
+//           }}
+//         >
+//           <CartesianGrid strokeDasharray="3 3" />
+//           <Tooltip formatter={temperatureFormatter} />
+//           <XAxis dataKey="time"
+//           />
+//           <YAxis domain={['auto', 'auto']}
+//           />
+//           <Legend />
+//           <Line
+//             type="monotone"
+//             dataKey="temperature"
+//             stroke="#8884d8"
+//             dot={false}
+//             activeDot={{ r: 4 }}
+//           />
+//           <Brush
+//             dataKey="Time"
+//             height={30}
+//             stroke="#8884d8"
+//             onChange={handleBrushChange}
+//           />
+//           <ReferenceLine y={medianValue} label="Median" stroke="red" strokeDasharray="3 3" />
+//         </LineChart>
+//       </div>
+//     </>
+//   );
+// });
+
+// export default LineGraph;
+
+// ```
+// ```
+// // client/src/components/tempgraph/tempgraphmodule/Loader.js
+
 // import React from 'react';
-// import styles from './BoxGraph.module.css';
+// import styles from './Loader.module.css'
 
-// // 숫자 형식을 포맷하는 함수
-// const formatNumber = (num) => isNaN(parseFloat(num)) ? 'N/A' : parseFloat(num).toFixed(2);
+// function Loader() {
+//   return <div className={styles['loader']}></div>;
+// }
 
-// const StatisticsTable = ({ stats }) => {
-//     return (
-//         <table className={styles['boxTable']}>
-//             <tbody>
-//                 <tr>
-//                     <td>최대값</td>
-//                     <td>{formatNumber(stats.min)}</td>
-//                 </tr>
-//                 <tr>
-//                     <td>Q3 (75번째 백분위수)</td>
-//                     <td>{formatNumber(stats.q1)}</td>
-//                 </tr>
-//                 <tr>
-//                     <td>중앙값</td>
-//                     <td>{formatNumber(stats.median)}</td>
-//                 </tr>
-//                 <tr>
-//                     <td>Q1 (25번째 백분위수)</td>
-//                     <td>{formatNumber(stats.q3)}</td>
-//                 </tr>
-//                 <tr>
-//                     <td>최소값</td>
-//                     <td>{formatNumber(stats.max)}</td>
-//                 </tr>
-//             </tbody>
-//         </table>
-//     );
-// };
+// export default Loader;
 
-// export default StatisticsTable;
 // ```
 // ```
-// // src/components/SaveCsvDataButton.js
+// // client/src/components/tempgraph/tempgraphmodule/SaveCsvDataButton.js
 
 // import React from 'react';
 // import styles from './SaveCsvDataButton.module.css'
@@ -900,41 +650,87 @@
 
 // ```
 // ```
-// // client\src\components\Loader.js
+// // client/src/components/tempgraph/tempgraphmodule/StatisticsTable.js
 
 // import React from 'react';
-// import styles from './Loader.module.css'
+// import styles from './BoxGraph.module.css';
 
-// function Loader() {
-//   return <div className={styles['loader']}></div>;
+// // 숫자 형식을 포맷하는 함수
+// const formatNumber = (num) => isNaN(parseFloat(num)) ? 'N/A' : parseFloat(num).toFixed(2);
+
+// const StatisticsTable = ({ stats }) => {
+//     return (
+//         <table className={styles['boxTable']}>
+//             <tbody>
+//                 <tr>
+//                     <td>최대값</td>
+//                     <td>{formatNumber(stats.min)}</td>
+//                 </tr>
+//                 <tr>
+//                     <td>Q3 (75번째 백분위수)</td>
+//                     <td>{formatNumber(stats.q1)}</td>
+//                 </tr>
+//                 <tr>
+//                     <td>중앙값</td>
+//                     <td>{formatNumber(stats.median)}</td>
+//                 </tr>
+//                 <tr>
+//                     <td>Q1 (25번째 백분위수)</td>
+//                     <td>{formatNumber(stats.q3)}</td>
+//                 </tr>
+//                 <tr>
+//                     <td>최소값</td>
+//                     <td>{formatNumber(stats.max)}</td>
+//                 </tr>
+//             </tbody>
+//         </table>
+//     );
+// };
+
+// export default StatisticsTable;
+// ```
+// ```
+// // client/src/components/tempgraph/tempgraphmodule/TextInputBox.js
+
+// import React from 'react';
+// import styles from './TextInputBox.module.css';
+
+// function TextInputBox({ value, onTextChange, onSave, showSaveButton }) {
+//   const handleChange = (event) => {
+//     onTextChange(event.target.value);
+//   };
+
+//   return (
+//     <div className={styles['textBoxUIWrap']}>
+//       <div className={styles['textBoxUIContainer']}>
+//         <div className={styles['textBoxUITitle']}>
+//           <h3 className={styles['title']}>상세 정보 입력</h3>
+//           {showSaveButton && (
+//             <button
+//               className={styles['resaveDataButton']}
+//               onClick={onSave}
+//               style={{ marginTop: '10px' }}>
+//               저장
+//             </button>
+//           )}
+//         </div>
+//         <textarea
+//           className={styles['textBoxTextarea']}
+//           type="text"
+//           value={value}
+//           rows="10"
+//           onChange={handleChange} />
+//       </div>
+
+//     </div>
+//   );
 // }
 
-// export default Loader;
+// export default TextInputBox;
 
 // ```
 // ```
-// // client\src\components\tempgraph\tempgraphmodule\useCalculateMedian.js
-
-// const useCalculateMedian = (data) => {
-//     if (!data || data.length === 0) return 0;
-  
-//     const sortedData = [...data].sort((a, b) => a - b);
-//     const midIndex = Math.floor(sortedData.length / 2);
-  
-//     if (sortedData.length % 2 === 0) {
-//       // 짝수 개의 요소가 있을 경우, 가운데 두 수의 평균 반환
-//       return (sortedData[midIndex - 1] + sortedData[midIndex]) / 2;
-//     } else {
-//       // 홀수 개의 요소가 있을 경우, 가운데 수 반환
-//       return sortedData[midIndex];
-//     }
-//   };
-  
-//   export default useCalculateMedian;
-  
-// ```
-// ```
-// // src\components\UploadDataButton.js
+// // client/src/components/tempgraph/tempgraphmodule/UploadDataButton.js
 
 // import React, { useState } from 'react';
 // import styles from './UploadDataButton.module.css'
@@ -991,77 +787,95 @@
 
 // ```
 // ```
-// // src/components/TextInputBox.js
+// // client\src\components\tempgraph\tempgraphmodule\useCalculateMedian.js
 
-// import React from 'react';
-// import styles from './TextInputBox.module.css';
-
-// function TextInputBox({ value, onTextChange, onSave, showSaveButton }) {
-//   const handleChange = (event) => {
-//     onTextChange(event.target.value);
+// const useCalculateMedian = (data) => {
+//     if (!data || data.length === 0) return 0;
+  
+//     const sortedData = [...data].sort((a, b) => a - b);
+//     const midIndex = Math.floor(sortedData.length / 2);
+  
+//     if (sortedData.length % 2 === 0) {
+//       // 짝수 개의 요소가 있을 경우, 가운데 두 수의 평균 반환
+//       return (sortedData[midIndex - 1] + sortedData[midIndex]) / 2;
+//     } else {
+//       // 홀수 개의 요소가 있을 경우, 가운데 수 반환
+//       return sortedData[midIndex];
+//     }
 //   };
-
-//   return (
-//     <div className={styles['textBoxUIWrap']}>
-//       <div className={styles['textBoxUIContainer']}>
-//         <div className={styles['textBoxUITitle']}>
-//           <h3 className={styles['title']}>상세 정보 입력</h3>
-//           {showSaveButton && (
-//             <button
-//               className={styles['resaveDataButton']}
-//               onClick={onSave}
-//               style={{ marginTop: '10px' }}>
-//               저장
-//             </button>
-//           )}
-//         </div>
-//         <textarea
-//           className={styles['textBoxTextarea']}
-//           type="text"
-//           value={value}
-//           rows="10"
-//           onChange={handleChange} />
-//       </div>
-
-//     </div>
-//   );
-// }
-
-// export default TextInputBox;
-
+  
+//   export default useCalculateMedian;
+  
 // ```
 // ```
-// // src\App.js
+// // client/src/components/Banner.js
 
 // import React from 'react';
-// import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-// import Banner from './components/Banner';
-// import LineBarPage from './components/line_box/pages/LineBarPage';
-// import GraphDataPage from './components/tempgraph/pages/GraphDataPage';
-// import ViewDataPage from './components/tempgraph/pages/ViewDataPage';
-// import Card from './components/3D/Card'
-// import Footer from './components/Footer';
-// import './App.css';
+// import { useNavigate } from 'react-router-dom';
+// import styles from './Banner.module.css';
+// import { faSignal, faMagnifyingGlassChart, faChartLine } from '@fortawesome/free-solid-svg-icons';
+// import { faGithub } from '@fortawesome/free-brands-svg-icons';
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-// function App() {
-//   const profileImage = process.env.PUBLIC_URL + "/images/jeonghyeon.jpg";
-//   return (
-//     <Router>
-//       <Banner />
-//       <Routes>
-//         <Route path="/"  />
-//         <Route path="/line-bar" element={<LineBarPage />} />
-//         <Route path="/graph-data" element={<GraphDataPage />} />
-//         <Route path="/view-data" element={<ViewDataPage />} />
-//         <Route path="/Card" element={<Card selectedImage={profileImage} />} />
-//       </Routes>
-//       <Footer />
-//     </Router>
-//   );
+// function Banner() {
+//     let navigate = useNavigate();
+
+//     const navigateTo = (path) => {
+//         navigate(path);
+//     };
+
+//     return (
+//         <div className={styles['bannerWrap']}>
+//             <div className={styles['bannerContainer']}>
+//                 <div className={styles['banner']}>
+//                     <div onClick={() => navigateTo('/')} style={{ cursor: 'pointer' }}>
+//                         <div className={styles['banner-logo']}>
+//                             <img src={`${process.env.PUBLIC_URL}/images/logo.png`} alt="logo" />
+//                         </div>
+//                     </div>
+//                     <ul className={styles['banner-menu']}>
+//                         <li className={styles['banner-title']} onClick={() => navigateTo('/graph-data')} style={{ cursor: 'pointer' }}>
+//                             <div className={styles['icon-img']}>
+//                                 <FontAwesomeIcon icon={faSignal} />
+//                             </div>
+//                             <div>Temp.Graph</div>
+//                         </li>
+//                         <li className={styles['banner-title']} onClick={() => navigateTo('/line-bar')} style={{ cursor: 'pointer' }}>
+//                             <div className={styles['icon-img']}>
+//                                 <FontAwesomeIcon icon={faChartLine} />
+//                             </div>
+//                             <div>Line/Bar</div>
+//                         </li>
+//                         <li className={styles['banner-title']} onClick={() => navigateTo('/Analysis-page')} style={{ cursor: 'pointer' }}>
+//                             <div className={styles['icon-img']}>
+//                                 <FontAwesomeIcon icon={faMagnifyingGlassChart} />
+//                             </div>
+//                             <div>Analysis</div>
+//                         </li>
+//                         <li className={styles['banner-title']} onClick={() => navigateTo('/graph-data')} style={{ cursor: 'pointer' }}>
+//                             <div className={styles['icon-img']}>
+//                                 {/* <FontAwesomeIcon icon={faTemperatureHigh} /> */}
+//                             </div>
+//                             <div>준비중...</div>
+//                         </li>
+//                     </ul>
+//                     <ul className={styles['banner-icons']}>
+//                         <li>
+//                             <a href='https://github.com/zzocojoa/temp_info_ver2' aria-label="GitHub" target='_blank'>
+//                                 <FontAwesomeIcon icon={faGithub} />
+//                             </a>
+//                         </li>
+//                         <li onClick={() => navigateTo('/Card')} style={{ cursor: 'pointer' }}>
+//                             <img className={styles['developer-icon']} src={`${process.env.PUBLIC_URL}/images/hoihou-icon-1.png`} alt="logo" />
+//                         </li>
+//                     </ul>
+//                 </div>
+//             </div>
+//         </div>
+//     );
 // }
 
-// export default App;
-
+// export default Banner;
 // ```
 // ```
 // // client/src/components/Footer.js
@@ -1082,68 +896,285 @@
 
 // ```
 // ```
-// // client/src/components/Banner.js
+// // client/src/api.js
 
-// import React from 'react';
-// import { useNavigate } from 'react-router-dom';
-// import styles from './Banner.module.css';
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import { faTemperatureHigh } from '@fortawesome/free-solid-svg-icons';
-// import { faFacebookSquare } from '@fortawesome/free-brands-svg-icons';
-// // import { faFacebookSquare, faInstagramSquare } from '@fortawesome/free-brands-svg-icons';
+// const API_BASE_URL = 'http://localhost:5000/api';
 
-
-
-// function Banner() {
-//     let navigate = useNavigate();
-
-//     // 홈으로 이동
-//     const navigateTo = (path) => {
-//         navigate(path);
-//     };
-
-//     return (
-//         <div className={styles['bannerWrap']}>
-//             <div className={styles['bannerContainer']}>
-//                 <div className={styles['banner']}>
-//                     <div onClick={() => navigateTo('/')} style={{ cursor: 'pointer' }}>
-//                         <div className={styles['banner-logo']}>
-//                             <img src={`${process.env.PUBLIC_URL}/images/logo.png`} alt="logo" />
-//                             {/* <div className={styles['banner-title']}>T/B</div> */}
-//                         </div>
-//                     </div>
-//                     <ul className={styles['banner-menu']}>
-//                         <li onClick={() => navigateTo('/line-bar')} style={{ cursor: 'pointer' }}>
-//                             <FontAwesomeIcon icon={faTemperatureHigh} />
-//                             Line/Bar
-//                         </li>
-//                         <li onClick={() => navigateTo('/graph-data')} style={{ cursor: 'pointer' }}>
-//                             <FontAwesomeIcon icon={faTemperatureHigh} />
-//                             온도 그래프
-//                         </li>
-//                         <li onClick={() => navigateTo('/graph-data')} style={{ cursor: 'pointer' }}>
-//                             <FontAwesomeIcon icon={faTemperatureHigh} />
-//                             준비중
-//                         </li>
-//                         <li onClick={() => navigateTo('/graph-data')} style={{ cursor: 'pointer' }}>
-//                             <FontAwesomeIcon icon={faTemperatureHigh} />
-//                             준비중
-//                         </li>
-//                         {/* 추가적인 메뉴 항목에 대한 경로 설정이 필요하면 여기에 구현 */}
-//                     </ul>
-
-//                     <ul className={styles['banner-icons']}>
-//                         <li><FontAwesomeIcon icon={faFacebookSquare} /></li>
-//                         <li onClick={() => navigateTo('/Card')} style={{ cursor: 'pointer' }}>
-//                             <img className={styles['developer-icon']} src={`${process.env.PUBLIC_URL}/images/Beatlefeed.png`} alt="logo" />
-//                             {/* <FontAwesomeIcon icon={faInstagramSquare} /> */}
-//                         </li>
-//                     </ul>
-//                 </div>
-//             </div>
-//         </div>
-//     );
+// // 파일 업로드 API
+// export async function uploadFile(file) {
+//   const formData = new FormData();
+//   formData.append('file', file);
+//   try {
+//     const response = await fetch(`${API_BASE_URL}/upload`, {
+//       method: 'POST',
+//       body: formData,
+//     });
+//     const { data: averagedData, boxplotStats, temperatureValues } = await response.json();
+//     console.log("boxplotStats: ", boxplotStats)
+//     return { averagedData, boxplotStats, temperatureValues }; // 업로드 결과 반환
+//   } catch (error) {
+//     console.error('Error uploading file:', error);
+//   }
 // }
 
-// export default Banner;
+// // 정제 파일 업로드 API (CSV 파일)
+// export async function uploadCsvFile(files) {
+//   const formData = new FormData();
+//   // formData.append('file', file);
+//   for (let i = 0; i < files.length; i++) {
+//     formData.append('files', files[i]);
+//   }
+
+//   try {
+//     const response = await fetch(`${API_BASE_URL}/upload-csv`, {
+//       method: 'POST',
+//       body: formData,
+//     });
+
+//     if (!response.ok) {
+//       throw new Error('Network response was not ok');
+//     }
+
+//     const data = await response.json();
+//     return data; // 성공적으로 업로드된 경우 서버 응답 반환
+//   } catch (error) {
+//     console.error('Error uploading CSV file:', error);
+//     throw error; // 컴포넌트에서 처리할 수 있게 에러를 다시 던짐
+//   }
+// }
+
+// // filteredData를 서버로 전송하는 함수(bolplot dynamic data)
+// export async function sendFilteredData(filteredData) {
+//   try {
+//     const response = await fetch(`${API_BASE_URL}/process-filtered-data`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({ filteredData }),
+//     });
+//     if (!response.ok) {
+//       throw new Error('Failed to send filtered data');
+//     }
+//     return await response.json(); // 서버 응답 반환
+//   } catch (error) {
+//     console.error('Error sending filtered data:', error);
+//     throw error; // 컴포넌트에서 처리할 수 있게 에러를 다시 던짐
+//   }
+// }
+
+// // 데이터 저장 API
+// export async function saveData(data) {
+//   try {
+//     const response = await fetch(`${API_BASE_URL}/save`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify(data),
+//     });
+//     if (!response.ok) {
+//       throw new Error('Failed to save data');
+//     }
+//     return await response.json(); // 저장 성공 결과 반환
+//   } catch (error) {
+//     console.error('Error saving data:', error);
+//     throw error; // 에러를 다시 던져 컴포넌트에서 처리할 수 있게 함
+//   }
+// }
+
+// export async function updateData(id, updatedData) {
+//   try {
+//     const response = await fetch(`${API_BASE_URL}/data/${id}`, {
+//       method: 'PATCH',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify(updatedData),
+//     });
+//     if (!response.ok) {
+//       throw new Error('Data update failed');
+//     }
+//     return await response.json();
+//   } catch (error) {
+//     console.error('Error updating data:', error);
+//     throw error;
+//   }
+// }
+
+// // 데이터 리스트 조회
+// export async function fetchDataList() {
+//   try {
+//     const response = await fetch(`${API_BASE_URL}/data-list`);
+//     if (response.ok) {
+//       const dataList = await response.json();
+//       // console.log("dataList: ", dataList)
+
+//       return dataList;
+//     } else {
+//       console.error('Failed to fetch data list');
+//     }
+//   } catch (error) {
+//     console.error('Error fetching data list:', error);
+//   }
+// }
+
+// // 특정 데이터 조회
+// export async function fetchDataDetails(dataId) {
+//   try {
+//     const response = await fetch(`${API_BASE_URL}/data/${dataId}`);
+//     return response.json(); // 조회된 데이터의 상세 정보 반환
+//   } catch (error) {
+//     console.error('Error fetching data details:', error);
+//   }
+// }
+
+// // 데이터 삭제
+// export async function deleteData(dataId) {
+//   const response = await fetch(`${API_BASE_URL}/data/${dataId}`, {
+//     method: 'DELETE',
+//   });
+//   if (!response.ok) {
+//     throw new Error('Network response was not ok');
+//   }
+//   return await response.json();
+// }
+
+// // 중앙값 계산 API 함수
+// export async function calculateMedian(data) {
+//   try {
+//     const response = await fetch(`${API_BASE_URL}/calculate-median`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({ data }), // 전송할 데이터
+//     });
+//     if (!response.ok) {
+//       throw new Error('Failed to calculate median');
+//     }
+//     const result = await response.json(); // 서버 응답으로부터 결과 받기
+//     return result.median; // 중앙값 반환
+//   } catch (error) {
+//     console.error('Error calculating median:', error);
+//     throw error; // 에러 발생 시, 이를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+//   }
+// }
+
+// // 필터링된 데이터 처리 및 중앙값 계산 API 함수
+// export const sendFilteredLinegraphData = async (data, startTime, endTime) => {
+//   try {
+//     const response = await fetch(`${API_BASE_URL}/filtered-linegraph-data`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({ data, startTime, endTime }),
+//     });
+//     if (response.ok) {
+//       const result = await response.json();
+//       return result;
+//     } else {
+//       throw new Error('Failed to process filtered data');
+//     }
+//   } catch (error) {
+//     console.error('Error sending filtered data:', error);
+//     throw error;
+//   }
+// };
+
+// // 클러스터링된 데이터를 가져오는 API 함수
+// // client/src/api.js 내의 fetchClusteredData 함수 수정
+// export async function fetchClusteredData(dwNumber, k) {
+//   try {
+//     const requestBody = dwNumber !== undefined && k !== undefined ? JSON.stringify({ dwNumber, k }) : null;
+
+//     const response = await fetch(`${API_BASE_URL}/clustered-data`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: requestBody,
+//     });
+
+//     if (!response.ok) {
+//       const errorResponse = await response.json(); // 서버로부터의 에러 메시지를 받습니다.
+//       throw new Error(errorResponse.message || 'Failed to fetch clustered data'); // 에러 메시지를 사용하여 예외를 던집니다.
+//     }
+//     return await response.json();
+//   } catch (error) {
+//     console.error('Error fetching clustered data:', error);
+//     throw error; // 이제 여기서 던진 예외는 호출하는 측에서 처리합니다.
+//   }
+// }
+
+// // DW 번호 검색 API 함수
+// export async function searchDwNumber(query) {
+//   try {
+//     const response = await fetch(`${API_BASE_URL}/search-dw?q=${encodeURIComponent(query || '')}`); // 빈 쿼리에 대해 모든 DW 번호 검색을 허용
+//     if (!response.ok) {
+//       throw new Error('Failed to fetch DW number suggestions');
+//     }
+//     const dwNumbers = await response.json();
+//     return dwNumbers;
+//   } catch (error) {
+//     console.error('Error searching DW numbers:', error);
+//     throw error;
+//   }
+// }
+
+// // 다이별 온도 프로필 데이터 제공
+// export async function fetchDieTemperatureProfile() {
+//   try {
+//     const response = await fetch(`${API_BASE_URL}/die-temperature-profile`);
+//     if (!response.ok) {
+//       throw new Error('Failed to fetch die temperature profile');
+//     }
+//     const data = await response.json();
+//     return data;
+//   } catch (error) {
+//     console.error('Error fetching die temperature profile:', error);
+//     throw error;
+//   }
+// }
+
+// ```
+// ```
+// // client\src\App.js
+
+// import React from 'react';
+// import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+// import Banner from './components/Banner';
+// import GraphDataPage from './components/tempgraph/pages/GraphDataPage';
+// import ViewDataPage from './components/tempgraph/pages/ViewDataPage';
+// import LineBarPage from './components/line_box/pages/LineBarPage';
+// import AnalysisPage from './components/clustercomponents/pages/analysisPage';
+// import ClusteredDataVisualization from './components/clustercomponents/ClusteredData';
+// import DieTemperatureProfileChart from './components/clustercomponents/DieTempProfile';
+// import Card from './components/3D/Card'
+// import Footer from './components/Footer';
+// import './App.css';
+
+// function App() {
+//   const profileImage = process.env.PUBLIC_URL + "/images/jeonghyeon-1.jpg";
+//   return (
+//     <Router>
+//       <Banner />
+//       <Routes>
+//         <Route path="/"  />
+//         <Route path="/graph-data" element={<GraphDataPage />} />
+//         <Route path="/view-data" element={<ViewDataPage />} />
+//         <Route path="/line-bar" element={<LineBarPage />} />
+//         <Route path="/Analysis-page" element={<AnalysisPage />} />
+//         <Route path="/cluster-data" element={<ClusteredDataVisualization />} />
+//         <Route path="/dietemp-data" element={<DieTemperatureProfileChart />} />
+//         <Route path="/Card" element={<Card selectedImage={profileImage} />} />
+//       </Routes>
+//       <Footer />
+//     </Router>
+//   );
+// }
+
+// export default App;
+
 // ```

@@ -1,4 +1,4 @@
-// client\src\components\Loader.js
+// client/src/components/tempgraph/tempgraphmodule/Loader.js
 
 import React from 'react';
 import styles from './Loader.module.css'

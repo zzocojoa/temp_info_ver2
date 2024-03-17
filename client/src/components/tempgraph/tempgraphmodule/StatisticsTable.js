@@ -1,4 +1,5 @@
-// src/components/StatisticsTable.js
+// client/src/components/tempgraph/tempgraphmodule/StatisticsTable.js
+
 import React from 'react';
 import styles from './BoxGraph.module.css';
 

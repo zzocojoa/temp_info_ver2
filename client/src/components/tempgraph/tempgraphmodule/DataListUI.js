@@ -10,7 +10,6 @@ import styles from './DataListUI.module.css';
 
 function DataListUI() {
   const [dataList, setDataList] = useState([]);
-  const [filteredDataList, setFilteredDataList] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isHandleSaveCsvChecked, setIsHandleSaveCsvChecked] = useState(true);
@@ -21,10 +20,7 @@ function DataListUI() {
     const loadDataList = async () => {
       try {
         const response = await fetchDataList();
-        if (response && Array.isArray(response)) {
-          setDataList(response);
-          setFilteredDataList(response);
-        }
+        setDataList(response || []);
       } catch (error) {
         console.error("데이터 로딩 중 오류 발생:", error);
         alert('데이터를 로드하는데 실패했습니다.');
@@ -33,36 +29,27 @@ function DataListUI() {
     loadDataList();
   }, []);
 
-  useEffect(() => {
-    // searchTerm이 변경될 때마다 실행되며, dataList를 기반으로 필터링
-    const filtered = dataList.filter(dataItem =>
-      `${dataItem.filedate}-${dataItem.numbering?.countNumber ?? ''}_${dataItem.numbering?.wNumber ?? ''}_${dataItem.numbering?.dwNumber ?? ''}_${dataItem.numbering?.dieNumber ?? ''}`
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-    );
-    setFilteredDataList(filtered); // 필터링된 결과를 저장
-    // setDisplayCount(10); // 검색 후 보여줄 아이템 수를 초기화
-  }, [searchTerm, dataList]);
+  const filteredDataList = searchTerm
+    ? dataList.filter(dataItem =>
+        `${dataItem.filedate}-${dataItem.numbering.countNumber}_${dataItem.numbering.wNumber}_${dataItem.numbering.dwNumber}_${dataItem.numbering.dieNumber}`
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      )
+    : dataList;
 
-  // useCallback을 사용하여 함수가 필요할 때만 재생성되도록 함
   const handleCheckboxChange = useCallback((itemId) => {
-    setSelectedItems(prev => {
-      const newSelectedItems = prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId];
-      return newSelectedItems;
-    });
+    setSelectedItems(prev => prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]);
   }, []);
 
   const handleLoadSelectedData = useCallback(() => {
     navigate('/view-data', { state: { selectedItems } });
-    setSelectedItems([]); // 추가: 불러오기 후 선택된 아이템 상태 초기화
+    setSelectedItems([]);
   }, [navigate, selectedItems]);
 
   const handleRemoveSelectedData = async () => {
     try {
       await Promise.all(selectedItems.map(itemId => deleteData(itemId)));
-      const updatedDataList = dataList.filter(item => !selectedItems.includes(item._id));
-      setDataList(updatedDataList);
-      setFilteredDataList(updatedDataList);
+      setDataList(prev => prev.filter(item => !selectedItems.includes(item._id)));
       setSelectedItems([]);
     } catch (error) {
       console.error("데이터 삭제 중 오류 발생:", error);

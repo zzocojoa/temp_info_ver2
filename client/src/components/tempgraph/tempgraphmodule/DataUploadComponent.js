@@ -1,4 +1,4 @@
-// src/components/DataUploadComponent.js
+// client/src/components/tempgraph/tempgraphmodule/DataUploadComponent.js
 
 import React, { useState } from 'react';
 import { uploadCsvFile } from '../../../api';
