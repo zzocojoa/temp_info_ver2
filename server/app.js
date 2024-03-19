@@ -15,18 +15,22 @@ const uploadDir = './uploads';
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
-app.use(bodyParser.json({ limit: '50mb' }));
-// URL 인코딩 본문 파서의 크기 제한을 50MB로 설정
-app.use(bodyParser.urlencoded({ 
+
+// Middleware 구성 변경
+// body-parser 미들웨어는 express 내장 미들웨어로 대체될 수 있음
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ 
   limit: '50mb',
   extended: true 
 }));
 
 app.use(cors());
-app.use(express.json());
 app.use(morgan('dev'));
+
+// MongoDB 연결
 connectDB();
 
+// 파일 라우트 설정
 app.use('/api', fileRoutes);
 
 const PORT = process.env.PORT || 5000;

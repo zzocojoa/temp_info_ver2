@@ -51,7 +51,7 @@ function Banner() {
                     </ul>
                     <ul className={styles['banner-icons']}>
                         <li>
-                            <a href='https://github.com/zzocojoa/temp_info_ver2' aria-label="GitHub" target='_blank'>
+                            <a href='https://github.com/zzocojoa/temp_info_ver2' aria-label="GitHub" target='_blank' rel="noreferrer noopener">
                                 <FontAwesomeIcon icon={faGithub} />
                             </a>
                         </li>

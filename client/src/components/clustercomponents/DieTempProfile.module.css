@@ -8,3 +8,7 @@
 .DieTempProfileContainer {
   margin-top: 80px;
 }
+
+.DieTempProfileBox {
+  display: flex;
+}
