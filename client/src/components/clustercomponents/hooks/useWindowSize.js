@@ -17,4 +17,4 @@ function useWindowSize() {
   return size;
 }
 
-export default useWindowSize; // 이 부분을 추가합니다.
+export default useWindowSize;
