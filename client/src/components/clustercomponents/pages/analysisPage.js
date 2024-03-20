@@ -18,7 +18,8 @@ const AnalysisPage = () => {
         navigate('/dietemp-data');
     };
 
-    const cluster_img = process.env.PUBLIC_URL + "/images/cluster.png";
+    // const cluster_img = process.env.PUBLIC_URL + "/images/cluster.png";
+    const cluster_img = "./images/cluster.png";
 
     return (
         <div className={styles['analysisWrap']}>

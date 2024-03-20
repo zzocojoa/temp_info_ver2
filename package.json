@@ -2,9 +2,14 @@
   "name": "my-app",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "concurrently \"npm run server\" \"electron .\"",
+    "server": "node server/app.js",
+    "build": "react-scripts build",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "electron-pack": "electron-builder build --win",
+    "package-win": "electron-packager . HeatWaveVisualizer --platform=win32 --arch=x64 --out=\"C:\\Users\\user\\Desktop\""
   },
   "keywords": [],
   "author": "",
@@ -28,5 +33,25 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.0",
     "recharts": "^2.11.0"
+  },
+  "bin": {
+    "server": "server/app.js"
+  },
+  "pkg": {
+    "targets": [
+      "node16-linux-x64",
+      "node16-macos-x64",
+      "node16-win-x64"
+    ],
+    "assets": [
+      "client/build/**/*",
+      "public/**/*",
+      "views/**/*"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^29.1.4",
+    "electron-builder": "^23.0.0",
+    "electron-packager": "^17.1.2"
   }
 }

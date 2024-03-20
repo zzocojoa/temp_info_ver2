@@ -20,7 +20,8 @@ function Banner() {
                 <div className={styles['banner']}>
                     <div onClick={() => navigateTo('/')} style={{ cursor: 'pointer' }}>
                         <div className={styles['banner-logo']}>
-                            <img src={`${process.env.PUBLIC_URL}/images/logo.png`} alt="logo" />
+                            {/* <img src={`${process.env.PUBLIC_URL}/images/logo.png`} alt="logo" /> */}
+                            <img src="./images/logo.png" alt="logo" />
                         </div>
                     </div>
                     <ul className={styles['banner-menu']}>
@@ -56,7 +57,8 @@ function Banner() {
                             </a>
                         </li>
                         <li onClick={() => navigateTo('/Card')} style={{ cursor: 'pointer' }}>
-                            <img className={styles['developer-icon']} src={`${process.env.PUBLIC_URL}/images/hoihou-icon-1.png`} alt="logo" />
+                            {/* <img className={styles['developer-icon']} src={`${process.env.PUBLIC_URL}/images/hoihou-icon-1.png`} alt="logo" /> */}
+                            <img className={styles['developer-icon']} src="./images/hoihou-icon-1.png" alt="hoihou-icon-1" />
                         </li>
                     </ul>
                 </div>

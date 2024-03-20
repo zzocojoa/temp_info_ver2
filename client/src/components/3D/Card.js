@@ -100,7 +100,9 @@ function Card({ selectedImage }) {
         };
     }, []);
 
-    const cacheBustingUrl = `${process.env.PUBLIC_URL}/images/hoihou-icon-1.png?${new Date().getTime()}`;
+    // const cacheBustingUrl = `${process.env.PUBLIC_URL}/images/hoihou-icon-1.png?${new Date().getTime()}`;
+    const cacheBustingUrl = "./images/hoihou-icon-1.png"
+
 
     // 카드 컴포넌트 렌더링
     return (
