@@ -5,13 +5,16 @@ import styles from './LineBarChartLogic.module.css';
 import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Brush } from 'recharts';
 
 const transformData = (fileMetadata) => {
-    return fileMetadata.map((item, index) => {
+    // 데이터 변환
+    let transformedData = fileMetadata.map((item, index) => {
         const { min, median, max } = item.boxplotStats;
-        const filedate = item.filedate;
+        const filedate = item.filedate; // 예: '2023-01-01-1'
         const dwNumber = item.numbering.dwNumber;
+        const countNumber = item.numbering.countNumber;
+
         return {
             index: index + 1,
-            filedate,
+            filedate: `${filedate}-${countNumber}`,
             dwNumber,
             min,
             median,
@@ -20,6 +23,16 @@ const transformData = (fileMetadata) => {
             maxMinusMedian: max - median,
         };
     });
+
+    // 날짜(filedate) 기준으로 데이터 정렬
+    transformedData.sort((a, b) => {
+        // 'YYYY-MM-DD-countNumber' 형식에서 'YYYY-MM-DD' 부분만 추출하여 Date 객체로 변환
+        const dateA = new Date(a.filedate.split('-').slice(0, 3).join('-'));
+        const dateB = new Date(b.filedate.split('-').slice(0, 3).join('-'));
+        return dateA - dateB;
+    });
+
+    return transformedData;
 };
 
 const TemperatureChart = ({ fileMetadata }) => {
@@ -62,7 +75,7 @@ const TemperatureChart = ({ fileMetadata }) => {
                             }}
                         >
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="index" />
+                            <XAxis dataKey="filedate" />
                             <YAxis yAxisId="left" orientation="left" domain={['auto', 'auto']} />
                             <YAxis yAxisId="right" orientation="right" domain={['auto', 'auto']} allowDataOverflow />
                             <Tooltip content={<CustomTooltip />} />

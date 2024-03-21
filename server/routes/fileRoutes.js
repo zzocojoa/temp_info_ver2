@@ -353,6 +353,7 @@ router.get('/die-temperature-profile', async (req, res) => {
 
     allData.forEach(entry => {
       const dieNumber = entry.numbering.dieNumber;
+      console.log(`Processing dieNumber: ${dieNumber}`);
       if (!aggregatedData[dieNumber]) {
         aggregatedData[dieNumber] = { min: [], median: [], max: [] };
       }
@@ -371,8 +372,6 @@ router.get('/die-temperature-profile', async (req, res) => {
 
       return { dieNumber, min, median, max };
     });
-    console.log("result: ", result)
-
 
     res.json(result);
   } catch (error) {
@@ -380,6 +379,5 @@ router.get('/die-temperature-profile', async (req, res) => {
     res.status(500).send('Internal server error');
   }
 });
-
 
 module.exports = router;

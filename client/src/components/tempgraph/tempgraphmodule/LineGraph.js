@@ -6,7 +6,6 @@ import {
 } from 'recharts';
 import { useLineGraphData } from './hooks/useLineGraphData';
 import { calculateMedian } from '../../../api';
-// import useCalculateMedian from './hooks/useCalculateMedian';
 
 import styles from './LineGraph.module.css'
 
@@ -56,14 +55,14 @@ const LineGraph = React.memo(({
     const temperatures = averagedData.map(item => item.temperature);
     try {
       const median = await calculateMedian(temperatures);
-      setMedianValue(median);
+      setMedianValue(median.median);
     } catch (error) {
       console.error('Error calculating median:', error);
-      // 에러 처리 로직을 추가하거나, 상태를 업데이트하지 않습니다.
     }
   }, []);
+  // console.log("medianValue: ", medianValue)
 
-  // 로드된 데이터에 대한 중앙값을 계산합니다.
+  // 로드된 데이터에 대한 중앙값을 계산
   useEffect(() => {
     if (averagedData.length > 0) {
       fetchMedian(averagedData);

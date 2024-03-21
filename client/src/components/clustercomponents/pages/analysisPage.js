@@ -59,6 +59,14 @@ const AnalysisPage = () => {
                         <img src={cluster_img} alt="cluster_img" className={styles['analysisData']} onClick={goToClusteredDataPage}></img>
                     </figure>
                 </div>
+                <div className={styles['analysisBox']}>
+                    <div className={styles['front']}>
+                        <i><FontAwesomeIcon icon={faChartLine} /></i>
+                    </div>
+                    <figure className={styles['back']}>
+                        <img src={cluster_img} alt="cluster_img" className={styles['analysisData']} onClick={goToClusteredDataPage}></img>
+                    </figure>
+                </div>
             </div>
         </div>
     );

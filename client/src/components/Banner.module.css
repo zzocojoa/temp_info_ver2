@@ -16,7 +16,7 @@
 
 .bannerWrap {
     background-color: #263343;
-    position: fixed;
+    position: sticky;
     top: 0;
     width: 100%;
     z-index: 1000;

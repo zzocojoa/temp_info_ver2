@@ -1,14 +1,208 @@
-/* client/src/components/clustercomponents/DieTempProfile.module.css */
 
 .DieTempProfileWrap {
-  margin: 0 auto;
-  width: 80%;
+  margin-top: 80px;
+  margin-bottom: 80px;
 }
 
 .DieTempProfileContainer {
-  margin-top: 80px;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 80px;
 }
 
-.DieTempProfileBox {
+.searchBoxWrap {
   display: flex;
 }
+
+.searchBoxContainer {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  margin: 10px;
+  gap: 20px;
+}
+
+.searchBox {
+  position: relative;
+}
+
+.searchText {
+  color: dimgray;
+  width: 8rem;
+  display: block;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: #e4dad4;
+  background-clip: padding-box;
+  border: 1px solid #dee2e6;
+  align-items: stretch;
+  border-radius: 0.375rem;
+  box-shadow: 4px 4px 6px 0 rgb(189, 175, 167, .5),
+    -4px -4px 6px 0 rgb(189, 175, 167, .2);
+  transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.searchTextLabel {
+  position: absolute;
+  color: #fff;
+  background-color: #343a40;
+  left: 0.35rem;
+  top: 30%;
+  transform: translateY(-50%);
+  transition: transform 0.3s, font-size 0.3s, opacity 0.3s;
+  pointer-events: none;
+  opacity: 0;
+  border: 1px solid black;
+  border-radius: 0.375rem;
+  padding: .2rem .35rem;
+}
+
+.searchText:focus+.searchTextLabel,
+.searchText:not(:placeholder-shown)+.searchTextLabel {
+  transform: translateY(-2.2rem);
+  font-size: 0.75rem;
+  opacity: .95;
+}
+
+.searchText:focus::placeholder {
+  opacity: 0;
+}
+
+.searchText:focus {
+  border-color: blue;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.searchText::placeholder {
+  font-size: .8rem;
+  opacity: 1;
+  color: dimgray;
+}
+
+.searchText:invalid {
+  animation: justshake .3s forwards;
+  color: red;
+}
+
+@keyframes justshake {
+  25% {
+    transform: translateX(5px);
+  }
+
+  50% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
+
+  100% {
+    transform: translateX-(5px);
+  }
+}
+
+.suggestions {
+  position: absolute;
+  margin-top: 5px;
+  top: 100%;
+  left: 0;
+  max-height: 130px;
+  overflow-y: auto;
+  display: inline-block;
+  padding: 10px 0;
+  list-style: none;
+  width: 8rem;
+  z-index: 1000;
+  border-radius: 0.375rem;
+  background-color: #343a40;
+  background-clip: padding-box;
+  border: 1px solid #343a40;
+  align-items: stretch;
+  border-radius: 0.375rem;
+  box-shadow: 4px 4px 6px 0 rgb(189, 175, 167, .5),
+    -4px -4px 6px 0 rgb(189, 175, 167, .2);
+  transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.scroll {
+  overflow-y: scroll;
+  box-sizing: border-box;
+  font-family: 'Nanum Gothic';
+}
+
+
+.scroll-css::-webkit-scrollbar {
+  width: 20px;
+}
+
+
+.scroll-css::-webkit-scrollbar-thumb {
+  background-color: #fff;
+  border-radius: 10px;
+  border: 7px solid #343a40;
+}
+
+
+.scroll-css::-webkit-scrollbar-track {
+  background-color: #343a40;
+}
+
+.suggestions li {
+  cursor: pointer;
+  color: #fff;
+  padding-left: 10px;
+}
+
+.suggestions li:hover {
+  background-color: #0d6efd;
+}
+
+.clusterLoadData {
+  width: 6rem;
+  font-size: 16px;
+  border: 2px solid #263343;
+  border-radius: 10px;
+  padding: 5px 10px;
+  text-align: center;
+  background: #263343;
+  background: linear-gradient(0deg, rgb(38, 51, 67) 0%, rgb(29, 39, 51) 100%);
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.clusterLoadData:before {
+  height: 0%;
+  width: 2px;
+}
+
+.clusterLoadData:hover {
+  font-weight: 700;
+  box-shadow: 4px 4px 6px 0 rgba(255, 255, 255, .5),
+    -4px -4px 6px 0 rgba(116, 125, 136, .5),
+    inset -4px -4px 6px 0 rgba(255, 255, 255, .2),
+    inset 4px 4px 6px 0 rgba(0, 0, 0, .4);
+}
+
+.clusterBox {
+  display: flex;
+  width: 100%;
+  height: 42rem;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 20px;
+  padding: 20px 30px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+

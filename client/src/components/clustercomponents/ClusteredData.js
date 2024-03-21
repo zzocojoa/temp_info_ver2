@@ -70,12 +70,13 @@ const ClusteredDataVisualization = () => {
 
   useEffect(() => {
     const loadSuggestions = async () => {
-      // 입력 값에 관계없이 searchDwNumber 함수를 호출합니다.
+      // 입력 값에 관계없이 searchDwNumber 함수를 호출
       const dwNumbers = await searchDwNumber(dwNumber);
-      // 중복 제거 로직은 유지합니다.
+      // 중복 제거 로직은 유지
       const uniqueDwNumbers = [...new Set(dwNumbers.map(item => item))];
       setSuggestions(uniqueDwNumbers);
-      setShowSuggestions(true); // 항상 드롭다운을 보여줍니다.
+      // 항상 드롭다운
+      setShowSuggestions(true);
     };
     loadSuggestions();
   }, [dwNumber]);
@@ -94,25 +95,28 @@ const ClusteredDataVisualization = () => {
     try {
       // 서버로부터 클러스터링 데이터 및 centroids 가져오기
       const { data: clusteredData, centroids, message } = await fetchClusteredData(dwNumber, k);
-      
-      // 클러스터링 데이터나 중심점 데이터가 없을 경우 서버에서 전달한 메시지를 사용하여 사용자에게 알립니다.
+
+      // 클러스터링 데이터나 중심점 데이터가 없을 경우 서버에서 전달한 메시지를 사용하여 사용자 알림
       if (!clusteredData || !centroids) {
         alert(`데이터를 불러오는 데 실패했습니다: ${message}`);
         return;
       }
   
-      // 클러스터링 데이터를 기반으로 차트 데이터셋을 구성합니다.
+      // 클러스터링 데이터를 기반으로 차트 데이터셋 구성
       const clusterGroups = clusteredData.reduce((groups, dataPoint) => {
+
         const cluster = dataPoint.cluster;
         if (!groups[cluster]) groups[cluster] = [];
         groups[cluster].push({
           x: dataPoint.median,
           y: parseFloat(dataPoint.dieNumber),
         });
+
         return groups;
       }, {});
-  
-      // 차트에 표시할 데이터셋 배열을 구성합니다.
+      console.log("clusterGroups: ", clusterGroups);
+
+      // 차트에 표시할 데이터셋 배열 구성
       const datasets = Object.entries(clusterGroups).map(([cluster, dataPoints]) => ({
         label: `Cluster ${cluster}`,
         data: dataPoints,
@@ -120,7 +124,7 @@ const ClusteredDataVisualization = () => {
         radius: 4,
       }));
   
-      // 중심점 데이터가 있을 경우, 해당 데이터를 차트 데이터셋에 추가합니다.
+      // 중심점 데이터가 있을 경우, 해당 데이터를 차트 데이터셋에 추가
       if (centroids.length) {
         datasets.push({
           label: 'Centroids',
@@ -131,10 +135,10 @@ const ClusteredDataVisualization = () => {
         });
       }
   
-      // 구성된 데이터셋을 차트 데이터로 설정합니다.
+      // 구성된 데이터셋을 차트 데이터로 설정
       setChartData({ datasets });
     } catch (error) {
-      // 오류 발생 시, 서버로부터 받은 오류 메시지 또는 기본 오류 메시지를 사용하여 알립니다.
+      // 오류 발생 시, 서버로부터 받은 오류 메시지 또는 기본 오류 메시지를 사용하여 알림
       const errorMessage = error.response?.data?.message || '알 수 없는 오류가 발생했습니다.';
       alert(errorMessage);
     }
