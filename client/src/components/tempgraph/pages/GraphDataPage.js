@@ -1,4 +1,4 @@
-// src/pages/GraphDataPage.js
+// client\src\components\tempgraph\pages\GraphDataPage.js
 
 import React, { useState, useEffect, useCallback } from 'react';
 import FileUploadButton from '../tempgraphmodule/FileUploadButton';
@@ -8,6 +8,7 @@ import LineGraph from '../tempgraphmodule/LineGraph';
 import BoxGraph from '../tempgraphmodule/BoxGraph';
 import DataListUI from '../tempgraphmodule/DataListUI';
 import TextInputBox from '../tempgraphmodule/TextInputBox';
+import ThresholdOutlierEliminationLogic from '../tempgraphmodule/ThresholdOutlierEliminationlogic';
 import styles from './GraphData.module.css';
 
 const GraphDataPage = React.memo(() => {
@@ -80,6 +81,7 @@ const GraphDataPage = React.memo(() => {
         <div className={styles['leftPanel']}>
           <h2 className={styles['headerTitle']}>Graph Data Visualization</h2>
           <FileUploadButton className={styles['fileUploadButton']} onFileSelect={handleFileSelect} />
+          <ThresholdOutlierEliminationLogic onResults={handleUploadSuccess} />
           <div className={styles['graphGenerated']}>
             <UploadDataButton className={styles['uploadDataButton']} selectedFile={uploadedFile} onUploadSuccess={handleUploadSuccess} isEnabled={!!uploadedFile} />
             {isGraphGenerated && (

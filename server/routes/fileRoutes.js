@@ -1,23 +1,30 @@
 // server\routes\fileRoutes.js
 
+const fs = require('fs').promises;
 const path = require('path');
 const express = require('express');
 const multer = require('multer');
-const fs = require('fs').promises;
 const router = express.Router();
 const Papa = require('papaparse');
 const FileMetadata = require('../models/FileMetadata');
+const ThresholdMetadata = require('../models/ThresholdFileMetadata');
 const processData = require('../utils/refining');
 const calculateMedian = require('../utils/calculateMedian');
 const processFilteredData = require('../utils/filteredDataProcessor');
 const calculateBoxplotStats = require('../utils/boxplotStats');
 const performClustering = require('../utils/performClustering');
+const { v4: uuidv4 } = require('uuid');
+const { spawn } = require('child_process');
+const archiver = require('archiver');
+
 
 // 파일 업로드 미들웨어 설정
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
   filename: (req, file, cb) => cb(null, file.originalname)
 });
+// 정적 파일 제공을 위한 미들웨어
+router.use('/files', express.static(path.join(__dirname, '../uploads')));
 
 const upload = multer({ storage: storage });
 
@@ -129,6 +136,83 @@ router.post('/process-filtered-data', async (req, res) => {
   }
 });
 
+// 업로드된 파일 처리 및 정제된 데이터를 CSV로 저장
+router.post('/threshold-upload', upload.array('files'), async (req, res) => {
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).send('No files uploaded.');
+  }
+  const uploadId = uuidv4();
+  try {
+    const results = await Promise.all(req.files.map(async (file) => {
+      const filePath = path.join(__dirname, '../uploads', file.filename);
+      const pythonProcess = spawn('python', [path.join(__dirname, '../utils/thresholdProcess.py'), filePath]);
+      let dataString = '';
+      pythonProcess.stdout.on('data', (data) => {
+        dataString += data.toString();
+      });
+      return new Promise((resolve, reject) => {
+        pythonProcess.stderr.on('data', (data) => {
+          console.error(`stderr: ${data}`);
+          reject('Server error during Python script execution');
+        });
+        pythonProcess.on('close', async (code) => {
+          if (code !== 0) {
+            reject(`Python script exited with code ${code}`);
+          } else {
+            try {
+              const jsonData = JSON.parse(dataString);
+              // CSV 형식으로 정제된 데이터 저장
+              const csv = Papa.unparse(jsonData[0].filtered_data);
+              // 업로드된 파일명을 기반으로 정제된 파일명 생성
+              const originalFileNameWithoutExtension = path.basename(file.originalname, path.extname(file.originalname));
+              const filteredDataFilePath = path.join(__dirname, '../OutlierFile', `${originalFileNameWithoutExtension}.csv`);
+              await fs.writeFile(filteredDataFilePath, csv);
+              const newFileMetadata = new ThresholdMetadata({
+                uploadId,
+                filePath: filteredDataFilePath,
+                fileName: `${originalFileNameWithoutExtension}-filtered.csv` // 정제된 파일명 설정
+              });
+              await newFileMetadata.save();
+              resolve(jsonData);
+            } catch (error) {
+              reject(`Error parsing JSON output from Python script: ${error}`);
+            }
+          }
+        });
+      });
+    }));
+    res.json({ uploadId, files: results });
+  } catch (error) {
+    console.error('An error occurred:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// 업로드된 파일 데이터 다운로드
+router.get('/download-filtered-data', async (req, res) => {
+  const { uploadId } = req.query;
+  try {
+    const fileMetadatas = await ThresholdMetadata.find({ uploadId });
+    if (!fileMetadatas || fileMetadatas.length === 0) {
+      return res.status(404).send('No files found for this upload ID.');
+    }
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    archive.on('error', function (err) {
+      res.status(500).send({ error: err.message });
+    });
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="${uploadId}.zip"`);
+    archive.pipe(res);
+    fileMetadatas.forEach(metadata => {
+      archive.file(metadata.filePath, { name: path.basename(metadata.filePath) });
+    });
+    archive.finalize();
+  } catch (error) {
+    console.error('An error occurred:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 // 필터링된 데이터 처리 및 중앙값 계산 엔드포인트
 router.post('/filtered-linegraph-data', async (req, res) => {
   const { data, startTime, endTime } = req.body;
@@ -215,7 +299,7 @@ router.delete('/data/:id', async (req, res) => {
   try {
     const id = req.params.id;
     const deletedItem = await FileMetadata.findByIdAndDelete(id);
-    
+
     if (!deletedItem) {
       console.log(`Data with id ${id} not found for deletion.`);
       return res.status(404).send({ message: 'Data not found' });

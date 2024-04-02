@@ -6,6 +6,11 @@ import StatisticsTable from './StatisticsTable'; // 통계 테이블 컴포넌�
 import styles from './BoxGraph.module.css';
 
 const BoxGraph = ({ boxplotStats }) => {
+
+  if (!boxplotStats || typeof boxplotStats.min === 'undefined' || typeof boxplotStats.q1 === 'undefined' || typeof boxplotStats.median === 'undefined' || typeof boxplotStats.q3 === 'undefined' || typeof boxplotStats.max === 'undefined') {
+    return <div>No data available</div>;
+  }
+
   const chartOptions = {
     chart: { type: 'boxPlot', height: 350 },
     title: { text: 'Temperature Box Plot', align: 'left' },

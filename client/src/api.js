@@ -1,6 +1,7 @@
 // client/src/api.js
 
-const API_BASE_URL = 'http://localhost:5000/api';
+// const API_BASE_URL = 'http://localhost:5000/api';
+export const API_BASE_URL = 'http://localhost:5000/api';
 
 function createFetchRequest(method, body = null) {
   const headers = new Headers();
@@ -63,6 +64,67 @@ export async function uploadCsvFile(files) {
   } catch (error) {
     console.error('Error uploading CSV file:', error);
     throw error; // 컴포넌트에서 처리할 수 있게 에러를 다시 던짐
+  }
+}
+
+// 이상치 필터링 및 중앙값 계산을 위한 API 함수
+export async function Threshold(files) {
+  const formData = new FormData();
+  for (let i = 0; i < files.length; i++) {
+    formData.append('files', files[i]);
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/threshold-upload`, {
+      method: 'POST',
+      body: formData,
+      cache: 'no-cache',
+    });
+    if (!response.ok) {
+      throw new Error('Server responded with an error');
+    }
+    // Assume the server's response includes an upload ID.
+    // The server should be modified accordingly to send this ID back.
+    const data = await response.json();
+    // This will return the upload ID along with any other data the server sends back.
+    return data;
+  } catch (error) {
+    console.error('Error in Threshold:', error);
+    throw error;
+  }
+}
+
+
+// 이상치 필터링 다운로드를 위한 API 함수
+export async function downloadFilteredData(uploadId) {
+  if (!uploadId) {
+    throw new Error('다운로드를 위한 업로드 ID가 제공되지 않았습니다.');
+  }
+
+  // 파일 다운로드를 위한 엔드포인트 URL 생성
+  const url = `${API_BASE_URL}/download-filtered-data?uploadId=${encodeURIComponent(uploadId)}`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`서버에서 오류 응답: ${response.status}`);
+    }
+
+    // 서버로부터 받은 ZIP 파일을 Blob으로 변환
+    const blob = await response.blob();
+    // Blob 객체를 이용해 다운로드 URL 생성
+    const downloadUrl = window.URL.createObjectURL(blob);
+    // 생성된 URL로 다운로드 링크 생성
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = 'filtered_data.zip'; // ZIP 파일명 설정
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(downloadUrl);
+  } catch (error) {
+    console.error('Error downloading filtered data:', error);
+    throw error;
   }
 }
 
