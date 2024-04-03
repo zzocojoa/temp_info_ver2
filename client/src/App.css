@@ -4,10 +4,13 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: "Karla", sans-serif;
+  /* font-family: "Lora", serif; */
+  /* font-family: "Archivo", sans-serif; */
+  /* font-family: "Frank Ruhl Libre", serif; */
 }
 
 body {
-  font-family: 'Arial', sans-serif;
   background-color: #f4f4f4;
 }
 
