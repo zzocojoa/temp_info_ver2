@@ -36,9 +36,9 @@ function Banner({ isOpen, setIsOpen }) {
                         </label>
                     </div>
                 </div>
-                <div className={styles['banner-logo']} onClick={() => navigateTo('/')} style={{ cursor: 'pointer' }}>
+                <a href="http://www.aldmc.co.kr/kor/main/main.html" className={styles['banner-logo']} style={{ cursor: 'pointer' }} aria-label="aldmc" target='_blank' rel="noreferrer noopener">
                     {isOpen && <img src="./images/logo.png" alt="logo" />}
-                </div>
+                </a>
             </div>
             <div className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ''}`}>
                 <div className={styles['bannerContainer']}>
@@ -68,15 +68,16 @@ function Banner({ isOpen, setIsOpen }) {
                                 </div>
                                 {isOpen ? <div className={styles['banner-title-name']}>준비중...</div> : null}
                             </li>
-                        </ul>
-                        <ul className={styles['banner-icons']}>
-                            <li>
-                                <a href='https://github.com/zzocojoa/temp_info_ver2' aria-label="GitHub" target='_blank' rel="noreferrer noopener">
+                            <li className={styles['banner-title']} style={{ cursor: 'pointer' }}>
+                                <a className={styles['icon-img']} href='https://github.com/zzocojoa/temp_info_ver2' aria-label="GitHub" target='_blank' rel="noreferrer noopener">
                                     <FontAwesomeIcon icon={faGithub} />
                                 </a>
                             </li>
+                        </ul>
+                        <ul className={styles['banner-icons']}>
+
                             <li onClick={() => navigateTo('/Card')} style={{ cursor: 'pointer' }}>
-                                {/* <img className={styles['developer-icon']} src="./images/hoihou-icon-1.png" alt="hoihou-icon-1" /> */}
+                                <img className={styles['developer-icon']} src="./images/hoihou-icon-1.png" alt="hoihou-icon-1" />
                             </li>
                         </ul>
                     </div>

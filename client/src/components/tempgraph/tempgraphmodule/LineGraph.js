@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, Tooltip, Brush, ReferenceLine,
-} from 'recharts';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import Plotly from 'plotly.js-dist-min';
 import { useLineGraphData } from './hooks/useLineGraphData';
 import { calculateMedian } from '../../../api';
 import styles from './LineGraph.module.css';
@@ -13,34 +11,30 @@ const LineGraph = React.memo(({
   dieNumber,
   wNumber,
   dwNumber,
-  onBrushChange,
   initialStartTime,
   initialEndTime,
   setBoxplotStats
 }) => {
-  const { startTime, endTime, handleBrushChange } = useLineGraphData(averagedData, initialStartTime, initialEndTime, onBrushChange, setBoxplotStats);
-  const [chartSize, setChartSize] = useState({ width: 600, height: 300 });
+  const { startTime, endTime, handleBrushChange } = useLineGraphData(averagedData, initialStartTime, initialEndTime, setBoxplotStats);
+  const [chartSize, setChartSize] = useState({ width: 600 });
   const [medianValue, setMedianValue] = useState(0);
+  const plotRef = useRef(null);
 
-  // 그래프 반응형 로직
   useEffect(() => {
     const handleResize = () => {
       const maxWidth = 1145;
-      const calculatedWidth = window.innerWidth <= maxWidth ? window.innerWidth * 0.9 : Math.min(window.innerWidth * 0.6, 1000);
-  
+      const calculatedWidth = window.innerWidth <= maxWidth ? window.innerWidth * 0.9 : Math.min(window.innerWidth * 0.6, 950);
+
       setChartSize({
-        width: Math.min(calculatedWidth, 1000),
-        height: 400
+        width: Math.min(calculatedWidth, 950)
       });
     };
-  
+
     window.addEventListener('resize', handleResize);
     handleResize();
 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  const temperatureFormatter = useCallback((value) => `${value.toFixed(2)}°C`, []);
 
   const fetchMedian = useCallback(async (averagedData) => {
     const temperatures = averagedData.map(item => item.temperature);
@@ -57,6 +51,70 @@ const LineGraph = React.memo(({
       fetchMedian(averagedData);
     }
   }, [averagedData, fetchMedian]);
+
+  useEffect(() => {
+    if (averagedData.length > 0) {
+      const times = averagedData.map(item => item.time);
+      const temperatures = averagedData.map(item => item.temperature);
+
+      const data = [
+        {
+          x: times,
+          y: temperatures,
+          type: 'scatter',
+          mode: 'lines',
+          name: 'Temperature',
+        },
+        {
+          x: times,
+          y: Array(times.length).fill(medianValue),
+          type: 'scatter',
+          mode: 'lines',
+          name: 'Median',
+          line: { dash: 'dash', color: 'red' },
+        },
+      ];
+
+      const layout = {
+        title: 'Temperature Over Time',
+        xaxis: {
+          title: 'Time',
+        },
+        yaxis: {
+          title: 'Temperature (°C)',
+        },
+        width: chartSize.width,
+        height: '100%',
+        showlegend: false,
+        paper_bgcolor: '#e2d1c7', // 전체 차트 배경색
+        plot_bgcolor: '#e2d1c7', // 플롯 영역 배경색
+        margin: {
+          l: 60,
+          r: 20,
+          t: 40,
+          b: 80
+        },
+        shapes: [
+          {
+            type: 'rect',
+            xref: 'x',
+            yref: 'paper',
+            x0: startTime,
+            x1: endTime,
+            y0: 0,
+            y1: 1,
+            fillcolor: '#d3d3d3',
+            opacity: 0.5,
+            line: {
+              width: 0,
+            },
+          },
+        ],
+      };
+
+      Plotly.newPlot(plotRef.current, data, layout);
+    } 
+  }, [averagedData, medianValue, startTime, endTime, chartSize]);
 
   return (
     <div className={styles['lineGrahpWrap']}>
@@ -132,34 +190,7 @@ const LineGraph = React.memo(({
           </div>
         </div>
       </div>
-      <LineChart className={styles['lineChart']}
-        width={chartSize.width}
-        height={chartSize.height}
-        data={averagedData}
-        margin={{
-          top: 20, right: 45, left: -10, bottom: 10,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <Tooltip formatter={temperatureFormatter} />
-        <XAxis dataKey="time" />
-        <YAxis domain={['auto', 'auto']} />
-        <Legend />
-        <Line
-          type="monotone"
-          dataKey="temperature"
-          stroke="#8884d8"
-          dot={false}
-          activeDot={{ r: 4 }}
-        />
-        <Brush
-          dataKey="time"
-          height={30}
-          stroke="#8884d8"
-          onChange={handleBrushChange}
-        />
-        <ReferenceLine y={medianValue} label="Median" stroke="red" strokeDasharray="3 3" />
-      </LineChart>
+      <div ref={plotRef} className={styles['plotly-chart']}></div>
     </div>
   );
 });

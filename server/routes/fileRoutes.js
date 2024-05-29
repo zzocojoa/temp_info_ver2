@@ -132,7 +132,7 @@ router.post('/process-filtered-data', async (req, res) => {
   }
 });
 
-// 업로드된 파일 처리 및 정제된 데이터를 CSV로 저장
+// 정제된 파일 업로드 처리 엔드포인트 (다중 파일 지원)
 router.post('/threshold-upload', upload.array('files'), async (req, res) => {
   if (!req.files || req.files.length === 0) {
     return res.status(400).send('No files uploaded.');
@@ -183,6 +183,7 @@ router.post('/threshold-upload', upload.array('files'), async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
+
 
 // 업로드된 파일 데이터 다운로드
 router.get('/download-filtered-data', async (req, res) => {

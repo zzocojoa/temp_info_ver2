@@ -1,55 +1,26 @@
-/* client\src\components\LineGraph.module.css */
-
 .lineGrahpWrap {
   display: flex;
   flex-direction: column;
-  align-content: center;
   align-items: center;
 }
 
-.chartContainer {
-  /* display: flex; */
+.textWrap {
   width: 100%;
-  height: 100%; 
-  /* min-width: 300px;
-  min-height: 300px; */
-}
-
-.lineChart {
-  display: inline-block;
-  margin: 10px 0 30px 0;
-  padding: 10px 0;
-  border-radius: 10px;
-  box-shadow: 4px 4px 6px 0 rgb(189, 175, 167, .5),
-    -4px -4px 6px 0 rgb(189, 175, 167, .2);
-}
-
-.XAxis {
-  color: white;
-}
-
-.timeContaier {
   display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.textContainer {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 5px;
 }
 
 .NumberWrap {
   display: flex;
-  align-items: center;
-}
-
-label {
-  display: flex;
-}
-
-label p {
-  margin-right: 5px;
-}
-
-label input {
-  margin-right: 5px;
-
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 .ExWrap {
@@ -60,7 +31,7 @@ label input {
   align-items: stretch;
   border-radius: 0.375rem;
   box-shadow: 4px 4px 6px 0 rgb(189, 175, 167, .5),
-  -4px -4px 6px 0 rgb(189, 175, 167, .2)
+  -4px -4px 6px 0 rgb(189, 175, 167, .2);
 }
 
 .ExNumber {
@@ -121,13 +92,17 @@ label input {
   }
 }
 
-.timeInputContainer {
+.timeInputWrap {
   display: flex;
-  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
-.startTimeBox,
-.endTimeBox {
+.timeInputContainer {
+  display: flex;
+}
+
+.startTimeBox, .endTimeBox {
   display: flex;
   justify-content: center;
   width: 15rem;
@@ -135,11 +110,10 @@ label input {
   align-items: stretch;
   border-radius: 0.375rem;
   box-shadow: 4px 4px 6px 0 rgb(189, 175, 167, .5),
-  -4px -4px 6px 0 rgb(189, 175, 167, .2)
+  -4px -4px 6px 0 rgb(189, 175, 167, .2);
 }
 
-.startTimeTitle,
-.endTimeTitle {
+.startTimeTitle, .endTimeTitle {
   width: 30%;
   display: flex;
   align-items: center;
@@ -158,8 +132,7 @@ label input {
   border-bottom-left-radius: 0.375rem;
 }
 
-.startTimeInput,
-.endTimeInput {
+.startTimeInput, .endTimeInput {
   width: 70%;
   display: block;
   padding: 0.375rem 0.75rem;
@@ -175,6 +148,21 @@ label input {
   border-top-right-radius: 0.375rem;
   border-bottom-right-radius: 0.375rem;
   transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.plotly-chart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%; /* 원하는 너비 설정 */
+  max-width: 1000px; /* 최대 너비 설정 */
+  height: 100%; /* 원하는 높이 설정 */
+  margin-bottom: 30px;
+  border: 1px solid #e2d1c7;
+    border-radius: 10px;
+    background-color: #e2d1c7;
+    box-shadow: 4px 4px 6px 0 rgb(189, 175, 167, .5), -4px -4px 6px 0 rgb(189, 175, 167, .2);
+  overflow: hidden;
 }
 
 @media (max-width: 1470px) {

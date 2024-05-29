@@ -83,17 +83,13 @@ export async function Threshold(files) {
     if (!response.ok) {
       throw new Error('Server responded with an error');
     }
-    // Assume the server's response includes an upload ID.
-    // The server should be modified accordingly to send this ID back.
     const data = await response.json();
-    // This will return the upload ID along with any other data the server sends back.
     return data;
   } catch (error) {
     console.error('Error in Threshold:', error);
     throw error;
   }
 }
-
 
 // 이상치 필터링 다운로드를 위한 API 함수
 export async function downloadFilteredData(uploadId) {
