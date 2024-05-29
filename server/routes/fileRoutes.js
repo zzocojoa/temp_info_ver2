@@ -34,9 +34,9 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     return res.status(400).send('No file uploaded.');
   }
   const filePath = req.file.path;
-  let allData = [];
   try {
     const fileContent = await fs.readFile(filePath, 'utf8');
+    let allData = [];
     Papa.parse(fileContent, {
       header: true,
       dynamicTyping: true,
@@ -46,8 +46,8 @@ router.post('/upload', upload.single('file'), async (req, res) => {
         allData.push({ date, time, temperature });
       }
     });
-    const { averagedData, boxplotStats } = processData(allData);
 
+    const { averagedData, boxplotStats } = processData(allData);
     res.json({ success: true, message: 'File processed successfully', data: averagedData, boxplotStats });
   } catch (error) {
     console.error('Error processing file:', error);
@@ -71,10 +71,8 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
     const filePath = file.path;
     const fileName = file.originalname;
 
-    // 파일 이름에서 정보 추출
     const match = fileName.match(/(\d{4}-\d{2}-\d{2})-(\d+)_(\d+)_(\d+)_(\d+)\.csv/);
     if (!match) {
-      // 파일 삭제 로직을 에러 처리 전에 배치하여, 파일이 올바르게 삭제되도록 함
       await fs.unlink(filePath);
       return { fileName, error: 'Invalid file name format.' };
     }
@@ -111,15 +109,13 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
       return { fileName, error: error.toString() };
     } finally {
       try {
-        await fs.unlink(filePath); // 임시 업로드 파일 삭제
+        await fs.unlink(filePath);
       } catch (error) {
         console.error('Error deleting file:', error);
       }
     }
   }));
 
-
-  // 모든 파일 처리 결과 반환
   res.json(uploadResults);
 });
 

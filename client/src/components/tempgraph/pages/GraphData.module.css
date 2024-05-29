@@ -1,6 +1,7 @@
 /* client\src\pages\GraphData.module.css */
 
 .graphDataWrap {
+  transition: margin-left 0.3s ease;
   max-width: 1740px;
   margin: 30px auto;
   padding-bottom: 80px;
@@ -12,6 +13,7 @@
 }
 
 .graphDataContainer {
+  display: flex;
   padding: 20px;
   display: grid;
   grid-template-areas:
@@ -19,8 +21,8 @@
   grid-template-columns:
     65% 25%;
   gap: 20px;
-  align-content: start;
-  align-items: start;
+  align-content: flex-start;
+  align-items: flex-start;
   justify-content: space-around;
   justify-items: stretch;
 }

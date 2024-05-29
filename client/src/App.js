@@ -1,6 +1,6 @@
 // client\src\App.js
 
-import React from 'react';
+import React, { useState } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Banner from './components/Banner';
 import GraphDataPage from './components/tempgraph/pages/GraphDataPage';
@@ -11,15 +11,18 @@ import ClusteredDataVisualization from './components/clustercomponents/Clustered
 import DieTemperatureProfileChart from './components/clustercomponents/DieTempProfile';
 import Card from './components/3D/Card';
 import Footer from './components/Footer';
-import './App.css';
+import styles from './App.css';
 
 function App() {
   // const profileImage = process.env.PUBLIC_URL + "/images/jeonghyeon-1.jpg";
   const profileImage = "./images/jeonghyeon-1.jpg";
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
     <Router>
-      <Banner />
+      <div className={styles['root-display']}>
+        <Banner isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+        <div style={{ marginLeft: isSidebarOpen ? '200px' : '60px', transition: 'margin-left 0.3s ease' }}>
       <Routes>
         {/* <Route path="/"  /> */}
         <Route path="/" element={<GraphDataPage />} />
@@ -31,6 +34,8 @@ function App() {
         <Route path="/dietemp-data" element={<DieTemperatureProfileChart />} />
         <Route path="/card" element={<Card selectedImage={profileImage} />} />
       </Routes>
+      </div>
+      </div>
       <Footer />
     </Router>
   );

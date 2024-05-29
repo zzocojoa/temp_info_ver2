@@ -1,22 +1,19 @@
 // client/src/components/Banner.js
-
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Banner.module.css';
 import { faSignal, faMagnifyingGlassChart, faChartLine } from '@fortawesome/free-solid-svg-icons';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-function Banner() {
+function Banner({ isOpen, setIsOpen }) {
     let navigate = useNavigate();
-    const [isOpen, setIsOpen] = useState(false);
 
     const navigateTo = (path) => {
         navigate(path);
     };
 
     const toggleSidebar = () => {
-        console.log('Toggling sidebar. Current state is:', isOpen);
         setIsOpen(!isOpen);
     };
 
@@ -28,19 +25,21 @@ function Banner() {
 
     return (
         <div className={styles.bannerWrap}>
-            <input type="checkbox" id="menuicon" className={styles.menuIcon} onChange={toggleSidebar} checked={isOpen} />
-            <div className={styles['bannerlogoWrap']}>
-                <label htmlFor="menuicon" className={styles.menuLabel}>
-                    <span className={getSpanClassName('menuSpan', 'menuSpanFirst')}></span>
-                    <span className={`${getSpanClassName('menuSpan', 'menuSpanMiddle')} ${isOpen ? styles.hidden : ''}`}></span>
-                    <span className={getSpanClassName('menuSpan', 'menuSpanLast')}></span>
-
-                </label>
+            <div className={styles.bannerHeader}>
+                <div className={styles.bannercheckbox}>
+                    <input type="checkbox" id="menuicon" className={styles.menuIcon} onChange={toggleSidebar} checked={isOpen} />
+                    <div className={styles['bannerlogoWrap']}>
+                        <label htmlFor="menuicon" className={styles.menuLabel}>
+                            <span className={getSpanClassName('menuSpan', 'menuSpanFirst')}></span>
+                            <span className={`${getSpanClassName('menuSpan', 'menuSpanMiddle')} ${isOpen ? styles.hidden : ''}`}></span>
+                            <span className={getSpanClassName('menuSpan', 'menuSpanLast')}></span>
+                        </label>
+                    </div>
+                </div>
                 <div className={styles['banner-logo']} onClick={() => navigateTo('/')} style={{ cursor: 'pointer' }}>
-                        {isOpen && <img src="./images/logo.png" alt="logo" />}
+                    {isOpen && <img src="./images/logo.png" alt="logo" />}
                 </div>
             </div>
-
             <div className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ''}`}>
                 <div className={styles['bannerContainer']}>
                     <div className={styles['banner']}>

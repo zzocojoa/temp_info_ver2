@@ -1,3 +1,5 @@
+// client\src\components\clustercomponents\DieTempProfile.js
+
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { fetchDieTemperatureProfile, searchDwNumber } from '../../api';

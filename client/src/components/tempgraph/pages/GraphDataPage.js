@@ -1,4 +1,4 @@
-// client\src\components\tempgraph\pages\GraphDataPage.js
+// client/src/components/tempgraph/pages/GraphDataPage.js
 
 import React, { useState, useEffect, useCallback } from 'react';
 import FileUploadButton from '../tempgraphmodule/FileUploadButton';
@@ -10,6 +10,7 @@ import DataListUI from '../tempgraphmodule/DataListUI';
 import TextInputBox from '../tempgraphmodule/TextInputBox';
 import ThresholdOutlierEliminationLogic from '../tempgraphmodule/ThresholdOutlierEliminationlogic';
 import styles from './GraphData.module.css';
+import Papa from 'papaparse';
 
 const GraphDataPage = React.memo(() => {
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -29,7 +30,6 @@ const GraphDataPage = React.memo(() => {
     dieNumber: '',
   });
 
-  // 그래프 생성 여부를 추적하는 상태 추가
   const [isGraphGenerated, setIsGraphGenerated] = useState(false);
 
   const handleFileSelect = useCallback((file) => {
@@ -56,31 +56,49 @@ const GraphDataPage = React.memo(() => {
   }, []);
 
   useEffect(() => {
-    // props로 받은 initialStartTime과 initialEndTime을 사용하여 초기 시간 설정
     setStartTime(initialStartTime);
     setEndTime(initialEndTime);
   }, [initialStartTime, initialEndTime]);
 
-  const handleSaveDataSuccess = useCallback(() => {
-    // 데이터 저장 성공 처리 로직
-  }, []);
+  const handleSaveDataSuccess = useCallback(() => {}, []);
 
   const handleBrushChange = useCallback((startIndex, endIndex) => {
-    // 시간 UI 상태로 저장
     const newStartTime = graphData[startIndex]?.time || '';
     const newEndTime = graphData[endIndex]?.time || '';
     setStartTime(newStartTime);
     setEndTime(newEndTime);
-    // 선택된 데이터 범위를 상태로 저장
     setSelectedRange({ start: startIndex, end: endIndex });
   }, [graphData]);
+
+  const processFile = (file) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const csvData = event.target.result;
+      const parsedData = Papa.parse(csvData, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+      }).data;
+
+      const worker = new Worker(new URL('../../../workers/averageDataWorker.js', import.meta.url));
+      const chunkSize = 1000; // 청크 크기 설정
+      worker.postMessage({ data: parsedData, chunkSize });
+
+      worker.onmessage = (event) => {
+        const averagedData = event.data;
+        setGraphData(averagedData);
+        setIsGraphGenerated(true);
+      };
+    };
+    reader.readAsText(file);
+  };
 
   return (
     <div className={styles['graphDataWrap']}>
       <div className={styles['graphDataContainer']}>
         <div className={styles['leftPanel']}>
           <h2 className={styles['headerTitle']}>Graph Data Visualization</h2>
-          <FileUploadButton className={styles['fileUploadButton']} onFileSelect={handleFileSelect} />
+          <FileUploadButton className={styles['fileUploadButton']} onFileSelect={(file) => { handleFileSelect(file); processFile(file); }} />
           <ThresholdOutlierEliminationLogic onResults={handleUploadSuccess} />
           <div className={styles['graphGenerated']}>
             <UploadDataButton className={styles['uploadDataButton']} selectedFile={uploadedFile} onUploadSuccess={handleUploadSuccess} isEnabled={!!uploadedFile} />
@@ -141,4 +159,3 @@ const GraphDataPage = React.memo(() => {
 });
 
 export default GraphDataPage;
-

@@ -1,120 +1,5 @@
 /* client\src\components\Banner.module.css */
 
-/* :root {
-    --text-color: #f0f4f5;
-    --background-color: #263343;
-    --accent-color: #d49466;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    list-style: none;
-}
-
-.bannerWrap {
-    background-color: #263343;
-    position: sticky;
-    top: 0;
-    width: 100%;
-    z-index: 1000;
-}
-
-.bannerContainer {
-    padding: 0 20px;
-}
-
-.banner {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 12px;
-}
-
-.banner-logo {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.banner-title {
-    color: #f0f4f5;
-    font-weight: 700;
-    font-size: 1.7rem;
-}
-
-.banner-logo img {
-    width: 7rem;
-    filter: drop-shadow(10px 7px 10px #d49466);
-}
-
-.banner-logo div {
-    display: inline-block;
-}
-
-.banner-menu {
-    display: flex;
-    border-radius: 5px;
-    gap: 25px;
-}
-
-.banner-menu li {
-    display: flex;
-    gap: 5px;
-    padding: 8px 12px;
-    border-radius: 5px;
-    font-size: 20px;
-    color: var(--accent-color);
-    font-weight: 700;
-    transition: background-color 0.3s ease;
-}
-
-.banner-menu>li .icon-img {
-    display: flex;
-    align-content: center;
-    justify-content: center;
-    align-items: center;
-}
-
-.banner-menu li:hover {
-    background-color: var(--accent-color);
-    color: #f0f4f5;
-}
-
-.banner-icons {
-    display: flex;
-    color: var(--accent-color);
-    gap: 10px;
-}
-
-.banner-icons li {
-    font-size: 30px;
-    display: flex;
-    align-content: center;
-    justify-content: center;
-    align-items: center;
-}
-
-.developer-icon {
-    width: 2.5rem;
-    filter: drop-shadow(10px 7px 10px #d49466);
-    transition: transform 0.3s ease-in-out;
-}
-
-.banner-icons a {
-    color: #d49466;
-    font-size: 1.9rem;
-}
-
-.developer-icon:hover {
-    transform: scale(1.3);
-} */
-
-
-/* client\src\components\Banner.module.css */
-
 :root {
     --text-color: #f0f4f5;
     --background-color: #263343;
@@ -137,29 +22,38 @@
     background-color: var(--background-color);
 }
 
+.bannerHeader {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
 .menuIcon {
     display: none;
 }
 
 .menuLabel {
     display: inline-block;
-    width: 30px;
-    height: 30px;
+    width: 35px;
+    height: 40px;
     position: relative;
     cursor: pointer;
     top: 20px;
-    left: 17px;
+    left: 13px;
     z-index: 3;
 }
+
 
 .menuSpan {
     display: block;
     background-color: #fff;
     width: 100%;
-    height: 3px;
+    height: 4px;
     position: absolute;
-    transition: background-color 0.35s ease-in-out, transform 0.35s ease-in-out;
+    transition: transform 0.35s ease-in-out, opacity 0.35s ease-in-out;
 }
+
 
 .menuSpanActive {
     background-color: #fff;
@@ -192,34 +86,29 @@
     display: none;
 }
 
-.banner {
+.bannerContainer {
     display: flex;
+    width: 100%;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    /* padding: 30px 12px; */
 }
 
-.bannerlogoWrap {
-    height: 3rem;
+.sidebar {
+    transition: width 0.3s ease;
+    width: 60px; /* 기본 너비 */
+    text-align: center;
 }
 
-.banner-logo {
-    display: inline-block;
-    position: relative;
-    cursor: pointer;
-    top: 1.3rem;
-    left: 1.6rem;
-    z-index: 3;
-}
-
-.banner-logo img {
-    width: 4rem;
+.sidebarOpen {
+    width: 200px; /* 열렸을 때의 너비 */
 }
 
 .banner-menu {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    width: 100%;
     gap: 25px;
     margin-top: 10px;
 }
@@ -227,18 +116,16 @@
 .banner-menu li {
     display: flex;
     align-items: center;
+    justify-content: center;
+    width: 100%;
     gap: .8rem;
     height: 3rem;
-    /* margin-left: .5rem; */
-    /* padding: 0 12px; */
-    /* justify-content: center; */
     border-radius: 5px;
     font-size: 20px;
     color: var(--accent-color);
     font-weight: 700;
     transition: background-color 0.3s ease;
     overflow: hidden;
-    width: 40px;
 }
 
 .banner-menu li:hover {
@@ -259,19 +146,67 @@
     transition: opacity 0.3s ease;
 }
 
-.banner-title-name {
-
-    font-size: 1rem;
-}
-
 .sidebarOpen .banner-menu li {
-    width: auto;
+    /* width: auto; */
     overflow: visible;
 }
 
 .sidebarOpen .banner-menu li .text {
     opacity: 1;
 }
+
+.banner-menu li button {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    height: 3rem;
+    border: none;
+    background: none;
+    color: var(--accent-color);
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    padding: 0;
+    width: 100%;
+    text-align: left;
+}
+
+.banner-menu li button:hover {
+    background-color: var(--accent-color);
+    color: #f0f4f5;
+}
+
+.bannerlogoWrap {
+    /* height: 3rem; */
+}
+
+.bannercheckbox {
+    margin: 0;
+    padding: 0;
+    /* height: 0;
+    width: 0; */
+}
+
+.banner-logo {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    top: 1.5rem;
+    left: 2.3rem;
+    z-index: 3;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.banner-logo img {
+    width: 5rem;
+}
+
+.banner-title-name {
+
+    font-size: 1rem;
+}
+
 
 .banner-icons {
     left: 0;
@@ -285,4 +220,15 @@
 .banner-icons a {
     color: #d49466;
     font-size: 1.9rem;
+}
+
+
+.banner-icons button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #d49466;
+    font-size: 1.9rem;
+    display: flex;
+    align-items: center;
 }
