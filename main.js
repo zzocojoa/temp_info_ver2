@@ -1,5 +1,3 @@
-// main.js
-
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const { exec } = require('child_process');
@@ -15,7 +13,8 @@ function createWindow() {
         }
     });
 
-    mainWindow.loadFile(path.join(__dirname, 'client/build/index.html'));
+    const startUrl = path.join(__dirname, 'client', 'build', 'index.html');
+    mainWindow.loadFile(startUrl);
 
     mainWindow.webContents.openDevTools();
 }

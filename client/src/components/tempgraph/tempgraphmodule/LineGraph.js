@@ -15,7 +15,7 @@ const LineGraph = React.memo(({
   initialEndTime,
   setBoxplotStats
 }) => {
-  const { startTime, endTime, handleBrushChange } = useLineGraphData(averagedData, initialStartTime, initialEndTime, setBoxplotStats);
+  const { startTime, endTime } = useLineGraphData(averagedData, initialStartTime, initialEndTime, setBoxplotStats);
   const [chartSize, setChartSize] = useState({ width: 600 });
   const [medianValue, setMedianValue] = useState(0);
   const plotRef = useRef(null);

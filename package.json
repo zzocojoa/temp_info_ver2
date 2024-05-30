@@ -6,10 +6,13 @@
   "scripts": {
     "start": "concurrently \"npm run server\" \"electron .\"",
     "server": "node server/app.js",
-    "build": "react-scripts build",
+    "build": "cd client && npm run build",
+    "build-client": "cd client && npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "electron-pack": "electron-builder build --win",
-    "package-win": "electron-packager . HeatWaveVisualizer --platform=win32 --arch=x64 --out=\"C:\\Users\\user\\Desktop\""
+    "package-win": "electron-packager . HeatWaveVisualizer --platform=win32 --arch=x64 --out=\"C:\\Users\\user\\Desktop\"",
+    "package-client": "npm run build-client && electron-packager . HeatWaveVisualizer --platform=win32 --arch=x64 --out=\"C:\\Users\\user\\Desktop\\dist\" --overwrite",
+    "package-server": "pkg . --out-path=\"C:\\Users\\user\\Desktop\""
   },
   "keywords": [],
   "author": "",
