@@ -1,40 +1,37 @@
+// client/src/components/tempgraph/tempgraphmodule/SaveCsvDataButton.js
+
 import React from 'react';
 import styles from './SaveCsvDataButton.module.css'
 import { saveData } from '../../../api';
 
 function SaveCsvDataButton({ data, fileName, onSaveSuccess, startTime, endTime }) {
   const downloadCsv = (data, fileName) => {
+    // numbering 정보가 있는 경우 해당 값을 사용하고, 없는 경우 기본값 사용
     const { countNumber = 'N/A', wNumber = 'N/A', dwNumber = 'N/A', dieNumber = 'N/A' } = data.numbering || {};
     const graphData = data.graphData;
 
+    // 파일명에서 날짜 추출
     const dateMatch = fileName.match(/\d{4}-\d{2}-\d{2}/);
     const dateFromFileName = dateMatch ? dateMatch[0] : new Date().toISOString().split('T')[0];
 
     const finalFileName = `${dateFromFileName}-${countNumber}_${wNumber}_${dwNumber}_${dieNumber}.csv`;
+    // console.log("finalFileName :", finalFileName);
+    let csvContent = "data:text/csv;charset=utf-8,date,time,temperature\n";
 
-    let csvContent = "date,time,temperature\n";
-    graphData.forEach(row => {
+    // graphData가 정의되지 않았을 경우를 처리
+    (graphData || []).forEach(row => {
       const { date, time, temperature } = row;
       csvContent += `${date},${time},${temperature}\n`;
     });
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    if (navigator.msSaveBlob) {
-      // For Internet Explorer and Edge
-      navigator.msSaveBlob(blob, finalFileName);
-    } else {
-      const link = document.createElement('a');
-      if (link.download !== undefined) {
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', finalFileName);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);  // Object URL 해제
-      }
-    }
+    // CSV 파일 다운로드 로직
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', finalFileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // 다운로드 핸들 로직

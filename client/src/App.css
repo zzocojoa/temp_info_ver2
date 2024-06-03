@@ -1,5 +1,17 @@
 /* client\src\App.css */
 
+/* .rootDisplay {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content {
+  flex: 1;
+  transition: margin-left 0.3s ease;
+  padding: 20px;
+} */
+
 * {
   margin: 0;
   padding: 0;

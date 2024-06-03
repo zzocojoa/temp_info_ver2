@@ -27,27 +27,31 @@ function ViewDataPage() {
   useEffect(() => {
     const fetchDetails = async () => {
       if (selectedItems && selectedItems.length > 0) {
-        const detailsPromises = selectedItems.map(id => fetchDataDetails(id));
-        const results = await Promise.all(detailsPromises);
-        // MongoDB 스키마에 따라 수정된 데이터 접근 로직
-        const allGraphData = results.flatMap(detail => detail.temperatureData || []);
-        const allBoxPlotData = results.map(detail => detail.boxplotStats).filter(data => data);
-        // 사용자 입력 데이터 처리를 위해 첫 번째 선택된 항목의 userInput을 사용
-        const firstUserInput = results[0]?.userInput || '';
-        const firstItemDetails = results[0]?.numbering || {};
-        const { countNumber, wNumber, dwNumber, dieNumber } = firstItemDetails;
-        const setInitialStartTime = results[0]?.startTime || '';
-        const setInitialEndTime = results[0]?.endTime || '';
-
-        // 상태에 Die_Number, DW_Number, W_Number 저장
-        setDetails({ countNumber, wNumber, dwNumber, dieNumber });
-        setGraphData(allGraphData);
-        setBoxPlotData(allBoxPlotData);
-        setUserInput(firstUserInput);
-        setstartTime(setInitialStartTime);
-        setendTime(setInitialEndTime);
+        try {
+          const detailsPromises = selectedItems.map(id => fetchDataDetails(id));
+          const results = await Promise.all(detailsPromises);
+          
+          const allGraphData = results.flatMap(detail => detail.temperatureData || []);
+          const allBoxPlotData = results.map(detail => detail.boxplotStats).filter(data => data);
+          const firstUserInput = results[0]?.userInput || '';
+          const firstItemDetails = results[0]?.numbering || {};
+          const { countNumber, wNumber, dwNumber, dieNumber } = firstItemDetails;
+          const setInitialStartTime = results[0]?.startTime || '';
+          const setInitialEndTime = results[0]?.endTime || '';
+    
+          setDetails({ countNumber, wNumber, dwNumber, dieNumber });
+          setGraphData(allGraphData);
+          setBoxPlotData(allBoxPlotData);
+          setUserInput(firstUserInput);
+          setstartTime(setInitialStartTime);
+          setendTime(setInitialEndTime);
+        } catch (error) {
+          console.error('Error fetching details:', error);
+          alert('Failed to fetch data details');
+        }
       }
     };
+    
 
     fetchDetails();
   }, [selectedItems]);

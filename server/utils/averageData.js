@@ -6,7 +6,6 @@ const calculateAveragedData = (filteredData) => {
     let groupedData = new Map();
     filteredData.forEach(item => {
         const roundedTime = moment(item.time, 'HH:mm:ss').startOf('minute').seconds(
-            // Math.floor(moment(item.time, 'HH:mm:ss').seconds() / 15) * 15
             moment(item.time, 'HH:mm:ss').seconds()
         ).format('HH:mm:ss');
 

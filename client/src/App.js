@@ -22,7 +22,7 @@ function App() {
     <Router>
       <div className={styles['root-display']}>
         <Banner isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-        <div style={{ marginLeft: isSidebarOpen ? '200px' : '60px', transition: 'margin-left 0.3s ease' }}>
+        <div style={{ marginLeft: isSidebarOpen ? '160px' : '60px', transition: 'margin-left 0.3s ease' }}>
       <Routes>
         {/* <Route path="/"  /> */}
         <Route path="/" element={<GraphDataPage />} />

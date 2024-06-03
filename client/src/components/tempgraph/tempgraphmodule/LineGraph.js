@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+// client\src\components\tempgraph\tempgraphmodule\LineGraph.js
+
+import React, { useState, useEffect } from 'react';
 import Plotly from 'plotly.js-dist-min';
 import { useLineGraphData } from './hooks/useLineGraphData';
 import { calculateMedian } from '../../../api';
@@ -11,110 +13,129 @@ const LineGraph = React.memo(({
   dieNumber,
   wNumber,
   dwNumber,
+  onBrushChange,
   initialStartTime,
   initialEndTime,
   setBoxplotStats
 }) => {
-  const { startTime, endTime } = useLineGraphData(averagedData, initialStartTime, initialEndTime, setBoxplotStats);
-  const [chartSize, setChartSize] = useState({ width: 600 });
+  const { startTime, endTime, handleBrushChange } = useLineGraphData(averagedData, initialStartTime, initialEndTime, onBrushChange, setBoxplotStats);
   const [medianValue, setMedianValue] = useState(0);
-  const plotRef = useRef(null);
 
   useEffect(() => {
-    const handleResize = () => {
-      const maxWidth = 1145;
-      const calculatedWidth = window.innerWidth <= maxWidth ? window.innerWidth * 0.9 : Math.min(window.innerWidth * 0.6, 950);
+    console.log("averagedData changed:", averagedData);
+  }, [averagedData]);
 
-      setChartSize({
-        width: Math.min(calculatedWidth, 950)
-      });
+  useEffect(() => {
+    console.log("startTime or endTime changed:", { startTime, endTime });
+  }, [startTime, endTime]);
+
+  useEffect(() => {
+    console.log("medianValue changed:", medianValue);
+  }, [medianValue]);
+
+  useEffect(() => {
+    const fetchMedian = async () => {
+      console.log("Fetching median for data:", averagedData);
+      const temperatures = averagedData.map(item => item.temperature);
+      try {
+        const median = await calculateMedian(temperatures);
+        console.log("Median value fetched:", median);
+        setMedianValue(median.median);
+      } catch (error) {
+        console.error('Error calculating median:', error);
+      }
     };
 
-    window.addEventListener('resize', handleResize);
-    handleResize();
-
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const fetchMedian = useCallback(async (averagedData) => {
-    const temperatures = averagedData.map(item => item.temperature);
-    try {
-      const median = await calculateMedian(temperatures);
-      setMedianValue(median.median);
-    } catch (error) {
-      console.error('Error calculating median:', error);
-    }
-  }, []);
-
-  useEffect(() => {
     if (averagedData.length > 0) {
+      console.log("Averaged data available, fetching median");
       fetchMedian(averagedData);
     }
-  }, [averagedData, fetchMedian]);
+  }, [averagedData]);
 
   useEffect(() => {
-    if (averagedData.length > 0) {
-      const times = averagedData.map(item => item.time);
-      const temperatures = averagedData.map(item => item.temperature);
+    const plotData = [{
+      x: averagedData.map(d => d.time),
+      y: averagedData.map(d => d.temperature),
+      type: 'scatter',
+      mode: 'lines',
+      line: { color: '#8884d8' },
+      hovertemplate: '%{y:.2f}°C<extra></extra>',  // Add hovertemplate for formatting tooltip
+    }];
 
-      const data = [
+    const layout = {
+      title: 'Temperature Over Time',
+      xaxis: { title: 'Time' },
+      yaxis: { title: 'Temperature (°C)', autorange: true },
+      showlegend: false,
+      paper_bgcolor: '#e2d1c7', // 전체 차트 배경색
+      plot_bgcolor: '#e2d1c7', // 플롯 영역 배경색
+      margin: {
+        l: 60,
+        r: 20,
+        t: 40,
+        b: 80
+      },
+      shapes: [
         {
-          x: times,
-          y: temperatures,
-          type: 'scatter',
-          mode: 'lines',
-          name: 'Temperature',
-        },
-        {
-          x: times,
-          y: Array(times.length).fill(medianValue),
-          type: 'scatter',
-          mode: 'lines',
-          name: 'Median',
-          line: { dash: 'dash', color: 'red' },
-        },
-      ];
-
-      const layout = {
-        title: 'Temperature Over Time',
-        xaxis: {
-          title: 'Time',
-        },
-        yaxis: {
-          title: 'Temperature (°C)',
-        },
-        width: chartSize.width,
-        height: '100%',
-        showlegend: false,
-        paper_bgcolor: '#e2d1c7', // 전체 차트 배경색
-        plot_bgcolor: '#e2d1c7', // 플롯 영역 배경색
-        margin: {
-          l: 60,
-          r: 20,
-          t: 40,
-          b: 80
-        },
-        shapes: [
-          {
-            type: 'rect',
-            xref: 'x',
-            yref: 'paper',
-            x0: startTime,
-            x1: endTime,
-            y0: 0,
-            y1: 1,
-            fillcolor: '#d3d3d3',
-            opacity: 0.5,
-            line: {
-              width: 0,
-            },
+          type: 'line',
+          x0: averagedData[0]?.time,
+          x1: averagedData[averagedData.length - 1]?.time,
+          y0: medianValue,
+          y1: medianValue,
+          line: {
+            color: 'red',
+            width: 2,
+            dash: 'dash'
           },
-        ],
-      };
+          name: 'Median'
+        }
+      ],
+      dragmode: 'zoom',  // Enable zooming
+      selectdirection: 'h',  // Horizontal selection for brush-like functionality
+      autosize: true,  // Enable autosizing
+      responsive: true  // Enable responsiveness
+    };
 
-      Plotly.newPlot(plotRef.current, data, layout);
-    } 
-  }, [averagedData, medianValue, startTime, endTime, chartSize]);
+    const handleRelayout = (eventdata) => {
+      console.log("eventdata:", eventdata); // xaxis.range 로그 추가
+
+      if (eventdata['xaxis.range[0]'] && eventdata['xaxis.range[1]']) {
+        const startRange = Math.round(eventdata['xaxis.range[0]']);
+        const endRange = Math.round(eventdata['xaxis.range[1]']);
+
+        console.log("startRange:", startRange, "endRange:", endRange);
+
+        // Ensure indices are within bounds
+        const startIndex = Math.max(0, startRange);
+        const endIndex = Math.min(averagedData.length - 1, endRange);
+
+        console.log("startIndex and endIndex changed:", { startIndex, endIndex });
+
+        if (startIndex !== endIndex) {
+          console.log("Brush changed:", { startIndex, endIndex });
+          handleBrushChange({ startIndex, endIndex });
+        } else {
+          console.log("Invalid range selected, indices not found.");
+        }
+      }
+    };
+
+    const lineChartElement = document.getElementById('lineChart');
+    if (lineChartElement) {
+      Plotly.newPlot(lineChartElement, plotData, layout, { responsive: true });
+      lineChartElement.on('plotly_relayout', handleRelayout);
+
+      const resizeObserver = new ResizeObserver(() => {
+        Plotly.Plots.resize(lineChartElement);
+      });
+      resizeObserver.observe(lineChartElement);
+
+      return () => {
+        resizeObserver.disconnect();
+        Plotly.purge(lineChartElement);
+      };
+    }
+  }, [averagedData, medianValue, handleBrushChange]);
 
   return (
     <div className={styles['lineGrahpWrap']}>
@@ -129,7 +150,10 @@ const LineGraph = React.memo(({
                 placeholder="0000"
                 className={styles['ExInfo']}
                 value={countNumber || ''}
-                onChange={(e) => onDetailsChange('countNumber', e.target.value)}
+                onChange={(e) => {
+                  console.log("C_Number changed:", e.target.value);
+                  onDetailsChange('countNumber', e.target.value);
+                }}
               />
             </div>
             <div className={styles['ExWrap']}>
@@ -140,7 +164,10 @@ const LineGraph = React.memo(({
                 placeholder="0000"
                 className={styles['ExInfo']}
                 value={wNumber || ''}
-                onChange={(e) => onDetailsChange('wNumber', e.target.value)}
+                onChange={(e) => {
+                  console.log("W_Number changed:", e.target.value);
+                  onDetailsChange('wNumber', e.target.value);
+                }}
               />
             </div>
             <div className={styles['ExWrap']}>
@@ -151,7 +178,10 @@ const LineGraph = React.memo(({
                 placeholder="0000"
                 className={styles['ExInfo']}
                 value={dwNumber || ''}
-                onChange={(e) => onDetailsChange('dwNumber', e.target.value)}
+                onChange={(e) => {
+                  console.log("DW_Number changed:", e.target.value);
+                  onDetailsChange('dwNumber', e.target.value);
+                }}
               />
             </div>
             <div className={styles['ExWrap']}>
@@ -162,7 +192,10 @@ const LineGraph = React.memo(({
                 placeholder="0000"
                 className={styles['ExInfo']}
                 value={dieNumber || ''}
-                onChange={(e) => onDetailsChange('dieNumber', e.target.value)}
+                onChange={(e) => {
+                  console.log("Die_Number changed:", e.target.value);
+                  onDetailsChange('dieNumber', e.target.value);
+                }}
               />
             </div>
           </div>
@@ -190,7 +223,7 @@ const LineGraph = React.memo(({
           </div>
         </div>
       </div>
-      <div ref={plotRef} className={styles['plotly-chart']}></div>
+      <div id="lineChart" className={styles['lineChart']} />
     </div>
   );
 });

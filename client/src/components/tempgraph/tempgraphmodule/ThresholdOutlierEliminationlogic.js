@@ -77,8 +77,8 @@ const ThresholdOutlierEliminationLogic = () => {
   return (
     <div>
       <form onSubmit={handleSubmit}>
-        <input type="file" multiple onChange={handleFileChange} />
-        <button type="submit" disabled={isUploading}>Upload</button>
+        {/* <input type="file" multiple onChange={handleFileChange} /> */}
+        {/* <button type="submit" disabled={isUploading}>Upload</button> */}
       </form>
       {isUploading && <p>Uploading and processing...</p>}
       {uploadSuccess && (

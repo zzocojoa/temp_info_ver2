@@ -150,19 +150,16 @@
   transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 
-.plotly-chart {
+.lineChart {
   display: flex;
-  justify-content: center;
+  width: 100%;
   align-items: center;
-  width: 100%; /* 원하는 너비 설정 */
-  max-width: 1000px; /* 최대 너비 설정 */
-  height: 100%; /* 원하는 높이 설정 */
   margin-bottom: 30px;
-  border: 1px solid #e2d1c7;
-    border-radius: 10px;
-    background-color: #e2d1c7;
-    box-shadow: 4px 4px 6px 0 rgb(189, 175, 167, .5), -4px -4px 6px 0 rgb(189, 175, 167, .2);
   overflow: hidden;
+  /* border: 1px solid #e2d1c7; */
+  border-radius: 10px;
+  background-color: #e2d1c7;
+  box-shadow: 4px 4px 6px 0 rgb(189, 175, 167, .5), -4px -4px 6px 0 rgb(189, 175, 167, .2);
 }
 
 @media (max-width: 1470px) {

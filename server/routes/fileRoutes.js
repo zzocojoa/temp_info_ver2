@@ -88,6 +88,12 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
           skipEmptyLines: true,
           complete: async (result) => {
             const temperatureValues = result.data;
+
+            // 시작 시간과 종료 시간 추출
+            const times = temperatureValues.map(entry => entry.time).sort();
+            const startTime = times[0];
+            const endTime = times[times.length - 1];
+
             const boxplotStats = calculateBoxplotStats(temperatureValues);
             const newFileMetadata = new FileMetadata({
               fileName,
@@ -95,9 +101,11 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
               boxplotStats,
               numbering: { countNumber, wNumber, dwNumber, dieNumber },
               filedate,
+              startTime,
+              endTime,
             });
             await newFileMetadata.save();
-            resolve({ fileName, message: 'File uploaded and data saved successfully', boxplotStats });
+            resolve({ fileName, message: 'File uploaded and data saved successfully', boxplotStats, startTime, endTime });
           },
           error: (error) => {
             reject(error.message);
@@ -119,18 +127,28 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
   res.json(uploadResults);
 });
 
+
 // boxplot dynamic data
 router.post('/process-filtered-data', async (req, res) => {
   const { filteredData } = req.body;
-  console.log("filteredData: ", filteredData)
+  console.log("filteredData: ", filteredData); // 초기 데이터 확인
+  
+  // 데이터 유효성 검사를 추가하여 디버깅에 도움을 줍니다.
+  if (!filteredData || !Array.isArray(filteredData) || filteredData.length === 0) {
+    console.error('Invalid or empty filtered data:', filteredData);
+    return res.status(400).json({ success: false, message: 'Invalid or empty filtered data' });
+  }
+
   try {
     const { boxplotStats } = processData(filteredData);
+    console.log("boxplotStats: ", boxplotStats); // 결과 데이터 확인
     res.json({ success: true, message: 'Filtered data processed successfully', boxplotStats });
   } catch (error) {
     console.error('Error processing filtered data:', error);
     res.status(500).send('Error processing filtered data');
   }
 });
+
 
 // 정제된 파일 업로드 처리 엔드포인트 (다중 파일 지원)
 router.post('/threshold-upload', upload.array('files'), async (req, res) => {
@@ -212,9 +230,12 @@ router.get('/download-filtered-data', async (req, res) => {
 
 // 필터링된 데이터 처리 및 중앙값 계산 엔드포인트
 router.post('/filtered-linegraph-data', async (req, res) => {
-  const { data, startTime, endTime } = req.body;
+  const { data, startTime, endTime } = req.body; // newStartTime, newEndTime 추가
+  console.log('Data received for filtering:', { data, startTime, endTime });
+
   try {
-    const { filteredData, median } = processFilteredData(data, startTime, endTime);
+    const { filteredData, median } = processFilteredData(data, startTime, endTime); // newStartTime, newEndTime 전달
+    // console.log('Filtered data:', filteredData);
     res.json({ success: true, filteredData, median });
   } catch (error) {
     console.error('Error processing filtered data:', error);

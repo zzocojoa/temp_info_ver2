@@ -1,4 +1,5 @@
 // client/src/components/Banner.js
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Banner.module.css';
@@ -45,7 +46,7 @@ function Banner({ isOpen, setIsOpen }) {
                     <div className={styles['banner']}>
                         <ul className={styles['banner-menu']}>
                             <li className={styles['banner-title']} onClick={() => navigateTo('/graph-data')} style={{ cursor: 'pointer' }}>
-                                <div className={styles['icon-img']} style={{ color: 'orange' }}>
+                                <div className={styles['icon-img']} >
                                     <FontAwesomeIcon icon={faSignal} />
                                 </div>
                                 {isOpen ? <div className={styles['banner-title-name']}>T.Graph</div> : null}

@@ -33,7 +33,7 @@ export async function uploadFile(file) {
       throw new Error('Server responded with an error');
     }
     const { data: averagedData, boxplotStats, temperatureValues } = await response.json();
-    console.log("boxplotStats: ", boxplotStats);
+    // console.log("boxplotStats: ", boxplotStats);
     return { averagedData, boxplotStats, temperatureValues };
   } catch (error) {
     console.error('Error uploading file:', error);
@@ -126,19 +126,29 @@ export async function downloadFilteredData(uploadId) {
 
 // filteredData를 서버로 전송하는 함수(bolplot dynamic data)
 export async function sendFilteredData(filteredData) {
+  console.debug('sendFilteredData called with:', filteredData); // 함수 호출 시 로그
   const requestInit = createFetchRequest('POST', { filteredData });
+
+  console.debug('Request initialization:', requestInit); // 요청 초기화 로그
 
   try {
     const response = await fetch(`${API_BASE_URL}/process-filtered-data`, requestInit);
+    console.debug('Response received:', response); // 응답 수신 시 로그
+
     if (!response.ok) {
+      console.error('Failed response:', response); // 실패한 응답 로그
       throw new Error('Failed to send filtered data');
     }
-    return await response.json(); // 서버 응답 반환
+
+    const jsonResponse = await response.json();
+    console.debug('JSON response:', jsonResponse); // JSON 응답 로그
+    return jsonResponse; // 서버 응답 반환
   } catch (error) {
-    console.error('Error sending filtered data:', error);
+    console.error('Error sending filtered data:', error); // 에러 로그
     throw error; // 컴포넌트에서 처리할 수 있게 에러를 다시 던짐
   }
 }
+
 
 // 데이터 저장 API
 export async function saveData(data) {

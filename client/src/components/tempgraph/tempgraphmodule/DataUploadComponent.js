@@ -28,6 +28,8 @@ function DataUploadComponent() {
       setSuccessMessage(response.map((result, index) => ({
         fileName: selectedFiles[index].name,
         status: result.success ? '실패' : '성공',
+        startTime: result.startTime, // 서버로부터 받은 시작 시간
+        endTime: result.endTime      // 서버로부터 받은 종료 시간
       })));
     } catch (error) {
       setIsLoading(false);

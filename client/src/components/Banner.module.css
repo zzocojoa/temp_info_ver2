@@ -94,6 +94,10 @@
     align-items: center;
 }
 
+.banner {
+    width: 100%;
+}
+
 .sidebar {
     transition: width 0.3s ease;
     width: 60px; /* 기본 너비 */
@@ -138,6 +142,11 @@
     align-items: center;
     justify-content: center;
     font-size: 25px;
+    color: orange;
+}
+
+.banner-menu li:hover .icon-img {
+    color: rgb(255, 145, 0);
 }
 
 .banner-menu li .text {
@@ -202,12 +211,7 @@
     width: 5rem;
 }
 
-.banner-title .icon-img {
-    color: #d49466;
-}
-
 .banner-title-name {
-
     font-size: 1rem;
 }
 
