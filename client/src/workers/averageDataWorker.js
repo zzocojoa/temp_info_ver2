@@ -11,12 +11,9 @@ self.onmessage = function(event) {
 
     const processChunk = (chunk) => {
         chunk.forEach(item => {
-            // const roundedTime = moment(item.time, 'HH:mm:ss').startOf('minute').seconds(
-            //     moment(item.time, 'HH:mm:ss').seconds()
-            // ).format('HH:mm:ss');
-
-            const roundedSeconds = Math.floor(moment(item.time, 'HH:mm:ss').seconds() / 15) * 15;
-            const roundedTime = moment(item.time, 'HH:mm:ss').startOf('minute').seconds(roundedSeconds).format('HH:mm:ss');
+            const roundedTime = moment(item.time, 'HH:mm:ss').startOf('minute').seconds(
+                moment(item.time, 'HH:mm:ss').seconds()
+            ).format('HH:mm:ss');
 
             const dateTimeKey = `${item.date} ${roundedTime}`;
             if (!groupedData.has(dateTimeKey)) {

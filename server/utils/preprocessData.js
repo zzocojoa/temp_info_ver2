@@ -4,8 +4,6 @@ function preprocessData(data) {
     let dateCounts = {};
     let temperatures = [];
 
-    // console.log("Initial data:", data);
-
     // 데이터 전처리
     for (const item of data) {
         const date = item['date'];
@@ -18,15 +16,10 @@ function preprocessData(data) {
         }
     }
 
-    // console.log("Date counts:", dateCounts);
-    // console.log("Processed temperatures:", temperatures);
-
     // dateCounts 객체가 비어있는 경우 처리
     const mostDataDate = Object.keys(dateCounts).length > 0
         ? Object.keys(dateCounts).reduce((a, b) => dateCounts[a] > dateCounts[b] ? a : b)
         : null;
-
-    // console.log("Date with most data:", mostDataDate);
 
     if (mostDataDate) {
         temperatures = temperatures.filter(item => item.date === mostDataDate);
@@ -34,11 +27,7 @@ function preprocessData(data) {
         temperatures = []; // mostDataDate가 없는 경우, temperatures 배열을 비웁니다.
     }
 
-    // console.log("Filtered temperatures:", temperatures);
-
     const tempValues = temperatures.map(item => item.temperature);
-
-    // console.log("Temperature values:", tempValues);
 
     return { temperatures, tempValues };
 }

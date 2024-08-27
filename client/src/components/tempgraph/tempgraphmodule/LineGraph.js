@@ -8,6 +8,7 @@ import styles from './LineGraph.module.css';
 
 const LineGraph = React.memo(({
   averagedData,
+  plcData,
   onDetailsChange,
   countNumber,
   dieNumber,
@@ -20,26 +21,28 @@ const LineGraph = React.memo(({
 }) => {
   const { startTime, endTime, handleBrushChange } = useLineGraphData(averagedData, initialStartTime, initialEndTime, onBrushChange, setBoxplotStats);
   const [medianValue, setMedianValue] = useState(0);
+  const [plcMedianValue, setPlcMedianValue] = useState(0);
+  console.log("plcData: ", plcData)
 
   useEffect(() => {
-    console.log("averagedData changed:", averagedData);
+    // console.log("averagedData changed:", averagedData);
   }, [averagedData]);
 
   useEffect(() => {
-    console.log("startTime or endTime changed:", { startTime, endTime });
+    // console.log("startTime or endTime changed:", { startTime, endTime });
   }, [startTime, endTime]);
 
   useEffect(() => {
-    console.log("medianValue changed:", medianValue);
+    // console.log("medianValue changed:", medianValue);
   }, [medianValue]);
 
   useEffect(() => {
     const fetchMedian = async () => {
-      console.log("Fetching median for data:", averagedData);
+      // console.log("Fetching median for data:", averagedData);
       const temperatures = averagedData.map(item => item.temperature);
       try {
         const median = await calculateMedian(temperatures);
-        console.log("Median value fetched:", median);
+        // console.log("Median value fetched:", median);
         setMedianValue(median.median);
       } catch (error) {
         console.error('Error calculating median:', error);
@@ -47,31 +50,69 @@ const LineGraph = React.memo(({
     };
 
     if (averagedData.length > 0) {
-      console.log("Averaged data available, fetching median");
+      // console.log("Averaged data available, fetching median");
       fetchMedian(averagedData);
     }
   }, [averagedData]);
 
   useEffect(() => {
-    const plotData = [{
-      x: averagedData.map(d => d.time),
-      y: averagedData.map(d => d.temperature),
-      type: 'scatter',
-      mode: 'lines',
-      line: { color: '#8884d8' },
-      hovertemplate: '%{y:.2f}°C<extra></extra>',  // Add hovertemplate for formatting tooltip
-    }];
+    const fetchPlcMedian = async () => {
+      console.log("Fetching median for PLC data:", plcData);
+      const temperatures = plcData.map(item => item.temperature);
+      try {
+        const median = await calculateMedian(temperatures);
+        // console.log("PLC Median value fetched:", median);
+        setPlcMedianValue(median.median);
+      } catch (error) {
+        console.error('Error calculating PLC median:', error);
+      }
+    };
+
+    if (plcData.length > 0) {
+      // console.log("PLC data available, fetching median");
+      fetchPlcMedian(plcData);
+    }
+  }, [plcData]);
+
+  useEffect(() => {
+    const plotData = [
+      {
+        x: averagedData.map(d => d.time),
+        y: averagedData.map(d => d.temperature),
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: '#8884d8' },
+        hovertemplate: '%{y:.2f}°C<extra></extra>',
+        name: 'Original Data'
+      },
+      {
+        x: plcData.map(d => d.time),
+        y: plcData.map(d => d.temperature),
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: '#82ca9d' },
+        hovertemplate: '%{y:.2f}°C<extra></extra>',
+        name: 'PLC Data',
+        yaxis: 'y2'
+      }
+    ];
 
     const layout = {
       title: 'Temperature Over Time',
       xaxis: { title: 'Time' },
       yaxis: { title: 'Temperature (°C)', autorange: true },
-      showlegend: false,
-      paper_bgcolor: '#e2d1c7', // 전체 차트 배경색
-      plot_bgcolor: '#e2d1c7', // 플롯 영역 배경색
+      yaxis2: {
+        title: 'PLC Temperature (°C)',
+        overlaying: 'y',
+        side: 'right',
+        autorange: true
+      },
+      showlegend: true,
+      paper_bgcolor: '#e2d1c7',
+      plot_bgcolor: '#e2d1c7',
       margin: {
         l: 60,
-        r: 20,
+        r: 60,
         t: 40,
         b: 80
       },
@@ -88,34 +129,47 @@ const LineGraph = React.memo(({
             dash: 'dash'
           },
           name: 'Median'
+        },
+        {
+          type: 'line',
+          x0: plcData[0]?.time,
+          x1: plcData[plcData.length - 1]?.time,
+          y0: plcMedianValue,
+          y1: plcMedianValue,
+          line: {
+            color: 'green',
+            width: 2,
+            dash: 'dash'
+          },
+          name: 'PLC Median',
+          yref: 'y2'
         }
       ],
-      dragmode: 'zoom',  // Enable zooming
-      selectdirection: 'h',  // Horizontal selection for brush-like functionality
-      autosize: true,  // Enable autosizing
-      responsive: true  // Enable responsiveness
+      dragmode: 'zoom',
+      selectdirection: 'h',
+      autosize: true,
+      responsive: true
     };
 
     const handleRelayout = (eventdata) => {
-      console.log("eventdata:", eventdata); // xaxis.range 로그 추가
+      // console.log("eventdata:", eventdata);
 
       if (eventdata['xaxis.range[0]'] && eventdata['xaxis.range[1]']) {
         const startRange = Math.round(eventdata['xaxis.range[0]']);
         const endRange = Math.round(eventdata['xaxis.range[1]']);
 
-        console.log("startRange:", startRange, "endRange:", endRange);
+        // console.log("startRange:", startRange, "endRange:", endRange);
 
-        // Ensure indices are within bounds
         const startIndex = Math.max(0, startRange);
         const endIndex = Math.min(averagedData.length - 1, endRange);
 
-        console.log("startIndex and endIndex changed:", { startIndex, endIndex });
+        // console.log("startIndex and endIndex changed:", { startIndex, endIndex });
 
         if (startIndex !== endIndex) {
-          console.log("Brush changed:", { startIndex, endIndex });
+          // console.log("Brush changed:", { startIndex, endIndex });
           handleBrushChange({ startIndex, endIndex });
         } else {
-          console.log("Invalid range selected, indices not found.");
+          // console.log("Invalid range selected, indices not found.");
         }
       }
     };
@@ -135,7 +189,7 @@ const LineGraph = React.memo(({
         Plotly.purge(lineChartElement);
       };
     }
-  }, [averagedData, medianValue, handleBrushChange]);
+  }, [averagedData, plcData, medianValue, plcMedianValue, handleBrushChange]);
 
   return (
     <div className={styles['lineGrahpWrap']}>
@@ -151,7 +205,7 @@ const LineGraph = React.memo(({
                 className={styles['ExInfo']}
                 value={countNumber || ''}
                 onChange={(e) => {
-                  console.log("C_Number changed:", e.target.value);
+                  // console.log("C_Number changed:", e.target.value);
                   onDetailsChange('countNumber', e.target.value);
                 }}
               />
@@ -165,7 +219,7 @@ const LineGraph = React.memo(({
                 className={styles['ExInfo']}
                 value={wNumber || ''}
                 onChange={(e) => {
-                  console.log("W_Number changed:", e.target.value);
+                  // console.log("W_Number changed:", e.target.value);
                   onDetailsChange('wNumber', e.target.value);
                 }}
               />
@@ -179,7 +233,7 @@ const LineGraph = React.memo(({
                 className={styles['ExInfo']}
                 value={dwNumber || ''}
                 onChange={(e) => {
-                  console.log("DW_Number changed:", e.target.value);
+                  // console.log("DW_Number changed:", e.target.value);
                   onDetailsChange('dwNumber', e.target.value);
                 }}
               />
@@ -193,7 +247,7 @@ const LineGraph = React.memo(({
                 className={styles['ExInfo']}
                 value={dieNumber || ''}
                 onChange={(e) => {
-                  console.log("Die_Number changed:", e.target.value);
+                  // console.log("Die_Number changed:", e.target.value);
                   onDetailsChange('dieNumber', e.target.value);
                 }}
               />

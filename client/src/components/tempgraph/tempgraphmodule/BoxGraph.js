@@ -5,15 +5,15 @@ import CustomApexChart from './CustomApexChart'; // 차트 컴포넌트
 import StatisticsTable from './StatisticsTable'; // 통계 테이블 컴포넌트
 import styles from './BoxGraph.module.css';
 
-const BoxGraph = ({ boxplotStats, initialStartTime, initialEndTime }) => {
+const BoxGraph = ({ boxplotStats = {}, initialStartTime, initialEndTime }) => {
 
   useEffect(() => {
-    console.log('BoxGraph component mounted');
-    console.log('boxplotStats:', boxplotStats);
+    // console.log('BoxGraph component mounted');
+    // console.log('boxplotStats:', boxplotStats);
 
     // 초기 데이터 확인 로그 추가
-    console.log('BoxGraph initialStartTime:', initialStartTime);
-    console.log('BoxGraph initialEndTime:', initialEndTime);
+    // console.log('BoxGraph initialStartTime:', initialStartTime);
+    // console.log('BoxGraph initialEndTime:', initialEndTime);
   }, [boxplotStats, initialStartTime, initialEndTime]);
 
   // boxplotStats 데이터 유효성 검사

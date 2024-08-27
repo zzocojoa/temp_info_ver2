@@ -1,15 +1,24 @@
 // client/src/components/tempgraph/tempgraphmodule/FileUploadButton.js
 
 import React, { useState } from 'react';
-import styles from './FileUploadButton.module.css'
+import styles from './FileUploadButton.module.css';
 
-function FileUploadButton({ onFileSelect }) {
+function FileUploadButton({ onFileSelect, onPLCFileSelect = () => {} }) { // 기본값 설정
   const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedPLCFile, setSelectedPLCFile] = useState(null);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
+    console.log('Selected file:', file); // 디버깅 로그 추가
     setSelectedFile(file);
     onFileSelect(file); // 부모 컴포넌트로 파일 데이터 전달
+  };
+
+  const handlePLCFileChange = (event) => {
+    const file = event.target.files[0];
+    console.log('Selected PLC file:', file); // 디버깅 로그 추가
+    setSelectedPLCFile(file);
+    onPLCFileSelect(file); // 부모 컴포넌트로 PLC 파일 데이터 전달
   };
 
   return (
@@ -24,9 +33,19 @@ function FileUploadButton({ onFileSelect }) {
         <div className={styles["fileUploadName"]}>
           {selectedFile && <p className={styles['fileName']}>File name: {selectedFile.name}</p>}
         </div>
+        <div className={styles["fileUploadButton"]}>
+          <label htmlFor="plcFile">
+            <div className={styles["fileUpload"]}>PLC 파일 업로드하기</div>
+          </label>
+          <input className={styles['fileUpload-btn']} type="file" id='plcFile' onChange={handlePLCFileChange} accept=".csv" />
+        </div>
+        <div className={styles["fileUploadName"]}>
+          {selectedPLCFile && <p className={styles['fileName']}>PLC File name: {selectedPLCFile.name}</p>}
+        </div>
       </div>
     </div>
   );
 }
 
 export default FileUploadButton;
+

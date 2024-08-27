@@ -41,31 +41,65 @@ export async function uploadFile(file) {
   }
 }
 
+// PLC 파일 업로드 API
+export async function uploadPLCFile(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/upload-plc`, {
+      method: 'POST',
+      body: formData,
+      cache: 'no-cache',
+    });
+    if (!response.ok) {
+      throw new Error('Server responded with an error');
+    }
+    const { data: averagedData } = await response.json();
+    return { averagedData };
+  } catch (error) {
+    console.error('Error uploading PLC file:', error);
+    throw error;
+  }
+}
+
 // 정제 파일 업로드 API (CSV 파일)
 export async function uploadCsvFile(files) {
   const formData = new FormData();
-  // formData.append('file', file);
   for (let i = 0; i < files.length; i++) {
     formData.append('files', files[i]);
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/upload-csv`, {
-      method: 'POST',
-      body: formData,
-    });
+    // 두 개의 fetch 요청을 병렬로 실행
+    const [uploadResponse, uploadPlcResponse] = await Promise.all([
+      fetch(`${API_BASE_URL}/upload-csv`, {
+        method: 'POST',
+        body: formData,
+      }),
+      fetch(`${API_BASE_URL}/upload-plc-csv`, {
+        method: 'POST',
+        body: formData,
+      })
+    ]);
 
-    if (!response.ok) {
+    if (!uploadResponse.ok || !uploadPlcResponse.ok) {
+      console.error('Upload response error:', uploadResponse.statusText);
+      console.error('Upload PLC response error:', uploadPlcResponse.statusText);
       throw new Error('Network response was not ok');
     }
 
-    const data = await response.json();
-    return data; // 성공적으로 업로드된 경우 서버 응답 반환
+    const uploadData = await uploadResponse.json();
+    const uploadPlcData = await uploadPlcResponse.json();
+
+    // 두 응답 데이터를 합쳐서 반환
+    return { uploadData, uploadPlcData };
   } catch (error) {
     console.error('Error uploading CSV file:', error);
     throw error; // 컴포넌트에서 처리할 수 있게 에러를 다시 던짐
   }
 }
+
 
 // 이상치 필터링 및 중앙값 계산을 위한 API 함수
 export async function Threshold(files) {

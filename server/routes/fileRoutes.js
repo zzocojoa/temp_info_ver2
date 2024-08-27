@@ -1,14 +1,16 @@
 // server\routes\fileRoutes.js
 
 const fs = require('fs').promises;
-const path = require('path');
 const express = require('express');
 const multer = require('multer');
 const router = express.Router();
 const Papa = require('papaparse');
+const path = require('path');
 const FileMetadata = require('../models/FileMetadata');
+const PLCFileMetadata = require('../models/PLCFileMetadata');
 const ThresholdMetadata = require('../models/ThresholdFileMetadata');
 const processData = require('../utils/refining');
+const plcrefining = require('../utils/plc_refining');
 const calculateMedian = require('../utils/calculateMedian');
 const processFilteredData = require('../utils/filteredDataProcessor');
 const calculateBoxplotStats = require('../utils/boxplotStats');
@@ -49,6 +51,39 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 
     const { averagedData, boxplotStats } = processData(allData);
     res.json({ success: true, message: 'File processed successfully', data: averagedData, boxplotStats });
+  } catch (error) {
+    console.error('Error processing file:', error);
+    res.status(500).send('Error processing file');
+  } finally {
+    try {
+      await fs.unlink(filePath);
+    } catch (error) {
+      console.error('Error deleting file:', error);
+    }
+  }
+});
+
+router.post('/upload-plc', upload.single('file'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('No file uploaded.');
+  }
+  const filePath = req.file.path;
+  try {
+    const fileContent = await fs.readFile(filePath, 'utf8');
+    let allData = [];
+    Papa.parse(fileContent, {
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+      step: (row) => {
+        const { 'Date': dateTime, 'pressure': pressure, 'C.T(back)': CTB, 'C.T(front)': CTF } = row.data;
+        allData.push({ dateTime, pressure, CTB, CTF });
+      }
+    });
+
+    const { averagedData } = plcrefining(allData);
+    console.log("averagedData: ", averagedData);
+    res.json({ success: true, message: 'PLC file processed successfully', data: averagedData });
   } catch (error) {
     console.error('Error processing file:', error);
     res.status(500).send('Error processing file');
@@ -127,11 +162,82 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
   res.json(uploadResults);
 });
 
+// 정제된 파일 업로드 처리 엔드포인트 (다중 파일 지원)
+router.post('/upload-csv', upload.array('files'), async (req, res) => {
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).send('No files uploaded.');
+  }
+
+  const uploadResults = await Promise.all(req.files.map(async (file) => {
+    const filePath = file.path;
+    const fileName = file.originalname;
+
+    const match = fileName.match(/(\d{4}-\d{2}-\d{2})-(\d+)\.csv/); // 새로운 파일명 형식에 맞는 정규 표현식
+    if (!match) {
+      await fs.unlink(filePath);
+      return { fileName, error: 'Invalid file name format.' };
+    }
+
+    const [, filedate, countNumber] = match;
+
+    try {
+      const fileContent = await fs.readFile(filePath, 'utf8');
+      return new Promise((resolve, reject) => {
+        Papa.parse(fileContent, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+          complete: async (result) => {
+            try {
+              const { pressures } = preprocessPLCData(result.data); // preprocessPLCData 사용
+
+              // 시작 시간과 종료 시간 추출
+              const times = pressures.map(entry => entry.time).sort();
+              const startTime = times[0];
+              const endTime = times[times.length - 1];
+
+              const newPLCFileMetadata = new PLCFileMetadata({
+                fileName,
+                pressureData: pressures,
+                numbering: { countNumber },
+                filedate,
+                startTime,
+                endTime,
+              });
+              await newPLCFileMetadata.save();
+              resolve({ fileName, message: 'PLC file uploaded and data saved successfully', startTime, endTime });
+            } catch (error) {
+              console.error('Error saving file metadata:', error);
+              reject(error.message);
+            }
+          },
+          error: (error) => {
+            console.error('Error parsing file:', error);
+            reject(error.message);
+          }
+        });
+      });
+    } catch (error) {
+      console.error('Error processing file:', error);
+      return { fileName, error: error.toString() };
+    } finally {
+      try {
+        await fs.unlink(filePath);
+      } catch (error) {
+        console.error('Error deleting file:', error);
+      }
+    }
+  }));
+
+  res.json(uploadResults);
+});
+
 
 // boxplot dynamic data
 router.post('/process-filtered-data', async (req, res) => {
   const { filteredData } = req.body;
-  console.log("filteredData: ", filteredData); // 초기 데이터 확인
+  // 초기 데이터 확인
+  // console.log("filteredData: ", filteredData); 
   
   // 데이터 유효성 검사를 추가하여 디버깅에 도움을 줍니다.
   if (!filteredData || !Array.isArray(filteredData) || filteredData.length === 0) {
@@ -141,7 +247,8 @@ router.post('/process-filtered-data', async (req, res) => {
 
   try {
     const { boxplotStats } = processData(filteredData);
-    console.log("boxplotStats: ", boxplotStats); // 결과 데이터 확인
+    // 결과 데이터 확인
+    // console.log("boxplotStats: ", boxplotStats); 
     res.json({ success: true, message: 'Filtered data processed successfully', boxplotStats });
   } catch (error) {
     console.error('Error processing filtered data:', error);
@@ -231,7 +338,7 @@ router.get('/download-filtered-data', async (req, res) => {
 // 필터링된 데이터 처리 및 중앙값 계산 엔드포인트
 router.post('/filtered-linegraph-data', async (req, res) => {
   const { data, startTime, endTime } = req.body; // newStartTime, newEndTime 추가
-  console.log('Data received for filtering:', { data, startTime, endTime });
+  // console.log('Data received for filtering:', { data, startTime, endTime });
 
   try {
     const { filteredData, median } = processFilteredData(data, startTime, endTime); // newStartTime, newEndTime 전달
@@ -319,11 +426,11 @@ router.delete('/data/:id', async (req, res) => {
     const deletedItem = await FileMetadata.findByIdAndDelete(id);
 
     if (!deletedItem) {
-      console.log(`Data with id ${id} not found for deletion.`);
+      // console.log(`Data with id ${id} not found for deletion.`);
       return res.status(404).send({ message: 'Data not found' });
     }
 
-    console.log(`Data with id ${id} successfully deleted.`);
+    // console.log(`Data with id ${id} successfully deleted.`);
     res.send({ message: 'Data successfully removed' });
   } catch (error) {
     console.error(`Error removing data with id ${req.params.id}:`, error);
