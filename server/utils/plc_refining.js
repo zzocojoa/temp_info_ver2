@@ -1,4 +1,4 @@
-// server\utils\plc_refining.js
+// server/utils/plc_refining.js
 
 const moment = require('moment');
 const preprocessPLCData = require('./preprocessPLCData');
@@ -8,7 +8,11 @@ const calculateAveragedData = require('./averageData');
 function plcrefining(data) {
     // 데이터 전처리 로직 호출
     const { pressures, pressureValues } = preprocessPLCData(data);
-    // console.log("pressures: ", pressures);
+
+    if (pressures.length === 0) {
+        console.log("No valid PLC data to process.");
+        return { averagedData: [] };
+    }
 
     const { q1, q3, lowerBound, upperBound } = calculateQuartiles(pressureValues);
 
@@ -19,14 +23,11 @@ function plcrefining(data) {
             time: moment(item.time, 'HH:mm:ss:SSS').format('HH:mm:ss'),
             pressure: item.pressure
         }));
-    // console.log("filteredData: ", filteredData);
 
     // AveragedData 계산 로직 호출
     const averagedData = calculateAveragedData(filteredData);
 
-    // console.log("averagedData: ", averagedData);
     return { averagedData };
-    // return { averagedData, boxplotStats };
 }
 
 module.exports = plcrefining;

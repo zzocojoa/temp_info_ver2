@@ -55,14 +55,11 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     console.error('Error processing file:', error);
     res.status(500).send('Error processing file');
   } finally {
-    try {
-      await fs.unlink(filePath);
-    } catch (error) {
-      console.error('Error deleting file:', error);
-    }
+    await fs.unlink(filePath);
   }
 });
 
+// PLC 파일 업로드 및 처리 엔드포인트
 router.post('/upload-plc', upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
@@ -76,17 +73,21 @@ router.post('/upload-plc', upload.single('file'), async (req, res) => {
       dynamicTyping: true,
       skipEmptyLines: true,
       step: (row) => {
-        const { 'Date': dateTime, 'pressure': pressure, 'C.T(back)': CTB, 'C.T(front)': CTF } = row.data;
-        allData.push({ dateTime, pressure, CTB, CTF });
+        allData.push(row.data);
       }
     });
 
     const { averagedData } = plcrefining(allData);
-    console.log("averagedData: ", averagedData);
-    res.json({ success: true, message: 'PLC file processed successfully', data: averagedData });
+    console.error('upload-plc averagedData:', averagedData);
+
+    if (averagedData.length === 0) {
+      res.status(400).json({ success: false, message: 'No valid data found in the PLC file.' });
+    } else {
+      res.json({ success: true, message: 'PLC file processed successfully', data: averagedData });
+    }
   } catch (error) {
-    console.error('Error processing file:', error);
-    res.status(500).send('Error processing file');
+    console.error('Error processing PLC file:', error);
+    res.status(500).json({ success: false, message: 'Error processing PLC file', error: error.toString() });
   } finally {
     try {
       await fs.unlink(filePath);
@@ -238,7 +239,7 @@ router.post('/process-filtered-data', async (req, res) => {
   const { filteredData } = req.body;
   // 초기 데이터 확인
   // console.log("filteredData: ", filteredData); 
-  
+
   // 데이터 유효성 검사를 추가하여 디버깅에 도움을 줍니다.
   if (!filteredData || !Array.isArray(filteredData) || filteredData.length === 0) {
     console.error('Invalid or empty filtered data:', filteredData);
@@ -352,12 +353,15 @@ router.post('/filtered-linegraph-data', async (req, res) => {
 
 // 데이터 저장 처리
 router.post('/save', async (req, res) => {
-  const { fileName, graphData, boxPlotData, numbering, filedate, userInput, startTime, endTime } = req.body;
+  const { fileName, graphData, boxPlotData, plcData, plcFileName, numbering, filedate, userInput, startTime, endTime } = req.body;
   try {
     const newFileMetadata = new FileMetadata({
       fileName,
       temperatureData: graphData,
+      plcData: plcData, // PLC 데이터 추가
       boxplotStats: boxPlotData,
+      plcFileName, // PLC 파일명 추가
+      plcUploadDate: plcData ? new Date() : null, // PLC 데이터가 있을 경우 현재 날짜 저장
       numbering: numbering,
       filedate,
       userInput,

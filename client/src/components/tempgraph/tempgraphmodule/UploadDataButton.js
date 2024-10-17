@@ -19,19 +19,30 @@ function UploadDataButton({ selectedFile, selectedPLCFile, onUploadSuccess, isEn
     try {
       let response = {};
       if (selectedFile) {
-        response = await uploadFile(selectedFile);
+        const fileResponse = await uploadFile(selectedFile);
+        response.averagedData = fileResponse.averagedData;
+        response.boxplotStats = fileResponse.boxplotStats;
       }
       if (selectedPLCFile) {
         const plcResponse = await uploadPLCFile(selectedPLCFile);
-        response = { ...response, plcData: plcResponse.pressures }; // Assuming plcData is `pressures`
+        response.plcData = plcResponse.averagedData;
       }
-      
-      setIsLoading(false); // 업로드 성공 또는 실패 시 로딩 상태를 false로 설정
-      if (response) {
-        const { averagedData, boxplotStats, plcData } = response;
-        const startTime = averagedData?.[0]?.time || '';
-        const endTime = averagedData?.[averagedData.length - 1]?.time || '';
-        onUploadSuccess(averagedData, boxplotStats, plcData, selectedFile?.name, startTime, endTime);
+
+      setIsLoading(false);
+      if (Object.keys(response).length > 0) {
+        const startTime = response.averagedData?.[0]?.time || response.plcData?.[0]?.time || '';
+        const endTime = response.averagedData?.[response.averagedData?.length - 1]?.time ||
+          response.plcData?.[response.plcData?.length - 1]?.time || '';
+        onUploadSuccess(
+          response.averagedData || [],
+          response.boxplotStats,
+          response.plcData || [],
+          selectedFile?.name || selectedPLCFile?.name,
+          startTime,
+          endTime,
+          startTime,  // uploadedStartTime
+          endTime     // uploadedEndTime
+        );
       } else {
         alert('Failed to upload file.');
       }

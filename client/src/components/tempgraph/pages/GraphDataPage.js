@@ -1,4 +1,4 @@
-// client\src\components\tempgraph\pages\GraphDataPage.js
+// client/src/components/tempgraph/pages/GraphDataPage.js
 
 import React, { useState, useEffect, useCallback } from 'react';
 import FileUploadButton from '../tempgraphmodule/FileUploadButton';
@@ -141,12 +141,12 @@ const GraphDataPage = React.memo(() => {
           />
           <ThresholdOutlierEliminationLogic onResults={handleUploadSuccess} />
           <div className={styles['graphGenerated']}>
-            <UploadDataButton 
-              className={styles['uploadDataButton']} 
-              selectedFile={uploadedFile} 
-              selectedPLCFile={uploadedPLCFile} 
-              onUploadSuccess={handleUploadSuccess} 
-              isEnabled={!!uploadedFile || !!uploadedPLCFile} 
+            <UploadDataButton
+              className={styles['uploadDataButton']}
+              selectedFile={uploadedFile}
+              selectedPLCFile={uploadedPLCFile}
+              onUploadSuccess={handleUploadSuccess}
+              isEnabled={!!uploadedFile || !!uploadedPLCFile}
             />
             {isGraphGenerated && (
               <>
@@ -167,7 +167,7 @@ const GraphDataPage = React.memo(() => {
                 />
                 <LineGraph
                   averagedData={graphData}
-                  plcData={plcGraphData}
+                  plcData={plcGraphData}  // 여기서 PLC 데이터를 전달하고 있는지 확인
                   countNumber={details.countNumber}
                   wNumber={details.wNumber}
                   dwNumber={details.dwNumber}

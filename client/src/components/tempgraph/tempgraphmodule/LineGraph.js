@@ -1,3 +1,5 @@
+// client/src/components/tempgraph/tempgraphmodule/LineGraph.js
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Plotly from 'plotly.js-dist-min';
 import { useLineGraphData } from './hooks/useLineGraphData';
@@ -65,7 +67,7 @@ const LineGraph = React.memo(({
   useEffect(() => {
     const fetchData = async () => {
       if (plcData.length > 0) {
-        const median = await fetchMedian(plcData);
+        const median = await fetchMedian(plcData.map(item => ({ temperature: item.pressure })));
         setPlcMedianValue(median);
       }
     };
@@ -73,53 +75,74 @@ const LineGraph = React.memo(({
   }, [plcData, fetchMedian]);
 
   useEffect(() => {
-    if (averagedData.length > 0 && plotRef.current) {
-      const plotData = [
-        {
-          x: averagedData.map(d => d.time),
-          y: averagedData.map(d => d.temperature),
-          type: 'scatter',
-          mode: 'lines',
-          line: { color: '#8884d8' },
-          hovertemplate: '%{y:.2f}°C<extra></extra>',
-          name: 'Original Data'
+    console.log("averagedData:", averagedData);
+    console.log("plcData:", plcData);
+    if (plcData.length > 0) {
+      console.log("PLC data sample:", plcData[0]);
+    }
+
+    if ((averagedData.length > 0 || plcData.length > 0) && plotRef.current) {
+      const currentPlotRef = plotRef.current;
+
+      try {
+        const plotData = [];
+
+        if (averagedData.length > 0) {
+          plotData.push({
+            x: averagedData.map(d => d.time),
+            y: averagedData.map(d => d.temperature),
+            type: 'scatter',
+            mode: 'lines',
+            line: { color: '#8884d8' },
+            hovertemplate: '%{y:.2f}°C<extra></extra>',
+            name: 'Temperature Data'
+          });
         }
-      ];
 
-      if (plcData.length > 0) {
-        plotData.push({
-          x: plcData.map(d => d.time),
-          y: plcData.map(d => d.temperature),
-          type: 'scatter',
-          mode: 'lines',
-          line: { color: '#82ca9d' },
-          hovertemplate: '%{y:.2f}°C<extra></extra>',
-          name: 'PLC Data',
-          yaxis: 'y2'
-        });
-      }
+        if (plcData.length > 0) {
+          plotData.push({
+            x: plcData.map(d => d.time),
+            y: plcData.map(d => d.pressure),
+            type: 'scatter',
+            mode: 'lines',
+            line: { color: '#82ca9d' },
+            hovertemplate: '%{y:.2f}<extra></extra>',
+            name: 'PLC Pressure',
+            yaxis: 'y2'
+          });
+          console.log("PLC data added to plot");
+        }
 
-      const layout = {
-        title: 'Temperature Over Time',
-        xaxis: { title: 'Time' },
-        yaxis: { title: 'Temperature (°C)', autorange: true },
-        yaxis2: {
-          title: 'PLC Temperature (°C)',
-          overlaying: 'y',
-          side: 'right',
-          autorange: true
-        },
-        showlegend: true,
-        paper_bgcolor: '#e2d1c7',
-        plot_bgcolor: '#e2d1c7',
-        margin: {
-          l: 60,
-          r: 60,
-          t: 40,
-          b: 80
-        },
-        shapes: [
-          {
+        const layout = {
+          title: 'Temperature and Pressure Over Time',
+          xaxis: { title: 'Time' },
+          yaxis: { title: 'Temperature (°C)', autorange: true },
+          yaxis2: {
+            title: 'Pressure',
+            overlaying: 'y',
+            side: 'right',
+            autorange: true,
+            range: plcData.length > 0 ? [Math.min(...plcData.map(d => d.pressure)), Math.max(...plcData.map(d => d.pressure))] : null
+          },
+          showlegend: true,
+          paper_bgcolor: '#e2d1c7',
+          plot_bgcolor: '#e2d1c7',
+          margin: {
+            l: 60,
+            r: 60,
+            t: 40,
+            b: 80
+          },
+          shapes: [],
+          dragmode: 'zoom',
+          selectdirection: 'h',
+          autosize: true,
+          responsive: true,
+          width: chartSize.width
+        };
+
+        if (averagedData.length > 0) {
+          layout.shapes.push({
             type: 'line',
             x0: averagedData[0]?.time,
             x1: averagedData[averagedData.length - 1]?.time,
@@ -130,60 +153,57 @@ const LineGraph = React.memo(({
               width: 2,
               dash: 'dash'
             },
-            name: 'Median'
-          }
-        ],
-        dragmode: 'zoom',
-        selectdirection: 'h',
-        autosize: true,
-        responsive: true,
-        width: chartSize.width
-      };
+            name: 'Temperature Median'
+          });
+        }
 
-      if (plcData.length > 0) {
-        layout.shapes.push({
-          type: 'line',
-          x0: plcData[0]?.time,
-          x1: plcData[plcData.length - 1]?.time,
-          y0: plcMedianValue,
-          y1: plcMedianValue,
-          line: {
-            color: 'green',
-            width: 2,
-            dash: 'dash'
-          },
-          name: 'PLC Median',
-          yref: 'y2'
+        if (plcData.length > 0) {
+          layout.shapes.push({
+            type: 'line',
+            x0: plcData[0]?.time,
+            x1: plcData[plcData.length - 1]?.time,
+            y0: plcMedianValue,
+            y1: plcMedianValue,
+            line: {
+              color: 'green',
+              width: 2,
+              dash: 'dash'
+            },
+            name: 'PLC Median',
+            yref: 'y2'
+          });
+        }
+
+        const handleRelayout = (eventdata) => {
+          if (eventdata['xaxis.range[0]'] && eventdata['xaxis.range[1]']) {
+            const startRange = Math.round(eventdata['xaxis.range[0]']);
+            const endRange = Math.round(eventdata['xaxis.range[1]']);
+            const startIndex = Math.max(0, startRange);
+            const endIndex = Math.min(averagedData.length - 1, endRange);
+
+            if (startIndex !== endIndex) {
+              handleBrushChange({ startIndex, endIndex });
+            }
+          }
+        };
+
+        Plotly.newPlot(currentPlotRef, plotData, layout);
+        currentPlotRef.on('plotly_relayout', handleRelayout);
+
+        const resizeObserver = new ResizeObserver(() => {
+          Plotly.Plots.resize(currentPlotRef);
         });
-      }
+        resizeObserver.observe(currentPlotRef);
 
-      const handleRelayout = (eventdata) => {
-        if (eventdata['xaxis.range[0]'] && eventdata['xaxis.range[1]']) {
-          const startRange = Math.round(eventdata['xaxis.range[0]']);
-          const endRange = Math.round(eventdata['xaxis.range[1]']);
-          const startIndex = Math.max(0, startRange);
-          const endIndex = Math.min(averagedData.length - 1, endRange);
-
-          if (startIndex !== endIndex) {
-            handleBrushChange({ startIndex, endIndex });
+        return () => {
+          resizeObserver.disconnect();
+          if (currentPlotRef) {
+            Plotly.purge(currentPlotRef);
           }
-        }
-      };
-
-      Plotly.newPlot(plotRef.current, plotData, layout);
-      plotRef.current.on('plotly_relayout', handleRelayout);
-
-      const resizeObserver = new ResizeObserver(() => {
-        Plotly.Plots.resize(plotRef.current);
-      });
-      resizeObserver.observe(plotRef.current);
-
-      return () => {
-        resizeObserver.disconnect();
-        if (plotRef.current) {
-          Plotly.purge(plotRef.current);
-        }
-      };
+        };
+      } catch (error) {
+        console.error("Error creating plot:", error);
+      }
     }
   }, [averagedData, plcData, medianValue, plcMedianValue, handleBrushChange, chartSize]);
 

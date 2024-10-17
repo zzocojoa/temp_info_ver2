@@ -1,6 +1,5 @@
 // client/src/api.js
 
-// const API_BASE_URL = 'http://localhost:5000/api';
 export const API_BASE_URL = 'http://localhost:5000/api';
 
 function createFetchRequest(method, body = null) {
@@ -33,7 +32,7 @@ export async function uploadFile(file) {
       throw new Error('Server responded with an error');
     }
     const { data: averagedData, boxplotStats, temperatureValues } = await response.json();
-    // console.log("boxplotStats: ", boxplotStats);
+    console.log("boxplotStats: ", boxplotStats);
     return { averagedData, boxplotStats, temperatureValues };
   } catch (error) {
     console.error('Error uploading file:', error);
@@ -56,6 +55,7 @@ export async function uploadPLCFile(file) {
       throw new Error('Server responded with an error');
     }
     const { data: averagedData } = await response.json();
+    console.log("PLC averagedData: ", averagedData);
     return { averagedData };
   } catch (error) {
     console.error('Error uploading PLC file:', error);

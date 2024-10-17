@@ -1,25 +1,20 @@
-// server\utils\preprocessPLCData.js
+// server/utils/preprocessPLCData.js
 
 function preprocessPLCData(data) {
     let dateCounts = {};
     let pressures = [];
 
     for (const item of data) {
-        const dateTime = item['dateTime'];
-        const pressure = parseFloat(item['pressure']);
+        const dateTime = item['날짜'];
+        const pressure = parseFloat(item['메인압력']);
 
         if (dateTime && !isNaN(pressure)) {
             // dateTime 형식을 분할하여 date와 time으로 분리
-            const date = dateTime.substring(0, 10);
-            const timePart = dateTime.substring(11);
-            const hours = timePart.substring(0, 2);
-            const minutes = timePart.substring(3, 5);
-            const seconds = timePart.substring(6, 8);
-            const millis = timePart.substring(9, 12);
-            const formattedTime = `${hours}:${minutes}:${seconds}:${millis}`;
+            const date = dateTime;
+            const time = item['시간'];
 
             dateCounts[date] = (dateCounts[date] || 0) + 1;
-            pressures.push({ date, time: formattedTime, pressure });
+            pressures.push({ date, time, pressure });
         }
     }
 
@@ -27,17 +22,16 @@ function preprocessPLCData(data) {
     // console.log("Processed pressures:", pressures);
 
     // dateCounts 객체가 비어있는 경우 처리
-    const mostDataDate = Object.keys(dateCounts).length > 0
-        ? Object.keys(dateCounts).reduce((a, b) => dateCounts[a] > dateCounts[b] ? a : b)
-        : null;
+    if (Object.keys(dateCounts).length === 0) {
+        console.log("No valid data found in the PLC file.");
+        return { pressures: [], pressureValues: [] };
+    }
+
+    const mostDataDate = Object.keys(dateCounts).reduce((a, b) => dateCounts[a] > dateCounts[b] ? a : b);
 
     // console.log("Date with most data:", mostDataDate);
 
-    if (mostDataDate) {
-        pressures = pressures.filter(item => item.date === mostDataDate);
-    } else {
-        pressures = []; // mostDataDate가 없는 경우, pressures 배열을 비웁니다.
-    }
+    pressures = pressures.filter(item => item.date === mostDataDate);
 
     // console.log("Filtered pressures:", pressures);
 

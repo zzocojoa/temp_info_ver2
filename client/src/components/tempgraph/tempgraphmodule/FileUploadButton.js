@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import styles from './FileUploadButton.module.css';
 
-function FileUploadButton({ onFileSelect, onPLCFileSelect = () => {} }) { // 기본값 설정
+function FileUploadButton({ onFileSelect, onPLCFileSelect }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedPLCFile, setSelectedPLCFile] = useState(null);
 
@@ -11,14 +11,14 @@ function FileUploadButton({ onFileSelect, onPLCFileSelect = () => {} }) { // 기
     const file = event.target.files[0];
     console.log('Selected file:', file); // 디버깅 로그 추가
     setSelectedFile(file);
-    onFileSelect(file); // 부모 컴포넌트로 파일 데이터 전달
+    onFileSelect(file);
   };
 
   const handlePLCFileChange = (event) => {
     const file = event.target.files[0];
     console.log('Selected PLC file:', file); // 디버깅 로그 추가
     setSelectedPLCFile(file);
-    onPLCFileSelect(file); // 부모 컴포넌트로 PLC 파일 데이터 전달
+    onPLCFileSelect(file);
   };
 
   return (
@@ -48,4 +48,3 @@ function FileUploadButton({ onFileSelect, onPLCFileSelect = () => {} }) { // 기
 }
 
 export default FileUploadButton;
-
