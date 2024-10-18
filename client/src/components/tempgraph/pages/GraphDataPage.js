@@ -32,24 +32,23 @@ const GraphDataPage = React.memo(() => {
     dieNumber: '',
   });
 
+  // 그래프 생성 상태 관리
   const [isGraphGenerated, setIsGraphGenerated] = useState(false);
 
-  const handleUploadSuccess = useCallback((
-    averagedData, boxplotStats,
-    plcData, uploadedFileName, startTime, endTime,
-    uploadedStartTime, uploadedEndTime
-  ) => {
+  // 업로드 성공 시 처리할 콜백 함수
+  const handleUploadSuccess = useCallback((averagedData, boxplotStats, plcData, uploadedFileName, startTime, endTime, uploadedStartTime, uploadedEndTime) => {
     setGraphData(Array.isArray(averagedData) ? averagedData : []);
     setBoxPlotData(boxplotStats);
     setPlcGraphData(Array.isArray(plcData) ? plcData : []);
     setUploadedFileName(uploadedFileName);
-    setIsGraphGenerated(true);
+    setIsGraphGenerated(true);  // 업로드 성공 시 그래프 생성 상태를 true로 설정
     setInitialStartTime(startTime);
     setInitialEndTime(endTime);
     setStartTime(uploadedStartTime);
     setEndTime(uploadedEndTime);
   }, []);
 
+  // 파일 처리 로직
   const processFile = useCallback((file) => {
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -67,12 +66,13 @@ const GraphDataPage = React.memo(() => {
       worker.onmessage = (event) => {
         const averagedData = event.data;
         setGraphData(averagedData);
-        setIsGraphGenerated(true);
+        setIsGraphGenerated(false); // 그래프는 버튼 클릭 후 생성됨
       };
     };
     reader.readAsText(file);
   }, []);
 
+  // PLC 파일 처리 로직
   const processPLCFile = useCallback((file) => {
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -90,37 +90,37 @@ const GraphDataPage = React.memo(() => {
       worker.onmessage = (event) => {
         const averagedData = event.data;
         setPlcGraphData(averagedData);
-        setIsGraphGenerated(true);
+        setIsGraphGenerated(false); // 그래프는 버튼 클릭 후 생성됨
       };
     };
     reader.readAsText(file);
   }, []);
 
+  // 파일 선택 시 상태 초기화 및 처리
   const handleFileSelect = useCallback((file) => {
     setUploadedFile(file);
-    setGraphData([]);
+    setGraphData([]);  // 기존 그래프 데이터 초기화
     setBoxPlotData(null);
     setUserInput('');
-    setIsGraphGenerated(false);
+    setIsGraphGenerated(false);  // 그래프 생성 상태를 false로 초기화
     processFile(file);
   }, [processFile]);
 
+  // PLC 파일 선택 시 상태 초기화 및 처리
   const handlePLCFileSelect = useCallback((file) => {
     setUploadedPLCFile(file);
     setPlcGraphData([]);
-    setIsGraphGenerated(false);
+    setIsGraphGenerated(false);  // PLC 파일 선택 시 그래프 생성 상태 초기화
     processPLCFile(file);
   }, [processPLCFile]);
 
+  // 타임 범위 설정 및 그래프 데이터 반영
   useEffect(() => {
     setStartTime(initialStartTime);
     setEndTime(initialEndTime);
   }, [initialStartTime, initialEndTime]);
 
-  const handleSaveDataSuccess = useCallback(() => {
-    // 데이터 저장 성공 처리 로직
-  }, []);
-
+  // 브러시로 선택된 구간에 따라 시간 범위 설정
   const handleBrushChange = useCallback((startIndex, endIndex) => {
     const newStartTime = graphData[startIndex]?.time || '';
     const newEndTime = graphData[endIndex]?.time || '';
@@ -148,7 +148,7 @@ const GraphDataPage = React.memo(() => {
               onUploadSuccess={handleUploadSuccess}
               isEnabled={!!uploadedFile || !!uploadedPLCFile}
             />
-            {isGraphGenerated && (
+            {isGraphGenerated && (  // 조건부 렌더링으로 그래프 컴포넌트 생성
               <>
                 <SaveCsvDataButton
                   data={{
@@ -160,14 +160,14 @@ const GraphDataPage = React.memo(() => {
                     userInput
                   }}
                   fileName={uploadedFileName}
-                  onSaveSuccess={handleSaveDataSuccess}
+                  onSaveSuccess={() => { /* 저장 성공 시 처리 로직 */ }}
                   selectedRange={selectedRange}
                   startTime={startTime}
                   endTime={endTime}
                 />
                 <LineGraph
                   averagedData={graphData}
-                  plcData={plcGraphData}  // 여기서 PLC 데이터를 전달하고 있는지 확인
+                  plcData={plcGraphData}  // PLC 데이터를 전달
                   countNumber={details.countNumber}
                   wNumber={details.wNumber}
                   dwNumber={details.dwNumber}
@@ -192,7 +192,7 @@ const GraphDataPage = React.memo(() => {
         </div>
         <div className={styles['rightPanel']}>
           <DataListUI />
-          {isGraphGenerated && (
+          {isGraphGenerated && (  // 조건부 렌더링으로 텍스트 입력 컴포넌트 생성
             <TextInputBox
               value={userInput}
               onTextChange={setUserInput}

@@ -11,14 +11,14 @@ function FileUploadButton({ onFileSelect, onPLCFileSelect }) {
     const file = event.target.files[0];
     console.log('Selected file:', file); // 디버깅 로그 추가
     setSelectedFile(file);
-    onFileSelect(file);
+    onFileSelect(file);  // 부모 컴포넌트로 파일 전달
   };
 
   const handlePLCFileChange = (event) => {
     const file = event.target.files[0];
     console.log('Selected PLC file:', file); // 디버깅 로그 추가
     setSelectedPLCFile(file);
-    onPLCFileSelect(file);
+    onPLCFileSelect(file);  // 부모 컴포넌트로 PLC 파일 전달
   };
 
   return (

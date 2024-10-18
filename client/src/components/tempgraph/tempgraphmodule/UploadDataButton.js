@@ -39,9 +39,7 @@ function UploadDataButton({ selectedFile, selectedPLCFile, onUploadSuccess, isEn
           response.plcData || [],
           selectedFile?.name || selectedPLCFile?.name,
           startTime,
-          endTime,
-          startTime,  // uploadedStartTime
-          endTime     // uploadedEndTime
+          endTime
         );
       } else {
         alert('Failed to upload file.');
