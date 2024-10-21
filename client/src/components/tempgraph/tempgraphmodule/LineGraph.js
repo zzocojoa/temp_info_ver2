@@ -95,7 +95,7 @@ const LineGraph = React.memo(({
             mode: 'lines',
             line: { color: '#8884d8' },
             hovertemplate: '%{y:.2f}°C<extra></extra>',
-            name: 'Temperature Data'
+            name: 'T.P'
           });
         }
 

@@ -14,12 +14,13 @@
 
 .fileUpload {
   width: 200px;
+  margin: 5px 10px 5px 0;
   font-size: 16px;
   border: 2px solid #263343;
   border-radius: 10px;
   padding: 5px 10px;
   text-align: center;
-  margin: 5px 0;
+  /* margin: 5px 0; */
   background: #263343;
   background: linear-gradient(0deg, rgb(38, 51, 67) 0%, rgb(29, 39, 51) 100%);
   border: none;
@@ -41,7 +42,7 @@
 }
 
 .fileName {
-  margin-left: 20px;
+  margin: 0 10px;
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.5;

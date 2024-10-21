@@ -23,6 +23,7 @@ export async function uploadFile(file) {
   formData.append('file', file);
 
   try {
+    console.log('파일 업로드 시작:', file.name);
     const response = await fetch(`${API_BASE_URL}/upload`, {
       method: 'POST',
       body: formData,
@@ -33,6 +34,8 @@ export async function uploadFile(file) {
     }
     const { data: averagedData, boxplotStats, temperatureValues } = await response.json();
     console.log("boxplotStats: ", boxplotStats);
+    console.log('파일 업로드 성공:', file.name);
+    console.log('박스플롯 통계:', boxplotStats);
     return { averagedData, boxplotStats, temperatureValues };
   } catch (error) {
     console.error('Error uploading file:', error);
@@ -46,6 +49,7 @@ export async function uploadPLCFile(file) {
   formData.append('file', file);
 
   try {
+    console.log('PLC 파일 업로드 시작:', file.name);
     const response = await fetch(`${API_BASE_URL}/upload-plc`, {
       method: 'POST',
       body: formData,
@@ -55,7 +59,8 @@ export async function uploadPLCFile(file) {
       throw new Error('Server responded with an error');
     }
     const { data: averagedData } = await response.json();
-    console.log("PLC averagedData: ", averagedData);
+    console.log('PLC 파일 업로드 성공:', file.name); // PLC 파일 업로드 성공 로그
+    console.log('PLC 데이터 처리 결과:', averagedData); // 결과 데이터 로그
     return { averagedData };
   } catch (error) {
     console.error('Error uploading PLC file:', error);
