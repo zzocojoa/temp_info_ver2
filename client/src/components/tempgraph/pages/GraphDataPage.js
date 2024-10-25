@@ -32,12 +32,20 @@ const GraphDataPage = React.memo(() => {
     dieNumber: '',
   });
 
+  // 그래프 생성 상태 관리
   const [isGraphGenerated, setIsGraphGenerated] = useState(false);
+  const [isBoxPlotUsed, setIsBoxPlotUsed] = useState(false);  // 박스플롯 사용 여부 추가
+  // console.log('isBoxPlotUsed:', isBoxPlotUsed);
+  // console.log('boxPlotData:', boxPlotData);
 
   // 업로드 성공 시 처리할 콜백 함수
-  const handleUploadSuccess = useCallback((averagedData, boxplotStats, plcData, uploadedFileName, startTime, endTime, uploadedStartTime, uploadedEndTime) => {
+  const handleUploadSuccess = useCallback((averagedData, boxplotStats, plcData, uploadedFileName, startTime, endTime, uploadedStartTime, uploadedEndTime, isBoxPlot) => {
+    console.log('handleUploadSuccess 호출됨');
+    console.log('boxplotStats:', boxplotStats);
+    console.log('isBoxPlot:', isBoxPlot);
+  
     setGraphData(Array.isArray(averagedData) ? averagedData : []);
-    setBoxPlotData(boxplotStats);
+    setBoxPlotData(isBoxPlot ? boxplotStats : null);  // 박스플롯 사용 여부에 따라 설정
     setPlcGraphData(Array.isArray(plcData) ? plcData : []);
     setUploadedFileName(uploadedFileName);
     setIsGraphGenerated(true);
@@ -45,15 +53,11 @@ const GraphDataPage = React.memo(() => {
     setInitialEndTime(endTime);
     setStartTime(uploadedStartTime);
     setEndTime(uploadedEndTime);
+    setIsBoxPlotUsed(isBoxPlot);  // 박스플롯 사용 여부 설정
   }, []);
 
   // 파일 처리 로직
   const processFile = useCallback((file) => {
-    if (!file) {
-      console.error('No file provided');
-      return;
-    }
-
     const reader = new FileReader();
     reader.onload = (event) => {
       const csvData = event.target.result;
@@ -70,7 +74,7 @@ const GraphDataPage = React.memo(() => {
       worker.onmessage = (event) => {
         const averagedData = event.data;
         setGraphData(averagedData);
-        setIsGraphGenerated(false);
+        setIsGraphGenerated(false);  // 그래프는 버튼 클릭 후 생성됨
       };
     };
     reader.readAsText(file);
@@ -78,11 +82,6 @@ const GraphDataPage = React.memo(() => {
 
   // PLC 파일 처리 로직
   const processPLCFile = useCallback((file) => {
-    if (!file) {
-      console.error('No PLC file provided');
-      return;
-    }
-
     const reader = new FileReader();
     reader.onload = (event) => {
       const csvData = event.target.result;
@@ -99,7 +98,7 @@ const GraphDataPage = React.memo(() => {
       worker.onmessage = (event) => {
         const averagedData = event.data;
         setPlcGraphData(averagedData);
-        setIsGraphGenerated(false);
+        setIsGraphGenerated(false);  // 그래프는 버튼 클릭 후 생성됨
       };
     };
     reader.readAsText(file);
@@ -108,20 +107,24 @@ const GraphDataPage = React.memo(() => {
   // 파일 선택 시 상태 초기화 및 처리
   const handleFileSelect = useCallback((file) => {
     if (file) {
+      const isBoxPlot = file.name.includes('LandData');  // LandData 여부 확인
+      console.log("isBoxPlot :", isBoxPlot)
       setUploadedFile(file);
       setGraphData([]);  // 기존 그래프 데이터 초기화
-      setBoxPlotData(null);
+      setBoxPlotData(null);  // 박스플롯 데이터 초기화
       setUserInput('');
       setIsGraphGenerated(false);  // 그래프 생성 상태를 false로 초기화
       processFile(file);
+      setIsBoxPlotUsed(isBoxPlot);  // LandData인 경우 박스플롯 사용
     } else {
       setUploadedFile(null);  // 파일이 없을 경우 상태 초기화
       setGraphData([]);
       setBoxPlotData(null);
       setIsGraphGenerated(false);
+      setIsBoxPlotUsed(false);  // 초기화 시 박스플롯 사용도 false로
       console.log('파일 선택 취소됨');
     }
-  }, [processFile]);
+  }, [processFile]);  
 
   // PLC 파일 선택 시 상태 초기화 및 처리
   const handlePLCFileSelect = useCallback((file) => {
@@ -130,6 +133,7 @@ const GraphDataPage = React.memo(() => {
       setPlcGraphData([]);
       setIsGraphGenerated(false);  // PLC 파일 선택 시 그래프 생성 상태 초기화
       processPLCFile(file);
+      setIsBoxPlotUsed(false);  // PLC 파일인 경우 박스플롯 사용하지 않음
     } else {
       setUploadedPLCFile(null);  // PLC 파일이 없을 경우 상태 초기화
       setPlcGraphData([]);
@@ -175,11 +179,14 @@ const GraphDataPage = React.memo(() => {
               className={styles['uploadDataButton']}
               selectedFile={uploadedFile}
               selectedPLCFile={uploadedPLCFile}
-              onUploadSuccess={handleUploadSuccess}
+              onUploadSuccess={(averagedData, boxplotStats, plcData, uploadedFileName, startTime, endTime, uploadedStartTime, uploadedEndTime) => {
+                console.log('UploadDataButton에서 handleUploadSuccess 호출됨');
+                handleUploadSuccess(averagedData, boxplotStats, plcData, uploadedFileName, startTime, endTime, uploadedStartTime, uploadedEndTime, isBoxPlotUsed);
+              }}
               isEnabled={!!uploadedFile || !!uploadedPLCFile}
               resetFileState={resetFileState}
             />
-            {isGraphGenerated && (
+            {isGraphGenerated && (  // 조건부 렌더링으로 그래프 컴포넌트 생성
               <>
                 <SaveCsvDataButton
                   data={{
@@ -198,7 +205,7 @@ const GraphDataPage = React.memo(() => {
                 />
                 <LineGraph
                   averagedData={graphData}
-                  plcData={plcGraphData}
+                  plcData={plcGraphData}  // PLC 데이터를 전달
                   countNumber={details.countNumber}
                   wNumber={details.wNumber}
                   dwNumber={details.dwNumber}
@@ -209,21 +216,26 @@ const GraphDataPage = React.memo(() => {
                   initialEndTime={initialEndTime}
                   setBoxplotStats={setBoxPlotData}
                 />
-                <BoxGraph
-                  initialStartTime={initialStartTime}
-                  initialEndTime={initialEndTime}
-                  averagedData={graphData}
-                  boxplotStats={boxPlotData}
-                  selectedRange={selectedRange}
-                  onBrushChange={handleBrushChange}
-                />
+
+                {/* 박스플롯 데이터를 사용하는 경우에만 BoxGraph 렌더링 */}
+                {isBoxPlotUsed && boxPlotData && (
+                  <BoxGraph
+                    initialStartTime={initialStartTime}
+                    initialEndTime={initialEndTime}
+                    averagedData={graphData}
+                    boxplotStats={boxPlotData}
+                    selectedRange={selectedRange}
+                    onBrushChange={handleBrushChange}
+                  />
+                )}
               </>
             )}
           </div>
         </div>
+
         <div className={styles['rightPanel']}>
           <DataListUI />
-          {isGraphGenerated && (
+          {isGraphGenerated && (  // 조건부 렌더링으로 텍스트 입력 컴포넌트 생성
             <TextInputBox
               value={userInput}
               onTextChange={setUserInput}

@@ -1,16 +1,17 @@
-// server/models/FileMetadata.js
+// server\models\FileMetadata.js
 
 const mongoose = require('mongoose');
 
 const fileMetadataSchema = new mongoose.Schema({
     fileName: String,
     uploadDate: { type: Date, default: Date.now },
+    // 온도 데이터
     temperatureData: [{
         date: String,
         time: String,
         temperature: Number
     }],
-    // PLC 데이터를 위한 새로운 필드 추가
+    // 통합된 PLC 데이터 필드 (박스플롯 통계는 없음)
     plcData: [{
         date: String,
         time: String,
@@ -19,6 +20,7 @@ const fileMetadataSchema = new mongoose.Schema({
         ctb: Number,
         speed: Number
     }],
+    // 온도 데이터를 위한 박스플롯 통계만 유지
     boxplotStats: {
         min: Number,
         q1: Number,
@@ -27,29 +29,19 @@ const fileMetadataSchema = new mongoose.Schema({
         max: Number,
         outliers: [Number]
     },
-    // PLC 데이터에 대한 boxplot 통계 추가
-    plcBoxplotStats: {
-        pressure: {
-            min: Number,
-            q1: Number,
-            median: Number,
-            q3: Number,
-            max: Number,
-            outliers: [Number]
-        },
-        // 필요한 경우 ctf, ctb, speed에 대한 boxplot 통계도 추가할 수 있습니다.
-    },
+    // 파일을 구분하는 정보
     numbering: {
         countNumber: String,
         wNumber: String,
         dwNumber: String,
         dieNumber: String,
     },
+    // 파일 메타데이터
     filedate: String,
     userInput: String,
     startTime: String, 
     endTime: String,
-    // PLC 파일 관련 메타데이터 추가
+    // PLC 파일 관련 추가 메타데이터
     plcFileName: String,
     plcUploadDate: { type: Date },
 });

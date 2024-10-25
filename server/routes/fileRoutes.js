@@ -7,7 +7,6 @@ const router = express.Router();
 const Papa = require('papaparse');
 const path = require('path');
 const FileMetadata = require('../models/FileMetadata');
-const PLCFileMetadata = require('../models/PLCFileMetadata');
 const ThresholdMetadata = require('../models/ThresholdFileMetadata');
 const processData = require('../utils/refining');
 const plcrefining = require('../utils/plc_refining');
@@ -18,7 +17,6 @@ const performClustering = require('../utils/performClustering');
 const { v4: uuidv4 } = require('uuid');
 const { spawn } = require('child_process');
 const archiver = require('archiver');
-
 
 // 파일 업로드 미들웨어 설정
 const storage = multer.diskStorage({
@@ -77,23 +75,13 @@ router.post('/upload-plc', upload.single('file'), async (req, res) => {
       }
     });
 
-    const { averagedData } = plcrefining(allData);
-    console.error('upload-plc averagedData:', averagedData);
-
-    if (averagedData.length === 0) {
-      res.status(400).json({ success: false, message: 'No valid data found in the PLC file.' });
-    } else {
-      res.json({ success: true, message: 'PLC file processed successfully', data: averagedData });
-    }
+    const { processedData } = plcrefining(allData);
+    res.json({ success: true, message: 'File processed successfully', data: processedData });
   } catch (error) {
     console.error('Error processing PLC file:', error);
     res.status(500).json({ success: false, message: 'Error processing PLC file', error: error.toString() });
   } finally {
-    try {
-      await fs.unlink(filePath);
-    } catch (error) {
-      console.error('Error deleting file:', error);
-    }
+    await fs.unlink(filePath);
   }
 });
 
@@ -107,7 +95,7 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
     const filePath = file.path;
     const fileName = file.originalname;
 
-    const match = fileName.match(/(\d{4}-\d{2}-\d{2})-(\d+)_(\d+)_(\d+)_(\d+)\.csv/);
+    const match = fileName.match(/(\d{4}-\d{2}-\d2})-(\d+)_(\d+)_(\d+)_(\d+)\.csv/);
     if (!match) {
       await fs.unlink(filePath);
       return { fileName, error: 'Invalid file name format.' };
@@ -131,10 +119,11 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
             const endTime = times[times.length - 1];
 
             const boxplotStats = calculateBoxplotStats(temperatureValues);
+            console.log("boxplotStats: ", boxplotStats)
             const newFileMetadata = new FileMetadata({
               fileName,
-              temperatureData: result.data,
-              boxplotStats,
+              temperatureData: result.data,  // 온도 데이터 저장
+              boxplotStats,  // 박스플롯 통계 저장
               numbering: { countNumber, wNumber, dwNumber, dieNumber },
               filedate,
               startTime,
@@ -163,7 +152,7 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
   res.json(uploadResults);
 });
 
-// 정제된 파일 업로드 처리 엔드포인트 (다중 파일 지원)
+// PLC 파일 처리 로직 수정
 router.post('/upload-csv', upload.array('files'), async (req, res) => {
   if (!req.files || req.files.length === 0) {
     return res.status(400).send('No files uploaded.');
@@ -173,7 +162,8 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
     const filePath = file.path;
     const fileName = file.originalname;
 
-    const match = fileName.match(/(\d{4}-\d{2}-\d{2})-(\d+)\.csv/); // 새로운 파일명 형식에 맞는 정규 표현식
+    // 날짜 형식 정규 표현식 수정
+    const match = fileName.match(/(\d{4}-\d{2}-\d{2})-(\d+)\.csv/); 
     if (!match) {
       await fs.unlink(filePath);
       return { fileName, error: 'Invalid file name format.' };
@@ -190,22 +180,23 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
           skipEmptyLines: true,
           complete: async (result) => {
             try {
-              const { pressures } = preprocessPLCData(result.data); // preprocessPLCData 사용
+              const { pressures } = preprocessPLCData(result.data); // PLC 데이터 처리
 
               // 시작 시간과 종료 시간 추출
               const times = pressures.map(entry => entry.time).sort();
               const startTime = times[0];
               const endTime = times[times.length - 1];
 
-              const newPLCFileMetadata = new PLCFileMetadata({
+              // FileMetadata에 PLC 데이터 저장
+              const newFileMetadata = new FileMetadata({
                 fileName,
-                pressureData: pressures,
+                plcData: pressures,  // PLC 데이터 저장
                 numbering: { countNumber },
                 filedate,
                 startTime,
                 endTime,
               });
-              await newPLCFileMetadata.save();
+              await newFileMetadata.save();
               resolve({ fileName, message: 'PLC file uploaded and data saved successfully', startTime, endTime });
             } catch (error) {
               console.error('Error saving file metadata:', error);
@@ -232,7 +223,6 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
 
   res.json(uploadResults);
 });
-
 
 // boxplot dynamic data
 router.post('/process-filtered-data', async (req, res) => {

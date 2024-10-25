@@ -32,7 +32,8 @@ function UploadDataButton({ selectedFile, selectedPLCFile, onUploadSuccess, isEn
       // PLC 파일 업로드 처리
       if (selectedPLCFile) {
         const plcResponse = await uploadPLCFile(selectedPLCFile);
-        response.plcData = plcResponse.averagedData;
+        response.plcData = plcResponse.averagedData; // PLC 데이터 처리 (pressure, ctf, ctb, speed 포함)
+        console.log("PLC Data:", response.plcData);  // PLC 데이터 로그
       }
 
       setIsLoading(false);  // 로딩 상태 종료
@@ -45,10 +46,10 @@ function UploadDataButton({ selectedFile, selectedPLCFile, onUploadSuccess, isEn
         
         // 업로드 성공 콜백 호출 및 파일 상태 초기화
         onUploadSuccess(
-          response.averagedData || [],
-          response.boxplotStats,
-          response.plcData || [],
-          selectedFile?.name || selectedPLCFile?.name,
+          response.averagedData || [], // 일반 파일 데이터
+          response.boxplotStats,        // 박스플롯 통계
+          response.plcData || [],       // PLC 파일 데이터 (pressure, ctf, ctb, speed 포함)
+          selectedFile?.name || selectedPLCFile?.name, // 파일명 전달
           startTime,
           endTime
         );

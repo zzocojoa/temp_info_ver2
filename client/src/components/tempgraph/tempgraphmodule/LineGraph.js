@@ -75,12 +75,6 @@ const LineGraph = React.memo(({
   }, [plcData, fetchMedian]);
 
   useEffect(() => {
-    console.log("averagedData:", averagedData);
-    console.log("plcData:", plcData);
-    if (plcData.length > 0) {
-      console.log("PLC data sample:", plcData[0]);
-    }
-
     if ((averagedData.length > 0 || plcData.length > 0) && plotRef.current) {
       const currentPlotRef = plotRef.current;
 
@@ -107,10 +101,9 @@ const LineGraph = React.memo(({
             mode: 'lines',
             line: { color: '#82ca9d' },
             hovertemplate: '%{y:.2f}<extra></extra>',
-            name: 'PLC Pressure',
+            name: 'P.S',
             yaxis: 'y2'
           });
-          console.log("PLC data added to plot");
         }
 
         const layout = {
@@ -121,18 +114,12 @@ const LineGraph = React.memo(({
             title: 'Pressure',
             overlaying: 'y',
             side: 'right',
-            autorange: true,
-            range: plcData.length > 0 ? [Math.min(...plcData.map(d => d.pressure)), Math.max(...plcData.map(d => d.pressure))] : null
+            autorange: true
           },
           showlegend: true,
           paper_bgcolor: '#e2d1c7',
           plot_bgcolor: '#e2d1c7',
-          margin: {
-            l: 60,
-            r: 60,
-            t: 40,
-            b: 80
-          },
+          margin: { l: 60, r: 60, t: 40, b: 80 },
           shapes: [],
           dragmode: 'zoom',
           selectdirection: 'h',
@@ -148,11 +135,7 @@ const LineGraph = React.memo(({
             x1: averagedData[averagedData.length - 1]?.time,
             y0: medianValue,
             y1: medianValue,
-            line: {
-              color: 'red',
-              width: 2,
-              dash: 'dash'
-            },
+            line: { color: 'red', width: 2, dash: 'dash' },
             name: 'Temperature Median'
           });
         }
@@ -164,11 +147,7 @@ const LineGraph = React.memo(({
             x1: plcData[plcData.length - 1]?.time,
             y0: plcMedianValue,
             y1: plcMedianValue,
-            line: {
-              color: 'green',
-              width: 2,
-              dash: 'dash'
-            },
+            line: { color: 'green', width: 2, dash: 'dash' },
             name: 'PLC Median',
             yref: 'y2'
           });

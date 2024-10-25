@@ -1,33 +1,27 @@
 // server/utils/plc_refining.js
 
-const moment = require('moment');
+const moment = require('moment'); // moment.js 사용
 const preprocessPLCData = require('./preprocessPLCData');
-const calculateQuartiles = require('./quartileCalculations');
-const calculateAveragedData = require('./averageData');
 
 function plcrefining(data) {
     // 데이터 전처리 로직 호출
-    const { pressures, pressureValues } = preprocessPLCData(data);
+    const { pressures } = preprocessPLCData(data);
 
+    // 데이터가 없을 경우 처리
     if (pressures.length === 0) {
-        console.log("No valid PLC data to process.");
-        return { averagedData: [] };
+        console.warn("No valid PLC data to process. Ensure the data contains valid '날짜', '시간', and '메인압력' fields.");
+        return { processedData: [] };
     }
 
-    const { q1, q3, lowerBound, upperBound } = calculateQuartiles(pressureValues);
+    // 유효한 압력 데이터를 포맷팅하여 반환
+    let processedData = pressures.map(item => ({
+        date: item.date,
+        time: moment(item.time, 'HH:mm:ss:SSS').format('HH:mm:ss'),  // time 필드 포맷팅
+        pressure: item.pressure
+    }));
 
-    // 필터링 및 데이터 변환 로직 호출
-    let filteredData = pressures.filter(item => item.pressure >= lowerBound && item.pressure <= upperBound)
-        .map(item => ({
-            date: item.date,
-            time: moment(item.time, 'HH:mm:ss:SSS').format('HH:mm:ss'),
-            pressure: item.pressure
-        }));
-
-    // AveragedData 계산 로직 호출
-    const averagedData = calculateAveragedData(filteredData);
-
-    return { averagedData };
+    return { processedData }; // 필터링 없이 변환된 데이터를 그대로 반환
 }
 
 module.exports = plcrefining;
+
