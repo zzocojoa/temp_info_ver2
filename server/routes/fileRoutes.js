@@ -33,10 +33,13 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
   }
-  const filePath = req.file.path;
+
+  const filePath = req.file.path;  // 업로드된 파일 경로
   try {
     const fileContent = await fs.readFile(filePath, 'utf8');
     let allData = [];
+
+    // CSV 파일 파싱
     Papa.parse(fileContent, {
       header: true,
       dynamicTyping: true,
@@ -47,12 +50,21 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       }
     });
 
+    // 데이터 처리 (평균 데이터 및 박스플롯 통계 생성)
     const { averagedData, boxplotStats } = processData(allData);
-    res.json({ success: true, message: 'File processed successfully', data: averagedData, boxplotStats });
+
+    // 성공적으로 처리된 데이터 반환
+    res.json({ 
+      success: true, 
+      message: 'File processed successfully', 
+      data: averagedData, 
+      boxplotStats 
+    });
   } catch (error) {
     console.error('Error processing file:', error);
     res.status(500).send('Error processing file');
   } finally {
+    // 업로드된 파일 삭제
     await fs.unlink(filePath);
   }
 });
@@ -62,10 +74,13 @@ router.post('/upload-plc', upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
   }
+
   const filePath = req.file.path;
   try {
     const fileContent = await fs.readFile(filePath, 'utf8');
     let allData = [];
+
+    // CSV 파일 파싱
     Papa.parse(fileContent, {
       header: true,
       dynamicTyping: true,
@@ -75,12 +90,24 @@ router.post('/upload-plc', upload.single('file'), async (req, res) => {
       }
     });
 
+    // PLC 데이터 처리
     const { processedData } = plcrefining(allData);
-    res.json({ success: true, message: 'File processed successfully', data: processedData });
+
+    // 성공적으로 처리된 데이터 반환
+    res.json({ 
+      success: true, 
+      message: 'PLC file processed successfully', 
+      data: processedData 
+    });
   } catch (error) {
     console.error('Error processing PLC file:', error);
-    res.status(500).json({ success: false, message: 'Error processing PLC file', error: error.toString() });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error processing PLC file', 
+      error: error.toString() 
+    });
   } finally {
+    // 업로드된 파일 삭제
     await fs.unlink(filePath);
   }
 });

@@ -18,55 +18,66 @@ function createFetchRequest(method, body = null) {
 }
 
 // 파일 업로드 API
-export async function uploadFile(file) {
+export const uploadFile = async (file, onProgress) => {
   const formData = new FormData();
   formData.append('file', file);
 
-  try {
-    console.log('파일 업로드 시작:', file.name);
-    const response = await fetch(`${API_BASE_URL}/upload`, {
-      method: 'POST',
-      body: formData,
-      cache: 'no-cache',
-    });
-    if (!response.ok) {
-      throw new Error('Server responded with an error');
-    }
-    const { data: averagedData, boxplotStats, temperatureValues } = await response.json();
-    console.log("boxplotStats: ", boxplotStats);
-    console.log('파일 업로드 성공:', file.name);
-    console.log('박스플롯 통계:', boxplotStats);
-    return { averagedData, boxplotStats, temperatureValues };
-  } catch (error) {
-    console.error('Error uploading file:', error);
-    throw error;
-  }
-}
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_BASE_URL}/upload`, true);
+
+    // 진행률을 추적하는 이벤트 리스너 추가
+    xhr.upload.onprogress = onProgress;
+
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        const response = JSON.parse(xhr.responseText);
+        // 응답 데이터가 제대로 반환되었는지 체크
+        if (response && response.data && response.boxplotStats) {
+          resolve(response);  // 성공 시 데이터 반환
+        } else {
+          reject(new Error('Invalid data format from server.'));
+        }
+      } else {
+        reject(new Error('Failed to upload file.'));
+      }
+    };
+
+    xhr.onerror = () => reject(new Error('Network Error'));
+    xhr.send(formData);
+  });
+};
 
 // PLC 파일 업로드 API
-export async function uploadPLCFile(file) {
+export const uploadPLCFile = async (file, onProgress) => {
   const formData = new FormData();
   formData.append('file', file);
 
-  try {
-    console.log('PLC 파일 업로드 시작:', file.name);
-    const response = await fetch(`${API_BASE_URL}/upload-plc`, {
-      method: 'POST',
-      body: formData,
-      cache: 'no-cache',
-    });
-    if (!response.ok) {
-      throw new Error('Server responded with an error');
-    }
-    const { data: averagedData } = await response.json();
-    console.log('PLC 파일 업로드 성공:', file.name); // PLC 파일 업로드 성공 로그
-    console.log('PLC 데이터 처리 결과:', averagedData); // 결과 데이터 로그
-    return { averagedData };
-  } catch (error) {
-    console.error('Error uploading PLC file:', error);
-    throw error;
-  }
-}
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_BASE_URL}/upload-plc`, true);
+
+    // 진행률을 추적하는 이벤트 리스너 추가
+    xhr.upload.onprogress = onProgress;
+
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        const response = JSON.parse(xhr.responseText);
+        // 응답 데이터가 제대로 반환되었는지 체크
+        if (response && response.data) {
+          resolve(response);  // 성공 시 데이터 반환
+        } else {
+          reject(new Error('Invalid data format from server.'));
+        }
+      } else {
+        reject(new Error('Failed to upload PLC file.'));
+      }
+    };
+
+    xhr.onerror = () => reject(new Error('Network Error'));
+    xhr.send(formData);
+  });
+};
 
 // 정제 파일 업로드 API (CSV 파일)
 export async function uploadCsvFile(files) {

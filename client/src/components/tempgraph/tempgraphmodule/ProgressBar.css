@@ -1,0 +1,43 @@
+/* client/src/components/tempgraph/tempgraphmodule/ProgressBar.css */
+
+/* Progress bar 전체 컨테이너 스타일 */
+.progress-bar-container {
+    width: 100%;
+    margin: 10px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Progress bar 배경 스타일 */
+  .progress-bar-background {
+    width: 80%; /* 전체 길이의 80%로 설정 */
+    background-color: #f3f4f6; /* 밝은 회색 배경 */
+    border-radius: 20px;
+    height: 25px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* 약간의 그림자 */
+    position: relative;
+  }
+  
+  /* Progress bar 채워지는 부분 스타일 */
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4da8f0, #58cced); /* 그라디언트 적용 */
+    border-radius: 20px;
+    transition: width 0.4s ease-in-out; /* 부드러운 애니메이션 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Progress bar 내부 텍스트 스타일 */
+  .progress-bar-text {
+    font-size: 14px;
+    color: white;
+    font-weight: bold;
+    position: absolute; /* 텍스트가 중앙에 고정되도록 설정 */
+    width: 100%;
+    text-align: center;
+  }
+  
