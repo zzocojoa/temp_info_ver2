@@ -40,9 +40,9 @@ const GraphDataPage = React.memo(() => {
 
   // 업로드 성공 시 처리할 콜백 함수
   const handleUploadSuccess = useCallback((averagedData, boxplotStats, plcData, uploadedFileName, startTime, endTime, uploadedStartTime, uploadedEndTime, isBoxPlot) => {
-    console.log('handleUploadSuccess 호출됨');
-    console.log('boxplotStats:', boxplotStats);
-    console.log('isBoxPlot:', isBoxPlot);
+    // console.log('handleUploadSuccess 호출됨');
+    // console.log('boxplotStats:', boxplotStats);
+    // console.log('isBoxPlot:', isBoxPlot);
   
     setGraphData(Array.isArray(averagedData) ? averagedData : []);
     setBoxPlotData(isBoxPlot ? boxplotStats : null);  // 박스플롯 사용 여부에 따라 설정
@@ -108,7 +108,7 @@ const GraphDataPage = React.memo(() => {
   const handleFileSelect = useCallback((file) => {
     if (file) {
       const isBoxPlot = file.name.includes('LandData');  // LandData 여부 확인
-      console.log("isBoxPlot :", isBoxPlot)
+      // console.log("isBoxPlot :", isBoxPlot)
       setUploadedFile(file);
       setGraphData([]);  // 기존 그래프 데이터 초기화
       setBoxPlotData(null);  // 박스플롯 데이터 초기화
@@ -122,7 +122,7 @@ const GraphDataPage = React.memo(() => {
       setBoxPlotData(null);
       setIsGraphGenerated(false);
       setIsBoxPlotUsed(false);  // 초기화 시 박스플롯 사용도 false로
-      console.log('파일 선택 취소됨');
+      // console.log('파일 선택 취소됨');
     }
   }, [processFile]);  
 
@@ -138,7 +138,7 @@ const GraphDataPage = React.memo(() => {
       setUploadedPLCFile(null);  // PLC 파일이 없을 경우 상태 초기화
       setPlcGraphData([]);
       setIsGraphGenerated(false);
-      console.log('PLC 파일 선택 취소됨');
+      // console.log('PLC 파일 선택 취소됨');
     }
   }, [processPLCFile]);
 
@@ -180,7 +180,7 @@ const GraphDataPage = React.memo(() => {
               selectedFile={uploadedFile}
               selectedPLCFile={uploadedPLCFile}
               onUploadSuccess={(averagedData, boxplotStats, plcData, uploadedFileName, startTime, endTime, uploadedStartTime, uploadedEndTime) => {
-                console.log('UploadDataButton에서 handleUploadSuccess 호출됨');
+                // console.log('UploadDataButton에서 handleUploadSuccess 호출됨');
                 handleUploadSuccess(averagedData, boxplotStats, plcData, uploadedFileName, startTime, endTime, uploadedStartTime, uploadedEndTime, isBoxPlotUsed);
               }}
               isEnabled={!!uploadedFile || !!uploadedPLCFile}

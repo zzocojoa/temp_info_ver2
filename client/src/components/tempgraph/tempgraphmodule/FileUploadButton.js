@@ -13,7 +13,7 @@ function FileUploadButton({ onFileSelect, onPLCFileSelect }) {
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      console.log('파일 선택됨:', file.name);
+      // console.log('파일 선택됨:', file.name);
       setSelectedFile(file);
       onFileSelect(file); // 선택된 파일을 상위 컴포넌트로 전달
     }
@@ -23,7 +23,7 @@ function FileUploadButton({ onFileSelect, onPLCFileSelect }) {
   const handlePLCFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      console.log('PLC 파일 선택됨:', file.name);
+      // console.log('PLC 파일 선택됨:', file.name);
       setSelectedPLCFile(file);
       onPLCFileSelect(file); // 선택된 PLC 파일을 상위 컴포넌트로 전달
     }
@@ -55,7 +55,7 @@ function FileUploadButton({ onFileSelect, onPLCFileSelect }) {
         {/* 일반 파일 업로드 */}
         <div className={styles["fileUploadButton"]}>
           <label htmlFor="file">
-            <div className={styles["fileUpload"]}>파일 업로드하기</div>
+            <div className={styles["fileUpload"]}>온도 데이터</div>
           </label>
           <input
             ref={fileInputRef}
@@ -74,7 +74,7 @@ function FileUploadButton({ onFileSelect, onPLCFileSelect }) {
         {/* PLC 파일 업로드 */}
         <div className={styles["fileUploadButton"]}>
           <label htmlFor="plcFile">
-            <div className={styles["fileUpload"]}>PLC 파일 업로드하기</div>
+            <div className={styles["fileUpload"]}>PLC 데이터</div>
           </label>
           <input
             ref={plcFileInputRef}

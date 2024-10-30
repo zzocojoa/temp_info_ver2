@@ -1,21 +1,9 @@
 // client/src/api.js
 
+import { createFetchRequest } from './utils/fetchUtils';
+
+
 export const API_BASE_URL = 'http://localhost:5000/api';
-
-function createFetchRequest(method, body = null) {
-  const headers = new Headers();
-  headers.append('Content-Type', 'application/json');
-  headers.append('Cache-Control', 'no-cache');
-
-  const requestInit = {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : null,
-    cache: 'no-cache',
-  };
-
-  return requestInit;
-}
 
 // 파일 업로드 API
 export const uploadFile = async (file, onProgress) => {
@@ -26,24 +14,45 @@ export const uploadFile = async (file, onProgress) => {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `${API_BASE_URL}/upload`, true);
 
-    // 진행률을 추적하는 이벤트 리스너 추가
     xhr.upload.onprogress = onProgress;
 
     xhr.onload = () => {
-      if (xhr.status === 200) {
-        const response = JSON.parse(xhr.responseText);
-        // 응답 데이터가 제대로 반환되었는지 체크
-        if (response && response.data && response.boxplotStats) {
-          resolve(response);  // 성공 시 데이터 반환
+      try {
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText);
+          // console.log("response: ", response); // 응답 데이터 확인
+
+          // 응답 데이터 구조 검증
+          if (
+            response &&
+            response.success &&
+            Array.isArray(response.data) &&
+            response.data.length > 0 &&
+            response.boxplotStats &&
+            'min' in response.boxplotStats &&
+            'q1' in response.boxplotStats &&
+            'median' in response.boxplotStats &&
+            'q3' in response.boxplotStats &&
+            'max' in response.boxplotStats
+          ) {
+            resolve(response); // 성공 시 데이터 반환
+          } else {
+            reject(new Error('Unexpected data format: Missing required fields in the response.'));
+          }
         } else {
-          reject(new Error('Invalid data format from server.'));
+          reject(new Error(`Server responded with status ${xhr.status}: ${xhr.statusText}`));
         }
-      } else {
-        reject(new Error('Failed to upload file.'));
+      } catch (error) {
+        console.error('Error parsing server response:', error);
+        reject(new Error('Error parsing server response.'));
       }
     };
 
-    xhr.onerror = () => reject(new Error('Network Error'));
+    xhr.onerror = () => {
+      console.error('Network Error occurred during file upload');
+      reject(new Error('Network Error'));
+    };
+
     xhr.send(formData);
   });
 };
@@ -57,27 +66,40 @@ export const uploadPLCFile = async (file, onProgress) => {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `${API_BASE_URL}/upload-plc`, true);
 
-    // 진행률을 추적하는 이벤트 리스너 추가
     xhr.upload.onprogress = onProgress;
 
     xhr.onload = () => {
       if (xhr.status === 200) {
-        const response = JSON.parse(xhr.responseText);
-        // 응답 데이터가 제대로 반환되었는지 체크
-        if (response && response.data) {
-          resolve(response);  // 성공 시 데이터 반환
-        } else {
-          reject(new Error('Invalid data format from server.'));
+        try {
+          const response = JSON.parse(xhr.responseText);
+          // console.log("response: ", response); // 응답 데이터 확인
+
+          // 응답 데이터 구조 검증
+          if (response && response.success && response.data && Array.isArray(response.data) && response.data.length > 0) {
+            const firstEntry = response.data[0];
+            // 필수 필드가 모두 포함되었는지 확인
+            if ('date' in firstEntry && 'time' in firstEntry && 'pressure' in firstEntry && 'ctf' in firstEntry && 'ctb' in firstEntry && 'speed' in firstEntry) {
+              resolve(response); // 성공 시 데이터 반환
+            } else {
+              reject(new Error('Unexpected data format: Missing required fields in the response.'));
+            }
+          } else {
+            reject(new Error('Invalid or empty data format from server.'));
+          }
+        } catch (error) {
+          console.error('Error parsing server response:', error);
+          reject(new Error('Error parsing server response.'));
         }
       } else {
-        reject(new Error('Failed to upload PLC file.'));
+        reject(new Error(`Server responded with status ${xhr.status}: ${xhr.statusText}`));
       }
     };
 
-    xhr.onerror = () => reject(new Error('Network Error'));
+    xhr.onerror = () => reject(new Error('Network Error occurred during file upload'));
     xhr.send(formData);
   });
 };
+
 
 // 정제 파일 업로드 API (CSV 파일)
 export async function uploadCsvFile(files) {

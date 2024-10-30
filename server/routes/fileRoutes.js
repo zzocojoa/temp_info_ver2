@@ -17,55 +17,43 @@ const performClustering = require('../utils/performClustering');
 const { v4: uuidv4 } = require('uuid');
 const { spawn } = require('child_process');
 const archiver = require('archiver');
+const { retryAsync, parseCsvFile, asyncDeleteFile } = require('../utils/fileUtils');
 
 // 파일 업로드 미들웨어 설정
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
   filename: (req, file, cb) => cb(null, file.originalname)
 });
+const upload = multer({ storage: storage });
+
 // 정적 파일 제공을 위한 미들웨어
 router.use('/files', express.static(path.join(__dirname, '../uploads')));
 
-const upload = multer({ storage: storage });
-
 // 파일 업로드 처리
 router.post('/upload', upload.single('file'), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).send('No file uploaded.');
-  }
+  if (!req.file) return res.status(400).send('No file uploaded.');
 
-  const filePath = req.file.path;  // 업로드된 파일 경로
+  const filePath = req.file.path;
   try {
-    const fileContent = await fs.readFile(filePath, 'utf8');
-    let allData = [];
-
     // CSV 파일 파싱
-    Papa.parse(fileContent, {
-      header: true,
-      dynamicTyping: true,
-      skipEmptyLines: true,
-      step: (row) => {
-        const { '[Date]': date, '[Time]': time, '[Temperature]': temperature } = row.data;
-        allData.push({ date, time, temperature });
-      }
-    });
-
+    const allData = await parseCsvFile(filePath);
+    
     // 데이터 처리 (평균 데이터 및 박스플롯 통계 생성)
     const { averagedData, boxplotStats } = processData(allData);
 
     // 성공적으로 처리된 데이터 반환
-    res.json({ 
-      success: true, 
-      message: 'File processed successfully', 
-      data: averagedData, 
-      boxplotStats 
+    res.json({
+      success: true,
+      message: 'File processed successfully',
+      data: averagedData,
+      boxplotStats
     });
   } catch (error) {
     console.error('Error processing file:', error);
     res.status(500).send('Error processing file');
   } finally {
     // 업로드된 파일 삭제
-    await fs.unlink(filePath);
+    await asyncDeleteFile(filePath);
   }
 });
 
@@ -77,9 +65,8 @@ router.post('/upload-plc', upload.single('file'), async (req, res) => {
 
   const filePath = req.file.path;
   try {
-    const fileContent = await fs.readFile(filePath, 'utf8');
+    const fileContent = await retryAsync(() => fs.readFile(filePath, 'utf8'));
     let allData = [];
-
     // CSV 파일 파싱
     Papa.parse(fileContent, {
       header: true,
@@ -89,9 +76,9 @@ router.post('/upload-plc', upload.single('file'), async (req, res) => {
         allData.push(row.data);
       }
     });
-
     // PLC 데이터 처리
     const { processedData } = plcrefining(allData);
+    // console.log("processedData: ", processedData)
 
     // 성공적으로 처리된 데이터 반환
     res.json({ 
@@ -415,14 +402,15 @@ router.patch('/data/:id', async (req, res) => {
 router.get('/data-list', async (req, res) => {
   try {
     const dataList = await FileMetadata.find({});
-    // 데이터가 자주 변경되지 않을 경우 캐시 허용 (예: 60초)
     res.set('Cache-Control', 'public, max-age=60');
+    res.set('Connection', 'close'); // keep-alive 비활성화
     res.json(dataList);
   } catch (error) {
     console.error('Error fetching data list:', error);
     res.status(500).send('Error fetching data list');
   }
 });
+
 
 // 특정 데이터 항목의 상세 정보 조회
 router.get('/data/:id', async (req, res) => {

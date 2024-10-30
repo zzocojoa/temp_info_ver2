@@ -31,10 +31,11 @@ function App() {
         setData(fetchedData); // Update the state with fetched data
       } catch (error) {
         console.error("Error fetching data:", error);
+        alert(`Failed to load data: ${error.message}`);
       }
     };
     loadData(); // Fetch data on component mount
-  }, []);
+  }, []);  
 
   return (
     <Router>

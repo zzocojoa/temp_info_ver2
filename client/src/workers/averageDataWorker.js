@@ -1,7 +1,8 @@
+// client/src/workers/averageDataWorker.js
+
 /* eslint-disable no-restricted-globals */
 /* eslint-disable no-undef */
 
-// client/src/workers/averageDataWorker.js
 self.importScripts('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js');
 
 self.onmessage = function(event) {

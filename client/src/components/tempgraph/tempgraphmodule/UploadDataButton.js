@@ -1,3 +1,5 @@
+// client\src\components\tempgraph\tempgraphmodule\UploadDataButton.js
+
 import React, { useState } from 'react';
 import styles from './UploadDataButton.module.css';
 import { uploadFile, uploadPLCFile } from '../../../api';  // API 함수 임포트
@@ -37,7 +39,7 @@ function UploadDataButton({ selectedFile, selectedPLCFile, onUploadSuccess, isEn
       if (selectedPLCFile) {
         const plcResponse = await uploadPLCFile(selectedPLCFile, handleProgress);
         response.plcData = plcResponse.data;
-        console.log("PLC Data:", response.plcData);  // PLC 데이터 로그
+        // console.log("PLC Data:", response.plcData);  // PLC 데이터 로그
       }
 
       setIsLoading(false);  // 로딩 상태 종료

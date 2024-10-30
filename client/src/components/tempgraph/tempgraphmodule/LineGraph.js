@@ -1,5 +1,3 @@
-// client/src/components/tempgraph/tempgraphmodule/LineGraph.js
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Plotly from 'plotly.js-dist-min';
 import { useLineGraphData } from './hooks/useLineGraphData';
@@ -80,46 +78,14 @@ const LineGraph = React.memo(({
 
       try {
         const plotData = [];
-
-        if (averagedData.length > 0) {
-          plotData.push({
-            x: averagedData.map(d => d.time),
-            y: averagedData.map(d => d.temperature),
-            type: 'scatter',
-            mode: 'lines',
-            line: { color: '#8884d8' },
-            hovertemplate: '%{y:.2f}°C<extra></extra>',
-            name: 'T.P'
-          });
-        }
-
-        if (plcData.length > 0) {
-          plotData.push({
-            x: plcData.map(d => d.time),
-            y: plcData.map(d => d.pressure),
-            type: 'scatter',
-            mode: 'lines',
-            line: { color: '#82ca9d' },
-            hovertemplate: '%{y:.2f}<extra></extra>',
-            name: 'P.S',
-            yaxis: 'y2'
-          });
-        }
-
+        // 수정됨: 기본 레이아웃 설정
         const layout = {
-          title: 'Temperature and Pressure Over Time',
+          title: 'Data Over Time',
           xaxis: { title: 'Time' },
-          yaxis: { title: 'Temperature (°C)', autorange: true },
-          yaxis2: {
-            title: 'Pressure',
-            overlaying: 'y',
-            side: 'right',
-            autorange: true
-          },
           showlegend: true,
           paper_bgcolor: '#e2d1c7',
           plot_bgcolor: '#e2d1c7',
-          margin: { l: 60, r: 60, t: 40, b: 80 },
+          margin: { l: 60, r: 80, t: 40, b: 80 },
           shapes: [],
           dragmode: 'zoom',
           selectdirection: 'h',
@@ -128,7 +94,27 @@ const LineGraph = React.memo(({
           width: chartSize.width
         };
 
+        // 수정됨: averagedData가 있을 때 temperature 데이터 및 y축 추가
         if (averagedData.length > 0) {
+          layout.yaxis = { 
+            title: 'Temperature (°C)', 
+            autorange: true,
+            showgrid: true,
+            zeroline: true
+          };
+
+          plotData.push({
+            x: averagedData.map(d => d.time),
+            y: averagedData.map(d => d.temperature),
+            type: 'scatter',
+            mode: 'lines',
+            line: { color: '#8884d8' },
+            hovertemplate: '%{y:.2f}°C<extra></extra>',
+            name: 'T.P',
+            yaxis: 'y'
+          });
+
+          // Temperature median line
           layout.shapes.push({
             type: 'line',
             x0: averagedData[0]?.time,
@@ -140,17 +126,93 @@ const LineGraph = React.memo(({
           });
         }
 
+        // 수정됨: PLC 데이터가 있을 때 처리
         if (plcData.length > 0) {
-          layout.shapes.push({
-            type: 'line',
-            x0: plcData[0]?.time,
-            x1: plcData[plcData.length - 1]?.time,
-            y0: plcMedianValue,
-            y1: plcMedianValue,
-            line: { color: 'green', width: 2, dash: 'dash' },
-            name: 'PLC Median',
-            yref: 'y2'
+          // 수정됨: 기본 y축이 없는 경우 pressure를 기본 y축으로 설정
+          if (!layout.yaxis) {
+            layout.yaxis = {
+              title: 'P.S',
+              autorange: true,
+              showgrid: true,
+              zeroline: true
+            };
+          }
+
+          // 수정됨: y축 설정을 미리 정의
+          const yaxisConfigs = {
+            speed: {
+              axis: averagedData.length > 0 ? 'y2' : 'y',
+              title: 'CTF',
+              color: '#82ca9d',
+              position: averagedData.length > 0 ? 1 : undefined,
+              side: 'right'
+            },
+            pressure: {
+              axis: 'y3',
+              title: 'P.S',
+              color: '#ff6347',
+              position: 1,
+              side: 'right'
+            },
+            ctb: {
+              axis: 'y3',
+              title: 'CTB',
+              color: '#4682b4',
+              position: 1,
+              side: 'right'
+            },
+            ctf: {
+              axis: 'y3',
+              title: 'Speed',
+              color: '#daa520',
+              position: 1,
+              side: 'right'
+            }
+          };
+
+          // 수정됨: PLC 데이터의 각 필드에 대한 처리
+          Object.entries(yaxisConfigs).forEach(([field, config]) => {
+            if (plcData[0][field] !== undefined) {
+              // y축 설정 추가
+              if (config.axis !== 'y') {
+                layout[`yaxis${config.axis.slice(1)}`] = {
+                  title: config.title,
+                  overlaying: 'y',
+                  side: config.side,
+                  position: config.position,
+                  autorange: true,
+                  showgrid: true,
+                  zeroline: true
+                };
+              }
+
+              // 데이터 추가
+              plotData.push({
+                x: plcData.map(d => d.time),
+                y: plcData.map(d => d[field]),
+                type: 'scatter',
+                mode: 'lines',
+                line: { color: config.color },
+                hovertemplate: '%{y:.2f}<extra></extra>',
+                name: config.title,
+                yaxis: config.axis
+              });
+            }
           });
+
+          // PLC median line
+          // if (plcData[0].pressure !== undefined) {
+          //   layout.shapes.push({
+          //     type: 'line',
+          //     x0: plcData[0]?.time,
+          //     x1: plcData[plcData.length - 1]?.time,
+          //     y0: plcMedianValue,
+          //     y1: plcMedianValue,
+          //     line: { color: 'green', width: 2, dash: 'dash' },
+          //     name: 'PLC Median',
+          //     yref: averagedData.length > 0 ? 'y2' : 'y'
+          //   });
+          // }
         }
 
         const handleRelayout = (eventdata) => {

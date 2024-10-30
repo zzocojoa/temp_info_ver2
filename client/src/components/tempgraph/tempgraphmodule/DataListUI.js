@@ -1,8 +1,7 @@
-// client/src/components/tempgraph/tempgraphmodule/DataListUI.js
+// client\src\components\tempgraph\tempgraphmodule\DataListUI.js
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-// 가상 스크롤링을 위해 react-window 사용
 import { FixedSizeList as List } from 'react-window';
 import { fetchDataList, deleteData, fetchDataDetails } from '../../../api';
 import DataUploadComponent from './DataUploadComponent';
@@ -13,30 +12,43 @@ function DataListUI() {
   const [selectedItems, setSelectedItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isHandleSaveCsvChecked, setIsHandleSaveCsvChecked] = useState(true);
-  const csvSaveModeText = isHandleSaveCsvChecked ? "개별" : "복수";
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const hasFetchedData = useRef(false); // 중복 호출 방지 플래그
+
+  // 검색 필터링 최적화
+  const filteredDataList = useMemo(() => {
+    if (!searchTerm) return dataList;
+    return dataList.filter(dataItem =>
+      `${dataItem.filedate}-${dataItem.numbering.countNumber}_${dataItem.numbering.wNumber}_${dataItem.numbering.dwNumber}_${dataItem.numbering.dieNumber}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+    );
+  }, [searchTerm, dataList]);
+
+  // CSV 모드 텍스트
+  const csvSaveModeText = useMemo(() => (isHandleSaveCsvChecked ? "개별" : "복수"), [isHandleSaveCsvChecked]);
+
+  // 데이터 로드 함수
+  const loadDataList = useCallback(async () => {
+    if (isLoading || hasFetchedData.current) return; // 중복 요청 방지
+    try {
+      setIsLoading(true);
+      const response = await fetchDataList();
+      setDataList(response || []);
+      hasFetchedData.current = true;
+    } catch (error) {
+      console.error("데이터 로딩 중 오류 발생:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLoading]);
 
   useEffect(() => {
-    const loadDataList = async () => {
-      try {
-        const response = await fetchDataList();
-        setDataList(response || []);
-      } catch (error) {
-        console.error("데이터 로딩 중 오류 발생:", error);
-        alert('데이터를 로드하는데 실패했습니다.');
-      }
-    };
     loadDataList();
-  }, []);
+  }, [loadDataList]);
 
-  const filteredDataList = searchTerm
-    ? dataList.filter(dataItem =>
-        `${dataItem.filedate}-${dataItem.numbering.countNumber}_${dataItem.numbering.wNumber}_${dataItem.numbering.dwNumber}_${dataItem.numbering.dieNumber}`
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      )
-    : dataList;
-
+  // 아이템 선택 처리
   const handleCheckboxChange = useCallback((itemId) => {
     setSelectedItems(prev => prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]);
   }, []);
@@ -61,67 +73,39 @@ function DataListUI() {
     setSelectedItems(e.target.checked ? filteredDataList.map(item => item._id) : []);
   }, [filteredDataList]);
 
-  // DB CSV data save
+  // CSV 저장 핸들러 최적화
   const handleSaveCsv = useCallback(async () => {
+    const selectedDataDetails = await Promise.all(selectedItems.map(id => fetchDataDetails(id)));
     if (isHandleSaveCsvChecked) {
-      const selectedDataDetails = await Promise.all(selectedItems.map(id => fetchDataDetails(id)));
-
       selectedDataDetails.forEach((item) => {
-        // CSV 헤더
         const csvHeader = 'date,time,temperature\n';
-
-        // 각 항목의 temperatureData를 CSV 형식의 문자열로 변환
-        const csvRows = item.temperatureData.map(tempData => {
-          const { date, time, temperature } = tempData;
-          return `"${date}","${time}","${temperature}"`;
-        }).join("\n");
-
-        // 파일명 생성 로직 수정: 각 항목에 대한 고유 파일명 생성
-        const { filedate, numbering: { countNumber, wNumber, dwNumber, dieNumber } } = item;
-        // 파일명을 생성하는 부분을 forEach 루프 내부에 넣어 각 항목별로 고유한 이름을 가지도록 함
-        const csvFileName = `${filedate}-${countNumber}_${wNumber}_${dwNumber}_${dieNumber}`.replace(/\/|:|\s/g, '_'); // 파일명에 사용 불가능한 문자는 '_'로 대체
-
-        // CSV 헤더와 모든 행을 결합하여 최종 CSV 내용을 생성
-        const csvContent = `data:text/csv;charset=utf-8,${csvHeader}${csvRows}`;
-        const encodedUri = encodeURI(csvContent);
-
-        // 임시 링크를 생성하여 프로그램적으로 클릭 이벤트를 발생시켜 파일 다운로드를 트리거
-        const link = document.createElement('a');
-        link.setAttribute('href', encodedUri);
-        link.setAttribute('download', `${csvFileName}.csv`); // 수정된 파일명 사용
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const csvRows = item.temperatureData.map(tempData => `"${tempData.date}","${tempData.time}","${tempData.temperature}"`).join("\n");
+        const csvFileName = `${item.filedate}-${item.numbering.countNumber}_${item.numbering.wNumber}_${item.numbering.dwNumber}_${item.numbering.dieNumber}`.replace(/\/|:|\s/g, '_');
+        downloadCsv(`${csvHeader}${csvRows}`, `${csvFileName}.csv`);
       });
-
     } else {
-      // 선택된 항목의 상세 정보를 비동기적으로 가져옵니다.
-      const selectedDataDetails = await Promise.all(selectedItems.map(id => fetchDataDetails(id)));
-      // CSV 헤더
       const csvHeader = 'filedate,countNumber,wNumber,dwNumber,dieNumber,min,median,max,startTime,endTime\n';
-      // 각 항목을 CSV 형식의 문자열로 변환
-      const csvRows = selectedDataDetails.map(item => {
-        const { filedate, numbering: { countNumber, wNumber, dwNumber, dieNumber }, boxplotStats: { min, median, max }, startTime, endTime } = item;
-        return `"${filedate}","${countNumber}","${wNumber}","${dwNumber}","${dieNumber}","${min}","${median}","${max}","${startTime}","${endTime}"`;
-      });
-      // CSV 헤더와 모든 행을 결합하여 최종 CSV 내용을 생성
-      const csvContent = `data:text/csv;charset=utf-8,${csvHeader}${csvRows.join("\n")}`;
-      // encodeURI를 사용하여 CSV 내용에 대한 URI를 생성
-      const encodedUri = encodeURI(csvContent);
-      // 임시 링크를 생성하여 프로그램적으로 클릭 이벤트를 발생시켜 파일 다운로드를 트리거
-      const link = document.createElement('a');
-      link.setAttribute('href', encodedUri);
-      link.setAttribute('download', 'selected_data.csv'); // 다운로드될 파일명 설정
-      document.body.appendChild(link); // 링크를 문서에 추가
-      link.click(); // 링크 클릭 이벤트 강제 실행
-      document.body.removeChild(link); // 사용 후 링크 제거
+      const csvRows = selectedDataDetails.map(item =>
+        `"${item.filedate}","${item.numbering.countNumber}","${item.numbering.wNumber}","${item.numbering.dwNumber}","${item.numbering.dieNumber}","${item.boxplotStats.min}","${item.boxplotStats.median}","${item.boxplotStats.max}","${item.startTime}","${item.endTime}"`
+      ).join("\n");
+      downloadCsv(`${csvHeader}${csvRows}`, 'selected_data.csv');
     }
   }, [isHandleSaveCsvChecked, selectedItems]);
 
-  // 가상 리스트를 통해 대규모 데이터 렌더링 최적화
+  // CSV 데이터 저장 로직을 분리하여 재사용 가능하게 만듦
+  const downloadCsv = (csvContent, fileName) => {
+    const encodedUri = encodeURI(`data:text/csv;charset=utf-8,${csvContent}`);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Row 컴포넌트를 외부로 분리하여 최적화
   const Row = useCallback(({ index, style }) => {
     const { _id, filedate, numbering } = filteredDataList[index];
-    const { countNumber, wNumber, dwNumber, dieNumber } = numbering || {};
     return (
       <div style={style} key={_id} className={styles['dataItem']}>
         <label htmlFor={`checkbox-${_id}`} className={styles['dataItemLabel']}>
@@ -131,13 +115,12 @@ function DataListUI() {
             checked={selectedItems.includes(_id)}
             onChange={() => handleCheckboxChange(_id)}
           />
-          {`${filedate}-${countNumber ?? 'N/A'}_${wNumber ?? 'N/A'}_${dwNumber ?? 'N/A'}_${dieNumber ?? 'N/A'}`}
+          {`${filedate}-${numbering.countNumber ?? 'N/A'}_${numbering.wNumber ?? 'N/A'}_${numbering.dwNumber ?? 'N/A'}_${numbering.dieNumber ?? 'N/A'}`}
         </label>
       </div>
     );
-  }, [selectedItems, handleCheckboxChange, filteredDataList]);
+  }, [filteredDataList, selectedItems, handleCheckboxChange]);
 
-  // 검색 결과 및 선택된 아이템 개수 표시
   const displayCounts = (
     <div className={styles['dataCountsWrap']}>
       <div className={styles['dataCountsContainer']}>
@@ -166,32 +149,29 @@ function DataListUI() {
       <DataUploadComponent />
       {displayCounts}
       <div className={styles['selectAllCheckbox']}>
-        <div className={styles['selectAllLabel']}>
-          <label className={styles['checkboxLabel']}>
-            <input
-              type="checkbox"
-              checked={selectedItems.length === filteredDataList.length && filteredDataList.length > 0}
-              onChange={handleSelectAllChange}
-            /> 전체 선택
-          </label>
-        </div>
-        <div className={styles['selectAllLabel']}>
-          <label className={styles['checkboxLabel']}>
-            <input
-              type="checkbox"
-              checked={isHandleSaveCsvChecked}
-              onChange={e => setIsHandleSaveCsvChecked(e.target.checked)}
-            />
-            <label>{`저장 유형: ${csvSaveModeText}`}</label>
-          </label>
-        </div>
+        <label className={styles['checkboxLabel']}>
+          <input
+            type="checkbox"
+            checked={selectedItems.length === filteredDataList.length && filteredDataList.length > 0}
+            onChange={handleSelectAllChange}
+          /> 전체 선택
+        </label>
+        <label className={styles['checkboxLabel']}>
+          <input
+            type="checkbox"
+            checked={isHandleSaveCsvChecked}
+            onChange={e => setIsHandleSaveCsvChecked(e.target.checked)}
+          />
+          {`저장 유형: ${csvSaveModeText}`}
+        </label>
       </div>
       <div className={styles['DataListContainer']}>
-        <List className={`${styles['scroll']} ${styles['scroll-css']}`}
-          height={400} // 적절한 높이 설정
+        <List
+          className={`${styles['scroll']} ${styles['scroll-css']}`}
+          height={400}
           itemCount={filteredDataList.length}
-          itemSize={30} // 아이템의 높이
-          width={'100%'} // 컨테이너의 너비
+          itemSize={30}
+          width={'100%'}
         >
           {Row}
         </List>
@@ -216,3 +196,4 @@ function DataListUI() {
 }
 
 export default DataListUI;
+
