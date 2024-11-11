@@ -8,10 +8,6 @@ import styles from './BoxGraph.module.css';
 const BoxGraph = ({ boxplotStats = null, initialStartTime, initialEndTime }) => {
 
   useEffect(() => {
-    // 박스플롯 데이터, 시작 시간 및 종료 시간을 확인하는 로그 추가 (필요 시)
-    console.log('BoxGraph 렌더링 시작');
-    console.log('BoxGraph initialStartTime:', initialStartTime);
-    console.log('BoxGraph initialEndTime:', initialEndTime);
   }, [initialStartTime, initialEndTime]);
 
   // boxplotStats 데이터 유효성 검사: 데이터가 없거나 유효하지 않으면 경고 출력 후 메시지 반환
@@ -22,9 +18,6 @@ const BoxGraph = ({ boxplotStats = null, initialStartTime, initialEndTime }) => 
     console.warn('Invalid or missing boxplotStats data:', boxplotStats);
     return <div>No boxplot data available</div>; // 데이터가 없을 경우 출력할 메시지
   }
-
-  // 유효한 박스플롯 데이터가 존재할 경우 콘솔에 유효성 정보 출력
-  console.log('BoxPlot stats are valid');
 
   // 차트 설정 (박스플롯)
   const chartOptions = {
@@ -51,17 +44,13 @@ const BoxGraph = ({ boxplotStats = null, initialStartTime, initialEndTime }) => 
     }]
   }];
 
-  // 차트 옵션과 시리즈 데이터 확인을 위한 로그 (필요 시)
-  console.log('chartOptions:', chartOptions);
-  console.log('chartSeries:', chartSeries);
-
   return (
     <div className={styles['graphDataWrap']}>
       <div className={styles['graphDataSVG']}>
-        <CustomApexChart options={chartOptions} series={chartSeries} /> {/* CustomApexChart 컴포넌트를 통해 차트 렌더링 */}
+        <CustomApexChart options={chartOptions} series={chartSeries} />
       </div>
       <div className={styles['graphDataTable']}>
-        <StatisticsTable stats={boxplotStats} /> {/* 통계 테이블 렌더링 */}
+        <StatisticsTable stats={boxplotStats} />
       </div>
     </div>
   );

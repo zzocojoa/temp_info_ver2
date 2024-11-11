@@ -23,7 +23,7 @@ function plcrefining(data) {
         speed: item.speed
     }));
     
-    console.log("processedData: ", processedData);
+    // console.log("processedData: ", processedData);
 
     return { processedData }; // 필터링 없이 변환된 데이터를 그대로 반환
 }

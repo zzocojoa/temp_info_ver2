@@ -27,7 +27,7 @@ function processData(data) {
     // BoxplotStats 계산 로직 호출
     const boxplotStats = calculateBoxplotStats(averagedData, q1, q3, lowerBound, upperBound);
 
-    console.log("averagedData: ", averagedData);
+    // console.log("averagedData: ", averagedData);
     return { averagedData, boxplotStats };
 }
 

@@ -3,6 +3,7 @@
 const fs = require('fs').promises;
 const express = require('express');
 const multer = require('multer');
+const moment = require('moment');
 const router = express.Router();
 const Papa = require('papaparse');
 const path = require('path');
@@ -18,6 +19,7 @@ const { v4: uuidv4 } = require('uuid');
 const { spawn } = require('child_process');
 const archiver = require('archiver');
 const { retryAsync, parseCsvFile, asyncDeleteFile } = require('../utils/fileUtils');
+const { mergeData } = require('../utils/combineMerge');
 
 // 파일 업로드 미들웨어 설정
 const storage = multer.diskStorage({
@@ -37,7 +39,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   try {
     // CSV 파일 파싱
     const allData = await parseCsvFile(filePath);
-    
+
     // 데이터 처리 (평균 데이터 및 박스플롯 통계 생성)
     const { averagedData, boxplotStats } = processData(allData);
 
@@ -81,23 +83,95 @@ router.post('/upload-plc', upload.single('file'), async (req, res) => {
     // console.log("processedData: ", processedData)
 
     // 성공적으로 처리된 데이터 반환
-    res.json({ 
-      success: true, 
-      message: 'PLC file processed successfully', 
-      data: processedData 
+    res.json({
+      success: true,
+      message: 'PLC file processed successfully',
+      data: processedData
     });
   } catch (error) {
     console.error('Error processing PLC file:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error processing PLC file', 
-      error: error.toString() 
+    res.status(500).json({
+      success: false,
+      message: 'Error processing PLC file',
+      error: error.toString()
     });
   } finally {
     // 업로드된 파일 삭제
     await fs.unlink(filePath);
   }
 });
+
+// 파일 업로드 설정
+const uploads = multer({ dest: 'uploads/' });
+
+router.post('/upload-combined', uploads.array('files', 2), async (req, res) => {
+  const files = req.files;
+  // console.log("files: ", files)
+
+  if (files.length !== 2) {
+    return res.status(400).json({ message: '온도 데이터와 PLC 데이터를 모두 업로드하세요.' });
+  }
+
+  try {
+    const [tempFile, plcFile] = files;
+
+    // 각각의 CSV 파일 파싱 후 1초 단위로 정제된 데이터 생성
+    const tempData = await parseAndProcessFile(tempFile.path);
+    const plcData = await parseAndProcessFile(plcFile.path);
+    // console.log("tempData:", tempData);  // 디버그용
+    // console.log("plcData:", plcData);    // 디버그용
+
+    // 정제된 데이터 병합
+    const mergedData = mergeData(plcData, tempData);
+    console.log("mergedData: ", mergedData)
+
+    res.json({ success: true, data: mergedData });
+  } catch (error) {
+    console.error('Error merging files:', error);
+    res.status(500).json({ message: '파일 병합 중 오류 발생' });
+  } finally {
+    await Promise.all(files.map(file => fs.unlink(file.path)));
+  }
+});
+
+// CSV 파일을 파싱하고 데이터 정제
+const parseAndProcessFile = async (filePath) => {
+  try {
+    const fileContent = await fs.readFile(filePath, 'utf8');
+    const data = [];
+
+    // PapaParse로 파일을 비동기적으로 처리
+    Papa.parse(fileContent, {
+      delimiter: ",",
+      skipEmptyLines: true,
+      dynamicTyping: true,
+      step: (result) => {
+        data.push({
+          date: result.data[0],
+          time: result.data[1] ? result.data[1].split(":").slice(0, 3).join(":") : null,
+          pressure: result.data[2] || null,
+          temperature: result.data[3] || null,
+          ctf: result.data[4] || null,
+          ctb: result.data[5] || null,
+          speed: result.data[6] || null
+        });
+      },
+      complete: () => {
+        console.log('Parsing complete');  // 완료 확인 로그 추가
+      },
+      error: (error) => {
+        console.error('Error during parsing:', error.message);
+        throw new Error(error.message);
+      }
+    });
+
+    // 유효한 시간 데이터를 필터링하여 반환
+    return data.filter(entry => entry.time !== null);
+  } catch (error) {
+    console.error('Error reading file:', error.message);
+    throw new Error('Failed to read and process file');
+  }
+};
 
 // 정제된 파일 업로드 처리 엔드포인트 (다중 파일 지원)
 router.post('/upload-csv', upload.array('files'), async (req, res) => {
@@ -133,7 +207,7 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
             const endTime = times[times.length - 1];
 
             const boxplotStats = calculateBoxplotStats(temperatureValues);
-            console.log("boxplotStats: ", boxplotStats)
+            // console.log("boxplotStats: ", boxplotStats)
             const newFileMetadata = new FileMetadata({
               fileName,
               temperatureData: result.data,  // 온도 데이터 저장
@@ -166,83 +240,11 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
   res.json(uploadResults);
 });
 
-// PLC 파일 처리 로직 수정
-router.post('/upload-csv', upload.array('files'), async (req, res) => {
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).send('No files uploaded.');
-  }
-
-  const uploadResults = await Promise.all(req.files.map(async (file) => {
-    const filePath = file.path;
-    const fileName = file.originalname;
-
-    // 날짜 형식 정규 표현식 수정
-    const match = fileName.match(/(\d{4}-\d{2}-\d{2})-(\d+)\.csv/); 
-    if (!match) {
-      await fs.unlink(filePath);
-      return { fileName, error: 'Invalid file name format.' };
-    }
-
-    const [, filedate, countNumber] = match;
-
-    try {
-      const fileContent = await fs.readFile(filePath, 'utf8');
-      return new Promise((resolve, reject) => {
-        Papa.parse(fileContent, {
-          header: true,
-          dynamicTyping: true,
-          skipEmptyLines: true,
-          complete: async (result) => {
-            try {
-              const { pressures } = preprocessPLCData(result.data); // PLC 데이터 처리
-
-              // 시작 시간과 종료 시간 추출
-              const times = pressures.map(entry => entry.time).sort();
-              const startTime = times[0];
-              const endTime = times[times.length - 1];
-
-              // FileMetadata에 PLC 데이터 저장
-              const newFileMetadata = new FileMetadata({
-                fileName,
-                plcData: pressures,  // PLC 데이터 저장
-                numbering: { countNumber },
-                filedate,
-                startTime,
-                endTime,
-              });
-              await newFileMetadata.save();
-              resolve({ fileName, message: 'PLC file uploaded and data saved successfully', startTime, endTime });
-            } catch (error) {
-              console.error('Error saving file metadata:', error);
-              reject(error.message);
-            }
-          },
-          error: (error) => {
-            console.error('Error parsing file:', error);
-            reject(error.message);
-          }
-        });
-      });
-    } catch (error) {
-      console.error('Error processing file:', error);
-      return { fileName, error: error.toString() };
-    } finally {
-      try {
-        await fs.unlink(filePath);
-      } catch (error) {
-        console.error('Error deleting file:', error);
-      }
-    }
-  }));
-
-  res.json(uploadResults);
-});
-
 // boxplot dynamic data
 router.post('/process-filtered-data', async (req, res) => {
   const { filteredData } = req.body;
   // 초기 데이터 확인
-  // console.log("filteredData: ", filteredData); 
+  console.log("filteredData: ", filteredData);
 
   // 데이터 유효성 검사를 추가하여 디버깅에 도움을 줍니다.
   if (!filteredData || !Array.isArray(filteredData) || filteredData.length === 0) {

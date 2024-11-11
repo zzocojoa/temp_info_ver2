@@ -1,6 +1,8 @@
+// client\src\components\tempgraph\tempgraphmodule\LineGraph.js
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Plotly from 'plotly.js-dist-min';
-import { useLineGraphData } from './hooks/useLineGraphData';
+import { useLineGraphData } from './hooks/useGraphDataSync';
 import { calculateMedian } from '../../../api';
 import styles from './LineGraph.module.css';
 
@@ -17,7 +19,10 @@ const LineGraph = React.memo(({
   initialEndTime,
   setBoxplotStats
 }) => {
-  const { startTime, endTime, handleBrushChange } = useLineGraphData(averagedData, initialStartTime, initialEndTime, onBrushChange, setBoxplotStats);
+  const { startTime, endTime, handleBrushChange } = useLineGraphData(
+    averagedData, initialStartTime, 
+    initialEndTime, onBrushChange, 
+    setBoxplotStats);
   const [chartSize, setChartSize] = useState({ width: 600 });
   const [medianValue, setMedianValue] = useState(0);
   const [plcMedianValue, setPlcMedianValue] = useState(0);
@@ -73,11 +78,19 @@ const LineGraph = React.memo(({
   }, [plcData, fetchMedian]);
 
   useEffect(() => {
+    console.log("LineGraph Updated startTime:", startTime);
+    console.log("LineGraph Updated endTime:", endTime);
+  }, [startTime, endTime]);
+
+
+  useEffect(() => {
     if ((averagedData.length > 0 || plcData.length > 0) && plotRef.current) {
       const currentPlotRef = plotRef.current;
 
       try {
         const plotData = [];
+        console.log("plotData: ", plotData)
+
         // 수정됨: 기본 레이아웃 설정
         const layout = {
           title: 'Data Over Time',
@@ -131,7 +144,7 @@ const LineGraph = React.memo(({
           // 수정됨: 기본 y축이 없는 경우 pressure를 기본 y축으로 설정
           if (!layout.yaxis) {
             layout.yaxis = {
-              title: 'P.S',
+              title: 'Speed',
               autorange: true,
               showgrid: true,
               zeroline: true
@@ -142,15 +155,15 @@ const LineGraph = React.memo(({
           const yaxisConfigs = {
             speed: {
               axis: averagedData.length > 0 ? 'y2' : 'y',
-              title: 'CTF',
-              color: '#82ca9d',
+              title: 'Speed',
+              color: '#82ca9d', // Speed 데이터에 맞게 수정됨
               position: averagedData.length > 0 ? 1 : undefined,
               side: 'right'
             },
             pressure: {
               axis: 'y3',
               title: 'P.S',
-              color: '#ff6347',
+              color: '#ff6347', // P.S 데이터에 맞게 수정됨
               position: 1,
               side: 'right'
             },
@@ -163,8 +176,8 @@ const LineGraph = React.memo(({
             },
             ctf: {
               axis: 'y3',
-              title: 'Speed',
-              color: '#daa520',
+              title: 'CTF',
+              color: '#daa520', // CTF 데이터에 맞게 수정됨
               position: 1,
               side: 'right'
             }
@@ -199,34 +212,43 @@ const LineGraph = React.memo(({
               });
             }
           });
-
-          // PLC median line
-          // if (plcData[0].pressure !== undefined) {
-          //   layout.shapes.push({
-          //     type: 'line',
-          //     x0: plcData[0]?.time,
-          //     x1: plcData[plcData.length - 1]?.time,
-          //     y0: plcMedianValue,
-          //     y1: plcMedianValue,
-          //     line: { color: 'green', width: 2, dash: 'dash' },
-          //     name: 'PLC Median',
-          //     yref: averagedData.length > 0 ? 'y2' : 'y'
-          //   });
-          // }
         }
 
         const handleRelayout = (eventdata) => {
           if (eventdata['xaxis.range[0]'] && eventdata['xaxis.range[1]']) {
-            const startRange = Math.round(eventdata['xaxis.range[0]']);
-            const endRange = Math.round(eventdata['xaxis.range[1]']);
-            const startIndex = Math.max(0, startRange);
-            const endIndex = Math.min(averagedData.length - 1, endRange);
-
-            if (startIndex !== endIndex) {
-              handleBrushChange({ startIndex, endIndex });
-            }
+              const startRange = Math.round(eventdata['xaxis.range[0]']);
+              const endRange = Math.round(eventdata['xaxis.range[1]']);
+      
+              const startIndex = Math.max(0, startRange);
+      
+              // 유효성 검사 후 사용할 데이터 결정
+              let endIndex;
+              if (averagedData && averagedData.length > 0) {
+                  endIndex = Math.min(averagedData.length - 1, endRange);
+              } else if (plcData && plcData.length > 0) {
+                  endIndex = Math.min(plcData.length - 1, endRange);
+              } else {
+                  // 데이터가 없으면 함수 종료
+                  console.warn("No valid data in averagedData or plcData.");
+                  return;
+              }
+      
+              if (startIndex !== endIndex) {
+                  // 데이터가 있는 경우, 동일한 범위의 데이터를 추출
+                  const filteredAveragedData = averagedData.slice(startIndex, endIndex + 1);
+                  const filteredPlcData = plcData.slice(startIndex, endIndex + 1);
+      
+                  console.log("LineGraph startIndex: ", startIndex);
+                  console.log("LineGraph endIndex: ", endIndex);
+                  console.log("filteredAveragedData: ", filteredAveragedData);
+                  console.log("filteredPlcData: ", filteredPlcData);
+      
+                  handleBrushChange({ startIndex, endIndex, filteredAveragedData, filteredPlcData });
+              }
           }
-        };
+      };
+      
+        
 
         Plotly.newPlot(currentPlotRef, plotData, layout);
         currentPlotRef.on('plotly_relayout', handleRelayout);

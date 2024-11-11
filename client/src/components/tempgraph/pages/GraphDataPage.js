@@ -1,6 +1,6 @@
 // client/src/components/tempgraph/pages/GraphDataPage.js
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import FileUploadButton from '../tempgraphmodule/FileUploadButton';
 import UploadDataButton from '../tempgraphmodule/UploadDataButton';
 import SaveCsvDataButton from '../tempgraphmodule/SaveCsvDataButton';
@@ -9,6 +9,7 @@ import BoxGraph from '../tempgraphmodule/BoxGraph';
 import DataListUI from '../tempgraphmodule/DataListUI';
 import TextInputBox from '../tempgraphmodule/TextInputBox';
 import ThresholdOutlierEliminationLogic from '../tempgraphmodule/ThresholdOutlierEliminationlogic';
+import { fetchDataList } from '../../../api'; // 수정됨: API 호출 추가
 import styles from './GraphData.module.css';
 import Papa from 'papaparse';
 
@@ -32,20 +33,36 @@ const GraphDataPage = React.memo(() => {
     dieNumber: '',
   });
 
-  // 그래프 생성 상태 관리
   const [isGraphGenerated, setIsGraphGenerated] = useState(false);
-  const [isBoxPlotUsed, setIsBoxPlotUsed] = useState(false);  // 박스플롯 사용 여부 추가
-  // console.log('isBoxPlotUsed:', isBoxPlotUsed);
-  // console.log('boxPlotData:', boxPlotData);
+  const [isBoxPlotUsed, setIsBoxPlotUsed] = useState(false);
+
+  // 수정됨: API 데이터 상태 추가
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // 수정됨: useEffect to load data on mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const fetchedData = await fetchDataList();
+        setData(fetchedData);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  // 수정됨: Memoize data to avoid unnecessary re-renders
+  const memoizedData = useMemo(() => data, [data]);
 
   // 업로드 성공 시 처리할 콜백 함수
   const handleUploadSuccess = useCallback((averagedData, boxplotStats, plcData, uploadedFileName, startTime, endTime, uploadedStartTime, uploadedEndTime, isBoxPlot) => {
-    // console.log('handleUploadSuccess 호출됨');
-    // console.log('boxplotStats:', boxplotStats);
-    // console.log('isBoxPlot:', isBoxPlot);
-  
     setGraphData(Array.isArray(averagedData) ? averagedData : []);
-    setBoxPlotData(isBoxPlot ? boxplotStats : null);  // 박스플롯 사용 여부에 따라 설정
+    setBoxPlotData(isBoxPlot ? boxplotStats : null);
     setPlcGraphData(Array.isArray(plcData) ? plcData : []);
     setUploadedFileName(uploadedFileName);
     setIsGraphGenerated(true);
@@ -53,7 +70,7 @@ const GraphDataPage = React.memo(() => {
     setInitialEndTime(endTime);
     setStartTime(uploadedStartTime);
     setEndTime(uploadedEndTime);
-    setIsBoxPlotUsed(isBoxPlot);  // 박스플롯 사용 여부 설정
+    setIsBoxPlotUsed(isBoxPlot);
   }, []);
 
   // 파일 처리 로직
@@ -74,7 +91,7 @@ const GraphDataPage = React.memo(() => {
       worker.onmessage = (event) => {
         const averagedData = event.data;
         setGraphData(averagedData);
-        setIsGraphGenerated(false);  // 그래프는 버튼 클릭 후 생성됨
+        setIsGraphGenerated(false);
       };
     };
     reader.readAsText(file);
@@ -98,7 +115,7 @@ const GraphDataPage = React.memo(() => {
       worker.onmessage = (event) => {
         const averagedData = event.data;
         setPlcGraphData(averagedData);
-        setIsGraphGenerated(false);  // 그래프는 버튼 클릭 후 생성됨
+        setIsGraphGenerated(false);
       };
     };
     reader.readAsText(file);
@@ -107,38 +124,35 @@ const GraphDataPage = React.memo(() => {
   // 파일 선택 시 상태 초기화 및 처리
   const handleFileSelect = useCallback((file) => {
     if (file) {
-      const isBoxPlot = file.name.includes('LandData');  // LandData 여부 확인
-      // console.log("isBoxPlot :", isBoxPlot)
+      const isBoxPlot = file.name.includes('LandData');
       setUploadedFile(file);
-      setGraphData([]);  // 기존 그래프 데이터 초기화
-      setBoxPlotData(null);  // 박스플롯 데이터 초기화
+      setGraphData([]);
+      setBoxPlotData(null);
       setUserInput('');
-      setIsGraphGenerated(false);  // 그래프 생성 상태를 false로 초기화
+      setIsGraphGenerated(false);
       processFile(file);
-      setIsBoxPlotUsed(isBoxPlot);  // LandData인 경우 박스플롯 사용
+      setIsBoxPlotUsed(isBoxPlot);
     } else {
-      setUploadedFile(null);  // 파일이 없을 경우 상태 초기화
+      setUploadedFile(null);
       setGraphData([]);
       setBoxPlotData(null);
       setIsGraphGenerated(false);
-      setIsBoxPlotUsed(false);  // 초기화 시 박스플롯 사용도 false로
-      // console.log('파일 선택 취소됨');
+      setIsBoxPlotUsed(false);
     }
-  }, [processFile]);  
+  }, [processFile]);
 
   // PLC 파일 선택 시 상태 초기화 및 처리
   const handlePLCFileSelect = useCallback((file) => {
     if (file) {
       setUploadedPLCFile(file);
       setPlcGraphData([]);
-      setIsGraphGenerated(false);  // PLC 파일 선택 시 그래프 생성 상태 초기화
+      setIsGraphGenerated(false);
       processPLCFile(file);
-      setIsBoxPlotUsed(false);  // PLC 파일인 경우 박스플롯 사용하지 않음
+      setIsBoxPlotUsed(false);
     } else {
-      setUploadedPLCFile(null);  // PLC 파일이 없을 경우 상태 초기화
+      setUploadedPLCFile(null);
       setPlcGraphData([]);
       setIsGraphGenerated(false);
-      // console.log('PLC 파일 선택 취소됨');
     }
   }, [processPLCFile]);
 
@@ -154,14 +168,42 @@ const GraphDataPage = React.memo(() => {
     setEndTime(initialEndTime);
   }, [initialStartTime, initialEndTime]);
 
-  // 브러시로 선택된 구간에 따라 시간 범위 설정
   const handleBrushChange = useCallback((startIndex, endIndex) => {
-    const newStartTime = graphData[startIndex]?.time || '';
-    const newEndTime = graphData[endIndex]?.time || '';
-    setStartTime(newStartTime);
-    setEndTime(newEndTime);
-    setSelectedRange({ start: startIndex, end: endIndex });
-  }, [graphData]);
+    // 데이터 유효성 검사
+    if ((graphData && graphData.length > 0) || (plcGraphData && plcGraphData.length > 0)) {
+        const newStartTime = graphData?.[startIndex]?.time || plcGraphData?.[startIndex]?.time || '';
+        const newEndTime = graphData?.[endIndex]?.time || plcGraphData?.[endIndex]?.time || '';
+        console.log("GraphDataPage newStartTime: ", newStartTime);
+        console.log("GraphDataPage newEndTime: ", newEndTime);
+
+        // setTimeout을 사용해 렌더링이 완료된 후 상태 업데이트
+        setTimeout(() => {
+            setStartTime(newStartTime);
+            setEndTime(newEndTime);
+            setSelectedRange({ start: startIndex, end: endIndex });
+        }, 0);
+    } else {
+        // 데이터가 없을 경우 초기 상태로 설정
+        setTimeout(() => {
+            setStartTime('');
+            setEndTime('');
+            setSelectedRange({ start: 0, end: 0 });
+        }, 0);
+    }
+}, [graphData, plcGraphData]);
+
+
+  useEffect(() => {
+    if (startTime && endTime) {
+      console.log("GraphDataPage Updated startTime:", startTime);
+      console.log("GraphDataPage Updated endTime:", endTime);
+    }
+  }, [startTime, endTime]);
+
+
+
+  if (isLoading) return <div>Loading...</div>; // 수정됨: 로딩 상태 처리
+  if (error) return <div>Error: {error}</div>;  // 수정됨: 오류 상태 처리
 
   return (
     <div className={styles['graphDataWrap']}>
@@ -179,14 +221,30 @@ const GraphDataPage = React.memo(() => {
               className={styles['uploadDataButton']}
               selectedFile={uploadedFile}
               selectedPLCFile={uploadedPLCFile}
-              onUploadSuccess={(averagedData, boxplotStats, plcData, uploadedFileName, startTime, endTime, uploadedStartTime, uploadedEndTime) => {
-                // console.log('UploadDataButton에서 handleUploadSuccess 호출됨');
-                handleUploadSuccess(averagedData, boxplotStats, plcData, uploadedFileName, startTime, endTime, uploadedStartTime, uploadedEndTime, isBoxPlotUsed);
+              onUploadSuccess={(
+                averagedData,
+                boxplotStats,
+                plcData,
+                uploadedFileName,
+                startTime,
+                endTime,
+                uploadedStartTime,
+                uploadedEndTime) => {
+                handleUploadSuccess(
+                  averagedData,
+                  boxplotStats,
+                  plcData,
+                  uploadedFileName,
+                  startTime,
+                  endTime,
+                  uploadedStartTime,
+                  uploadedEndTime,
+                  isBoxPlotUsed);
               }}
               isEnabled={!!uploadedFile || !!uploadedPLCFile}
               resetFileState={resetFileState}
             />
-            {isGraphGenerated && (  // 조건부 렌더링으로 그래프 컴포넌트 생성
+            {isGraphGenerated && (
               <>
                 <SaveCsvDataButton
                   data={{
@@ -205,7 +263,7 @@ const GraphDataPage = React.memo(() => {
                 />
                 <LineGraph
                   averagedData={graphData}
-                  plcData={plcGraphData}  // PLC 데이터를 전달
+                  plcData={plcGraphData}
                   countNumber={details.countNumber}
                   wNumber={details.wNumber}
                   dwNumber={details.dwNumber}
@@ -215,9 +273,8 @@ const GraphDataPage = React.memo(() => {
                   initialStartTime={initialStartTime}
                   initialEndTime={initialEndTime}
                   setBoxplotStats={setBoxPlotData}
-                />
 
-                {/* 박스플롯 데이터를 사용하는 경우에만 BoxGraph 렌더링 */}
+                />
                 {isBoxPlotUsed && boxPlotData && (
                   <BoxGraph
                     initialStartTime={initialStartTime}
@@ -232,10 +289,9 @@ const GraphDataPage = React.memo(() => {
             )}
           </div>
         </div>
-
         <div className={styles['rightPanel']}>
           <DataListUI />
-          {isGraphGenerated && (  // 조건부 렌더링으로 텍스트 입력 컴포넌트 생성
+          {isGraphGenerated && (
             <TextInputBox
               value={userInput}
               onTextChange={setUserInput}
@@ -249,4 +305,3 @@ const GraphDataPage = React.memo(() => {
 });
 
 export default GraphDataPage;
-

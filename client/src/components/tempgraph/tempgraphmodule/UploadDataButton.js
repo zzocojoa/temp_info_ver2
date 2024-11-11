@@ -1,8 +1,8 @@
-// client\src\components\tempgraph\tempgraphmodule\UploadDataButton.js
+// client/src/components/tempgraph/tempgraphmodule/UploadDataButton.js
 
 import React, { useState } from 'react';
 import styles from './UploadDataButton.module.css';
-import { uploadFile, uploadPLCFile } from '../../../api';  // API 함수 임포트
+import { uploadFile, uploadPLCFile, uploadCombinedFiles } from '../../../api';  // API 함수 임포트
 import ProgressBar from './ProgressBar';  // ProgressBar 컴포넌트 추가
 
 function UploadDataButton({ selectedFile, selectedPLCFile, onUploadSuccess, isEnabled, resetFileState }) {
@@ -27,32 +27,36 @@ function UploadDataButton({ selectedFile, selectedPLCFile, onUploadSuccess, isEn
 
     try {
       let response = {};
-      
-      // 일반 파일 업로드 처리
-      if (selectedFile) {
+
+      // 두 파일이 모두 선택된 경우 통합 업로드 처리
+      if (selectedFile && selectedPLCFile) {
+        const combinedResponse = await uploadCombinedFiles(selectedFile, selectedPLCFile, handleProgress);
+        response.mergedData = combinedResponse.data;
+      } 
+      // 일반 파일 단독 업로드 처리
+      else if (selectedFile) {
         const fileResponse = await uploadFile(selectedFile, handleProgress);
         response.averagedData = fileResponse.data;
         response.boxplotStats = fileResponse.boxplotStats;
-      }
-
-      // PLC 파일 업로드 처리
-      if (selectedPLCFile) {
+      } 
+      // PLC 파일 단독 업로드 처리
+      else if (selectedPLCFile) {
         const plcResponse = await uploadPLCFile(selectedPLCFile, handleProgress);
         response.plcData = plcResponse.data;
-        // console.log("PLC Data:", response.plcData);  // PLC 데이터 로그
       }
 
       setIsLoading(false);  // 로딩 상태 종료
       setProgress(100);     // 업로드 완료 시 진행률 100%
 
       if (Object.keys(response).length > 0) {
-        const startTime = response.averagedData?.[0]?.time || response.plcData?.[0]?.time || '';
-        const endTime = response.averagedData?.[response.averagedData?.length - 1]?.time ||
+        const startTime = response.mergedData?.[0]?.time || response.averagedData?.[0]?.time || response.plcData?.[0]?.time || '';
+        const endTime = response.mergedData?.[response.mergedData?.length - 1]?.time ||
+          response.averagedData?.[response.averagedData?.length - 1]?.time ||
           response.plcData?.[response.plcData?.length - 1]?.time || '';
 
         // 업로드 성공 콜백 호출
         onUploadSuccess(
-          response.averagedData || [],
+          response.mergedData || response.averagedData || [],
           response.boxplotStats,
           response.plcData || [],
           selectedFile?.name || selectedPLCFile?.name,

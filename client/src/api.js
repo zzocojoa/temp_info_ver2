@@ -20,7 +20,7 @@ export const uploadFile = async (file, onProgress) => {
       try {
         if (xhr.status === 200) {
           const response = JSON.parse(xhr.responseText);
-          // console.log("response: ", response); // 응답 데이터 확인
+          // console.log("uploadFile response: ", response); // 응답 데이터 확인
 
           // 응답 데이터 구조 검증
           if (
@@ -72,7 +72,7 @@ export const uploadPLCFile = async (file, onProgress) => {
       if (xhr.status === 200) {
         try {
           const response = JSON.parse(xhr.responseText);
-          // console.log("response: ", response); // 응답 데이터 확인
+          console.log("uploadPLCFile response: ", response); // 응답 데이터 확인
 
           // 응답 데이터 구조 검증
           if (response && response.success && response.data && Array.isArray(response.data) && response.data.length > 0) {
@@ -96,6 +96,53 @@ export const uploadPLCFile = async (file, onProgress) => {
     };
 
     xhr.onerror = () => reject(new Error('Network Error occurred during file upload'));
+    xhr.send(formData);
+  });
+};
+
+// 온도 데이터와 PLC 데이터를 함께 업로드하는 API
+export const uploadCombinedFiles = async (tempFile, plcFile, onProgress) => {
+  const formData = new FormData();
+  formData.append('files', tempFile); // 첫 번째 파일
+  formData.append('files', plcFile); // 두 번째 파일
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_BASE_URL}/upload-combined`, true);
+
+    xhr.upload.onprogress = onProgress;
+
+    xhr.onload = () => {
+      try {
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText);
+          console.log("response: ", response); // 응답 데이터 확인
+
+          // 응답 데이터 구조 검증
+          if (
+            response &&
+            response.success &&
+            Array.isArray(response.data) &&
+            response.data.length > 0
+          ) {
+            resolve(response); // 성공 시 데이터 반환
+          } else {
+            reject(new Error('Unexpected data format: Missing required fields in the response.'));
+          }
+        } else {
+          reject(new Error(`Server responded with status ${xhr.status}: ${xhr.statusText}`));
+        }
+      } catch (error) {
+        console.error('Error parsing server response:', error);
+        reject(new Error('Error parsing server response.'));
+      }
+    };
+
+    xhr.onerror = () => {
+      console.error('Network Error occurred during file upload');
+      reject(new Error('Network Error'));
+    };
+
     xhr.send(formData);
   });
 };
@@ -198,7 +245,6 @@ export async function downloadFilteredData(uploadId) {
 
 // filteredData를 서버로 전송하는 함수(bolplot dynamic data)
 export async function sendFilteredData(filteredData) {
-  console.debug('sendFilteredData called with:', filteredData); // 함수 호출 시 로그
   const requestInit = createFetchRequest('POST', { filteredData });
 
   console.debug('Request initialization:', requestInit); // 요청 초기화 로그
@@ -206,7 +252,6 @@ export async function sendFilteredData(filteredData) {
   try {
     const response = await fetch(`${API_BASE_URL}/process-filtered-data`, requestInit);
     console.debug('Response received:', response); // 응답 수신 시 로그
-
     if (!response.ok) {
       console.error('Failed response:', response); // 실패한 응답 로그
       throw new Error('Failed to send filtered data');
