@@ -56,9 +56,6 @@ const GraphDataPage = React.memo(() => {
     loadData();
   }, []);
 
-  // 수정됨: Memoize data to avoid unnecessary re-renders
-  const memoizedData = useMemo(() => data, [data]);
-
   // 업로드 성공 시 처리할 콜백 함수
   const handleUploadSuccess = useCallback((averagedData, boxplotStats, plcData, uploadedFileName, startTime, endTime, uploadedStartTime, uploadedEndTime, isBoxPlot) => {
     setGraphData(Array.isArray(averagedData) ? averagedData : []);
