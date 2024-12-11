@@ -42,12 +42,27 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       dynamicTyping: true,
       skipEmptyLines: true,
       step: (row) => {
-        const { '[Date]': date, '[Time]': time, '[Temperature]': temperature } = row.data;
-        allData.push({ date, time, temperature });
+        const {
+          Timestamp,
+          메인압력,
+          '콘테이너온도 앞쪽': 컨테이너온도앞,
+          '콘테이너온도 뒷쪽': 컨테이너온도뒤,
+          '현재속도': 현재속도,
+          Temperature
+        } = row.data;
+        allData.push({
+          timestamp: Timestamp,
+          mainPressure: 메인압력,
+          containerTempFront: 컨테이너온도앞,
+          containerTempBack: 컨테이너온도뒤,
+          currentSpeed: 현재속도,
+          temperature: Temperature
+        });
       }
     });
 
     const { averagedData, boxplotStats } = processData(allData);
+
     res.json({ success: true, message: 'File processed successfully', data: averagedData, boxplotStats });
   } catch (error) {
     console.error('Error processing file:', error);
@@ -95,6 +110,7 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
             const endTime = times[times.length - 1];
 
             const boxplotStats = calculateBoxplotStats(temperatureValues);
+
             const newFileMetadata = new FileMetadata({
               fileName,
               temperatureData: result.data,
@@ -132,7 +148,7 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
 router.post('/process-filtered-data', async (req, res) => {
   const { filteredData } = req.body;
   console.log("filteredData: ", filteredData); // 초기 데이터 확인
-  
+
   // 데이터 유효성 검사를 추가하여 디버깅에 도움을 줍니다.
   if (!filteredData || !Array.isArray(filteredData) || filteredData.length === 0) {
     console.error('Invalid or empty filtered data:', filteredData);

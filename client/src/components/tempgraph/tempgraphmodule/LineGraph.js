@@ -1,6 +1,6 @@
 // client\src\components\tempgraph\tempgraphmodule\LineGraph.js
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Plotly from 'plotly.js-dist-min';
 import { useLineGraphData } from './hooks/useLineGraphData';
 import { calculateMedian } from '../../../api';
@@ -20,6 +20,7 @@ const LineGraph = React.memo(({
 }) => {
   const { startTime, endTime, handleBrushChange } = useLineGraphData(averagedData, initialStartTime, initialEndTime, onBrushChange, setBoxplotStats);
   const [medianValue, setMedianValue] = useState(0);
+  const plotRef = useRef(null);
 
   useEffect(() => {
     console.log("averagedData changed:", averagedData);
@@ -53,25 +54,99 @@ const LineGraph = React.memo(({
   }, [averagedData]);
 
   useEffect(() => {
-    const plotData = [{
-      x: averagedData.map(d => d.time),
+    if (!averagedData || averagedData.length === 0) {
+      if (plotRef.current) {
+        Plotly.purge(plotRef.current);
+      }
+      return;
+    }
+
+    const xValues = averagedData.map(d => d.time);
+
+    const temperatureTrace = {
+      x: xValues,
       y: averagedData.map(d => d.temperature),
       type: 'scatter',
       mode: 'lines',
       line: { color: '#8884d8' },
-      hovertemplate: '%{y:.2f}°C<extra></extra>',  // Add hovertemplate for formatting tooltip
-    }];
+      hovertemplate: '%{y:.2f}°C<extra></extra>',
+      name: 'Temperature'
+    };
+
+    const mainPressureTrace = {
+      x: xValues,
+      y: averagedData.map(d => d.mainPressure),
+      type: 'scatter',
+      mode: 'lines',
+      line: { color: '#ff7f0e' },
+      hovertemplate: '%{y:.2f}<extra></extra>',
+      name: 'Main Pressure'
+    };
+
+    const containerTempFrontTrace = {
+      x: xValues,
+      y: averagedData.map(d => d.containerTempFront),
+      type: 'scatter',
+      mode: 'lines',
+      line: { color: '#2ca02c' },
+      hovertemplate: '%{y:.2f}<extra></extra>',
+      name: 'Container Temp Front'
+    };
+
+    const containerTempBackTrace = {
+      x: xValues,
+      y: averagedData.map(d => d.containerTempBack),
+      type: 'scatter',
+      mode: 'lines',
+      line: { color: '#d62728' },
+      hovertemplate: '%{y:.2f}<extra></extra>',
+      name: 'Container Temp Back'
+    };
+
+    // currentSpeed를 오른쪽 y축(y2)에 표시
+    const currentSpeedTrace = {
+      x: xValues,
+      y: averagedData.map(d => d.currentSpeed),
+      type: 'scatter',
+      mode: 'lines',
+      line: { color: '#9467bd' },
+      hovertemplate: '%{y:.2f}<extra></extra>',
+      name: 'Current Speed',
+      yaxis: 'y2' // currentSpeed는 오른쪽 y축 사용
+    };
+
+    const plotData = [
+      temperatureTrace,
+      mainPressureTrace,
+      containerTempFrontTrace,
+      containerTempBackTrace,
+      currentSpeedTrace
+    ];
 
     const layout = {
       title: 'Temperature Over Time',
       xaxis: { title: 'Time' },
       yaxis: { title: 'Temperature (°C)', autorange: true },
-      showlegend: false,
-      paper_bgcolor: '#e2d1c7', // 전체 차트 배경색
-      plot_bgcolor: '#e2d1c7', // 플롯 영역 배경색
+      yaxis2: {
+        title: 'Current Speed',
+        overlaying: 'y',
+        side: 'right',
+        showgrid: false,
+        autorange: true
+      },
+      showlegend: true,
+      legend: {
+        orientation: 'h', // 범주를 가로로 정렬
+        x: 0,
+        y: 0.97, // 그래프 위쪽에 위치
+        xanchor: 'left',
+        yanchor: 'bottom'
+      },
+      paper_bgcolor: '#e2d1c7',
+      plot_bgcolor: '#e2d1c7',
       margin: {
         l: 60,
-        r: 20,
+        r: 60, // 오른쪽 여백 확대
         t: 40,
         b: 80
       },
@@ -90,14 +165,14 @@ const LineGraph = React.memo(({
           name: 'Median'
         }
       ],
-      dragmode: 'zoom',  // Enable zooming
-      selectdirection: 'h',  // Horizontal selection for brush-like functionality
-      autosize: true,  // Enable autosizing
-      responsive: true  // Enable responsiveness
+      dragmode: 'zoom',
+      selectdirection: 'h',
+      autosize: true,
+      responsive: true
     };
 
     const handleRelayout = (eventdata) => {
-      console.log("eventdata:", eventdata); // xaxis.range 로그 추가
+      console.log("eventdata:", eventdata);
 
       if (eventdata['xaxis.range[0]'] && eventdata['xaxis.range[1]']) {
         const startRange = Math.round(eventdata['xaxis.range[0]']);
@@ -105,7 +180,6 @@ const LineGraph = React.memo(({
 
         console.log("startRange:", startRange, "endRange:", endRange);
 
-        // Ensure indices are within bounds
         const startIndex = Math.max(0, startRange);
         const endIndex = Math.min(averagedData.length - 1, endRange);
 

@@ -3,8 +3,8 @@
 const quartile = require('./quartile');
 
 const calculateBoxplotStats = (averagedData) => {
-  // console.log("averagedData: ", averagedData)
   const temperatureValues = averagedData.map(entry => entry.temperature).filter(t => !isNaN(t));
+
   if (temperatureValues.length === 0) {
     return { min: null, q1: null, median: null, q3: null, max: null, outliers: [] };
   }
@@ -19,8 +19,9 @@ const calculateBoxplotStats = (averagedData) => {
   const min = Math.min(...temperatureValues);
   const max = Math.max(...temperatureValues);
   const outliers = temperatureValues.filter(t => t < lowerBound || t > upperBound);
-  // console.log("boxplotStats.js, median: ", median)
+
   return { min, q1, median, q3, max, outliers };
 };
 
 module.exports = calculateBoxplotStats;
+

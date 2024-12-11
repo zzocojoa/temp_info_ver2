@@ -1,44 +1,32 @@
 // server/utils/preprocessData.js
 
 function preprocessData(data) {
-    let dateCounts = {};
+    // data: {timestamp, mainPressure, containerTempFront, containerTempBack, currentSpeed, temperature}[]
+    // 모든 필드를 숫자로 변환 가능한 경우 변환
     let temperatures = [];
+    let tempValues = [];
 
-    // console.log("Initial data:", data);
-
-    // 데이터 전처리
     for (const item of data) {
-        const date = item['date'];
-        const time = item['time'];
-        const temperature = parseFloat(item['temperature']);
+        const temperature = parseFloat(item.temperature);
+        const mainPressure = parseFloat(item.mainPressure);
+        const containerTempFront = parseFloat(item.containerTempFront);
+        const containerTempBack = parseFloat(item.containerTempBack);
+        const currentSpeed = parseFloat(item.currentSpeed);
 
         if (!isNaN(temperature)) {
-            dateCounts[date] = (dateCounts[date] || 0) + 1;
-            temperatures.push({ date, time, temperature });
+            temperatures.push({
+                timestamp: item.timestamp,
+                mainPressure: isNaN(mainPressure) ? null : mainPressure,
+                containerTempFront: isNaN(containerTempFront) ? null : containerTempFront,
+                containerTempBack: isNaN(containerTempBack) ? null : containerTempBack,
+                currentSpeed: isNaN(currentSpeed) ? null : currentSpeed,
+                temperature: temperature
+            });
+            tempValues.push(temperature);
         }
     }
+    console.log("tempValues: ", tempValues)
 
-    // console.log("Date counts:", dateCounts);
-    // console.log("Processed temperatures:", temperatures);
-
-    // dateCounts 객체가 비어있는 경우 처리
-    const mostDataDate = Object.keys(dateCounts).length > 0
-        ? Object.keys(dateCounts).reduce((a, b) => dateCounts[a] > dateCounts[b] ? a : b)
-        : null;
-
-    // console.log("Date with most data:", mostDataDate);
-
-    if (mostDataDate) {
-        temperatures = temperatures.filter(item => item.date === mostDataDate);
-    } else {
-        temperatures = []; // mostDataDate가 없는 경우, temperatures 배열을 비웁니다.
-    }
-
-    // console.log("Filtered temperatures:", temperatures);
-
-    const tempValues = temperatures.map(item => item.temperature);
-
-    // console.log("Temperature values:", tempValues);
 
     return { temperatures, tempValues };
 }

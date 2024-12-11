@@ -1,4 +1,4 @@
-// server/models/FileMetadata.js
+// server\models\FileMetadata.js
 
 const mongoose = require('mongoose');
 
@@ -8,7 +8,11 @@ const fileMetadataSchema = new mongoose.Schema({
     temperatureData: [{
         date: String,
         time: String,
-        temperature: Number
+        temperature: Number,
+        mainPressure: { type: Number, default: null },
+        containerTempFront: { type: Number, default: null },
+        containerTempBack: { type: Number, default: null },
+        currentSpeed: { type: Number, default: null }
     }],
     boxplotStats: {
         min: Number,
@@ -26,7 +30,7 @@ const fileMetadataSchema = new mongoose.Schema({
     },
     filedate: String,
     userInput: String,
-    startTime: String, 
+    startTime: String,
     endTime: String,
 });
 
