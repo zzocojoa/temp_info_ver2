@@ -23,24 +23,24 @@ const LineGraph = React.memo(({
   const plotRef = useRef(null);
 
   useEffect(() => {
-    console.log("averagedData changed:", averagedData);
+    // console.log("averagedData changed:", averagedData);
   }, [averagedData]);
 
   useEffect(() => {
-    console.log("startTime or endTime changed:", { startTime, endTime });
+    // console.log("startTime or endTime changed:", { startTime, endTime });
   }, [startTime, endTime]);
 
   useEffect(() => {
-    console.log("medianValue changed:", medianValue);
+    // console.log("medianValue changed:", medianValue);
   }, [medianValue]);
 
   useEffect(() => {
     const fetchMedian = async () => {
-      console.log("Fetching median for data:", averagedData);
+      // console.log("Fetching median for data:", averagedData);
       const temperatures = averagedData.map(item => item.temperature);
       try {
         const median = await calculateMedian(temperatures);
-        console.log("Median value fetched:", median);
+        // console.log("Median value fetched:", median);
         setMedianValue(median.median);
       } catch (error) {
         console.error('Error calculating median:', error);
@@ -48,7 +48,7 @@ const LineGraph = React.memo(({
     };
 
     if (averagedData.length > 0) {
-      console.log("Averaged data available, fetching median");
+      // console.log("Averaged data available, fetching median");
       fetchMedian(averagedData);
     }
   }, [averagedData]);
@@ -172,7 +172,7 @@ const LineGraph = React.memo(({
     };
 
     const handleRelayout = (eventdata) => {
-      console.log("eventdata:", eventdata);
+      // console.log("이벤트 데이터:", eventdata);
 
       if (eventdata['xaxis.range[0]'] && eventdata['xaxis.range[1]']) {
         const startRange = Math.round(eventdata['xaxis.range[0]']);

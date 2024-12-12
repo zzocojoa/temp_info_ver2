@@ -273,6 +273,7 @@ router.post('/save', async (req, res) => {
       startTime,
       endTime,
     });
+    console.log("newFileMetadata: ", newFileMetadata)
     await newFileMetadata.save();
     res.json({ message: 'Data saved successfully', data: newFileMetadata });
   } catch (error) {

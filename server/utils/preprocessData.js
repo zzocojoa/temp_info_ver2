@@ -25,8 +25,6 @@ function preprocessData(data) {
             tempValues.push(temperature);
         }
     }
-    console.log("tempValues: ", tempValues)
-
 
     return { temperatures, tempValues };
 }

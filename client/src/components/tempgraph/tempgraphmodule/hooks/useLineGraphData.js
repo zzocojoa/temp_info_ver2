@@ -9,30 +9,30 @@ export const useLineGraphData = (averagedData, initialStartTime, initialEndTime,
     const [median, setMedian] = useState(null);
 
     useEffect(() => {
-        console.log('useEffect called with initialStartTime:', initialStartTime, 'initialEndTime:', initialEndTime); // 디버깅용 로그 추가
+        // console.log('useEffect called with initialStartTime:', initialStartTime, 'initialEndTime:', initialEndTime); // 디버깅용 로그 추가
         setStartTime(initialStartTime);
         setEndTime(initialEndTime);
     }, [initialStartTime, initialEndTime]);
 
     // useCallback을 사용하여 함수 메모이제이션 적용
     const handleBrushChange = useCallback(async (e) => {
-        console.log('handleBrushChange called with:', e); // 디버깅용 로그 추가
+        // console.log('handleBrushChange called with:', e); // 디버깅용 로그 추가
 
         if (!e) {
             const startIndex = 0;
             const endIndex = averagedData.length - 1;
-            console.log('onBrushChange called with startIndex:', startIndex, 'endIndex:', endIndex); // 디버깅용 로그 추가
+            // console.log('onBrushChange called with startIndex:', startIndex, 'endIndex:', endIndex); // 디버깅용 로그 추가
             onBrushChange(startIndex, endIndex);
             return;
         }
 
         const { startIndex, endIndex } = e;
-        console.log('onBrushChange called with startIndex:', startIndex, 'endIndex:', endIndex); // 디버깅용 로그 추가
+        // console.log('onBrushChange called with startIndex:', startIndex, 'endIndex:', endIndex); // 디버깅용 로그 추가
         onBrushChange(startIndex, endIndex);
 
         const newStartTime = averagedData[startIndex]?.time;
         const newEndTime = averagedData[endIndex]?.time;
-        console.log('newStartTime:', newStartTime, 'newEndTime:', newEndTime); // 디버깅용 로그 추가
+        // console.log('newStartTime:', newStartTime, 'newEndTime:', newEndTime); // 디버깅용 로그 추가
 
         if (newStartTime && newEndTime) {
             setStartTime(newStartTime);
@@ -63,7 +63,7 @@ export const useLineGraphData = (averagedData, initialStartTime, initialEndTime,
         }
     }, [averagedData, onBrushChange, setBoxplotStats]); // 의존성 배열에 필요한 값들을 추가
 
-    console.log('Rendering useLineGraphData with startTime:', startTime, 'endTime:', endTime, 'median:', median); // 디버깅용 로그 추가
+    // console.log('Rendering useLineGraphData with startTime:', startTime, 'endTime:', endTime, 'median:', median); // 디버깅용 로그 추가
 
     return { startTime, endTime, median, handleBrushChange };
 };

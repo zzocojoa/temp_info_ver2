@@ -8,12 +8,12 @@ import styles from './BoxGraph.module.css';
 const BoxGraph = ({ boxplotStats, initialStartTime, initialEndTime }) => {
 
   useEffect(() => {
-    console.log('BoxGraph component mounted');
-    console.log('boxplotStats:', boxplotStats);
+    // console.log('BoxGraph component mounted');
+    // console.log('boxplotStats:', boxplotStats);
 
-    // 초기 데이터 확인 로그 추가
-    console.log('BoxGraph initialStartTime:', initialStartTime);
-    console.log('BoxGraph initialEndTime:', initialEndTime);
+    // // 초기 데이터 확인 로그 추가
+    // console.log('BoxGraph initialStartTime:', initialStartTime);
+    // console.log('BoxGraph initialEndTime:', initialEndTime);
   }, [boxplotStats, initialStartTime, initialEndTime]);
 
   // boxplotStats 데이터 유효성 검사
@@ -22,7 +22,7 @@ const BoxGraph = ({ boxplotStats, initialStartTime, initialEndTime }) => {
     return <div>No data available</div>;
   }
 
-  console.log('BoxPlot stats are valid');
+  // console.log('BoxPlot stats are valid');
 
   const chartOptions = {
     chart: { type: 'boxPlot', height: 350 },
@@ -40,8 +40,8 @@ const BoxGraph = ({ boxplotStats, initialStartTime, initialEndTime }) => {
     }]
   }];
 
-  console.log('chartOptions:', chartOptions);
-  console.log('chartSeries:', chartSeries);
+  // console.log('chartOptions:', chartOptions);
+  // console.log('chartSeries:', chartSeries);
 
   return (
     <div className={styles['graphDataWrap']}>
