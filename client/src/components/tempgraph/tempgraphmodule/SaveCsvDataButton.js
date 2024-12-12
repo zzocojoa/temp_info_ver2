@@ -11,11 +11,15 @@ function SaveCsvDataButton({ data, fileName, onSaveSuccess, startTime, endTime }
     const graphData = data.graphData;
 
     // 파일명에서 날짜 추출
-    const dateMatch = fileName.match(/\d{4}-\d{2}-\d{2}/);
-    const dateFromFileName = dateMatch ? dateMatch[0] : new Date().toISOString().split('T')[0];
+    const dateMatch = fileName.match(/\d{6}/);
+    let formattedDate = '';
 
-    const finalFileName = `${dateFromFileName}-${countNumber}_${wNumber}_${dwNumber}_${dieNumber}.csv`;
-    // console.log("finalFileName :", finalFileName);
+    if (dateMatch) {
+      const rawDate = dateMatch[0];
+      formattedDate = `20${rawDate.slice(0, 2)}-${rawDate.slice(2, 4)}-${rawDate.slice(4, 6)}`;
+    }
+
+    const finalFileName = `${formattedDate}-${countNumber}_${wNumber}_${dwNumber}_${dieNumber}.csv`;
     let csvContent = "data:text/csv;charset=utf-8,date,time,temperature,mainPressure,containerTempFront,containerTempBack,currentSpeed\n";
 
     // graphData가 정의되지 않았을 경우를 처리

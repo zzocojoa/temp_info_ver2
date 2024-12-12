@@ -147,7 +147,7 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
 // boxplot dynamic data
 router.post('/process-filtered-data', async (req, res) => {
   const { filteredData } = req.body;
-  console.log("filteredData: ", filteredData); // 초기 데이터 확인
+  // console.log("filteredData: ", filteredData); // 초기 데이터 확인
 
   // 데이터 유효성 검사를 추가하여 디버깅에 도움을 줍니다.
   if (!filteredData || !Array.isArray(filteredData) || filteredData.length === 0) {
@@ -157,7 +157,7 @@ router.post('/process-filtered-data', async (req, res) => {
 
   try {
     const { boxplotStats } = processData(filteredData);
-    console.log("boxplotStats: ", boxplotStats); // 결과 데이터 확인
+    // console.log("boxplotStats: ", boxplotStats); // 결과 데이터 확인
     res.json({ success: true, message: 'Filtered data processed successfully', boxplotStats });
   } catch (error) {
     console.error('Error processing filtered data:', error);
@@ -262,6 +262,7 @@ router.post('/filtered-linegraph-data', async (req, res) => {
 // 데이터 저장 처리
 router.post('/save', async (req, res) => {
   const { fileName, graphData, boxPlotData, numbering, filedate, userInput, startTime, endTime } = req.body;
+
   try {
     const newFileMetadata = new FileMetadata({
       fileName,
@@ -273,7 +274,6 @@ router.post('/save', async (req, res) => {
       startTime,
       endTime,
     });
-    console.log("newFileMetadata: ", newFileMetadata)
     await newFileMetadata.save();
     res.json({ message: 'Data saved successfully', data: newFileMetadata });
   } catch (error) {
