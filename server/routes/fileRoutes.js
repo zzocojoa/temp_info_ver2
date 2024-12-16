@@ -85,8 +85,13 @@ router.post('/upload-csv', upload.array('files'), async (req, res) => {
   const uploadResults = await Promise.all(req.files.map(async (file) => {
     const filePath = file.path;
     const fileName = file.originalname;
+    console.log("filePath: ", filePath)
+    console.log("fileName: ", fileName)
 
-    const match = fileName.match(/(\d{4}-\d{2}-\d{2})-(\d+)_(\d+)_(\d+)_(\d+)\.csv/);
+
+    const match = fileName.match(/(\d{4}-\d{2}-\d{2})-(\d+)_([A-Za-z0-9]+)_(\d+)_(\d+)\.csv/);
+    console.log("match: ", match)
+
     if (!match) {
       await fs.unlink(filePath);
       return { fileName, error: 'Invalid file name format.' };

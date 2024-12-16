@@ -68,7 +68,7 @@ const LineGraph = React.memo(({
       y: averagedData.map(d => d.temperature),
       type: 'scatter',
       mode: 'lines',
-      line: { color: '#8884d8' },
+      line: { color: '#595699' },
       hovertemplate: '%{y:.2f}°C<extra></extra>',
       name: 'Temperature'
     };
@@ -109,7 +109,7 @@ const LineGraph = React.memo(({
       y: averagedData.map(d => d.currentSpeed),
       type: 'scatter',
       mode: 'lines',
-      line: { color: '#9467bd' },
+      line: { color: '#17cfb0' },
       hovertemplate: '%{y:.2f}<extra></extra>',
       name: 'Current Speed',
       yaxis: 'y2' // currentSpeed는 오른쪽 y축 사용
