@@ -10,16 +10,36 @@ export default class Helpers {
   getLegendStyles() {
     let stylesheet = document.createElement('style')
     stylesheet.setAttribute('type', 'text/css')
-    const nonce = this.lgCtx.ctx?.opts?.chart?.nonce || this.w.config.chart.nonce;
+    const nonce =
+      this.lgCtx.ctx?.opts?.chart?.nonce || this.w.config.chart.nonce
     if (nonce) {
-      stylesheet.setAttribute('nonce', nonce);
+      stylesheet.setAttribute('nonce', nonce)
     }
 
     const text = `
+      .apexcharts-flip-y {
+        transform: scaleY(-1) translateY(-100%);
+        transform-origin: top;
+        transform-box: fill-box;
+      }
+      .apexcharts-flip-x {
+        transform: scaleX(-1);
+        transform-origin: center;
+        transform-box: fill-box;
+      }
       .apexcharts-legend {
         display: flex;
         overflow: auto;
         padding: 0 10px;
+      }
+      .apexcharts-legend.apexcharts-legend-group-horizontal {
+        flex-direction: column;
+      }
+      .apexcharts-legend-group {
+        display: flex;
+      }
+      .apexcharts-legend-group-vertical {
+        flex-direction: column-reverse;
       }
       .apexcharts-legend.apx-legend-position-bottom, .apexcharts-legend.apx-legend-position-top {
         flex-wrap: wrap
@@ -30,18 +50,19 @@ export default class Helpers {
       }
       .apexcharts-legend.apx-legend-position-bottom.apexcharts-align-left, .apexcharts-legend.apx-legend-position-top.apexcharts-align-left, .apexcharts-legend.apx-legend-position-right, .apexcharts-legend.apx-legend-position-left {
         justify-content: flex-start;
+        align-items: flex-start;
       }
       .apexcharts-legend.apx-legend-position-bottom.apexcharts-align-center, .apexcharts-legend.apx-legend-position-top.apexcharts-align-center {
         justify-content: center;
+        align-items: center;
       }
       .apexcharts-legend.apx-legend-position-bottom.apexcharts-align-right, .apexcharts-legend.apx-legend-position-top.apexcharts-align-right {
         justify-content: flex-end;
+        align-items: flex-end;
       }
       .apexcharts-legend-series {
         cursor: pointer;
         line-height: normal;
-      }
-      .apexcharts-legend.apx-legend-position-bottom .apexcharts-legend-series, .apexcharts-legend.apx-legend-position-top .apexcharts-legend-series{
         display: flex;
         align-items: center;
       }
@@ -54,15 +75,13 @@ export default class Helpers {
       }
       .apexcharts-legend-marker {
         position: relative;
-        display: inline-block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
-        margin-right: 3px;
-        border-style: solid;
+        margin-right: 1px;
       }
 
-      .apexcharts-legend.apexcharts-align-right .apexcharts-legend-series, .apexcharts-legend.apexcharts-align-left .apexcharts-legend-series{
-        display: inline-block;
-      }
       .apexcharts-legend-series.apexcharts-no-click {
         cursor: auto;
       }
@@ -71,7 +90,9 @@ export default class Helpers {
       }
       .apexcharts-inactive-legend {
         opacity: 0.45;
-      }`
+      }
+
+    `
 
     let rules = document.createTextNode(text)
 
@@ -80,19 +101,16 @@ export default class Helpers {
     return stylesheet
   }
 
-  getLegendBBox() {
+  getLegendDimensions() {
     const w = this.w
-    let currLegendsWrap = w.globals.dom.baseEl.querySelector(
-      '.apexcharts-legend'
-    )
-    let currLegendsWrapRect = currLegendsWrap.getBoundingClientRect()
-
-    let currLegendsWrapWidth = currLegendsWrapRect.width
-    let currLegendsWrapHeight = currLegendsWrapRect.height
+    let currLegendsWrap =
+      w.globals.dom.baseEl.querySelector('.apexcharts-legend')
+    let { width: currLegendsWrapWidth, height: currLegendsWrapHeight } =
+      currLegendsWrap.getBoundingClientRect()
 
     return {
       clwh: currLegendsWrapHeight,
-      clww: currLegendsWrapWidth
+      clww: currLegendsWrapWidth,
     }
   }
 
@@ -130,12 +148,12 @@ export default class Helpers {
         const seriesToMakeVisible = [
           {
             cs: w.globals.collapsedSeries,
-            csi: w.globals.collapsedSeriesIndices
+            csi: w.globals.collapsedSeriesIndices,
           },
           {
             cs: w.globals.ancillaryCollapsedSeries,
-            csi: w.globals.ancillaryCollapsedSeriesIndices
-          }
+            csi: w.globals.ancillaryCollapsedSeriesIndices,
+          },
         ]
         seriesToMakeVisible.forEach((r) => {
           this.riseCollapsedSeries(r.cs, r.csi, realIndex)
@@ -145,7 +163,7 @@ export default class Helpers {
       }
     } else {
       // for non-axis charts i.e pie / donuts
-      let seriesEl = w.globals.dom.Paper.select(
+      let seriesEl = w.globals.dom.Paper.findOne(
         ` .apexcharts-series[rel='${seriesCnt + 1}'] path`
       )
 
@@ -154,60 +172,63 @@ export default class Helpers {
         let dataLabels = w.config.plotOptions.pie.donut.labels
 
         const graphics = new Graphics(this.lgCtx.ctx)
-        graphics.pathMouseDown(seriesEl.members[0], null)
-        this.lgCtx.ctx.pie.printDataLabelsInner(
-          seriesEl.members[0].node,
-          dataLabels
-        )
+        graphics.pathMouseDown(seriesEl, null)
+        this.lgCtx.ctx.pie.printDataLabelsInner(seriesEl.node, dataLabels)
       }
 
       seriesEl.fire('click')
     }
   }
 
-  hideSeries({ seriesEl, realIndex }) {
+  getSeriesAfterCollapsing({ realIndex }) {
     const w = this.w
+    const gl = w.globals
 
     let series = Utils.clone(w.config.series)
 
-    if (w.globals.axisCharts) {
-      let shouldNotHideYAxis = false
+    if (gl.axisCharts) {
+      let yaxis = w.config.yaxis[gl.seriesYAxisReverseMap[realIndex]]
 
-      if (
-        w.config.yaxis[realIndex] &&
-        w.config.yaxis[realIndex].show &&
-        w.config.yaxis[realIndex].showAlways
-      ) {
-        shouldNotHideYAxis = true
-        if (w.globals.ancillaryCollapsedSeriesIndices.indexOf(realIndex) < 0) {
-          w.globals.ancillaryCollapsedSeries.push({
-            index: realIndex,
-            data: series[realIndex].data.slice(),
-            type: seriesEl.parentNode.className.baseVal.split('-')[1]
-          })
-          w.globals.ancillaryCollapsedSeriesIndices.push(realIndex)
+      const collapseData = {
+        index: realIndex,
+        data: series[realIndex].data.slice(),
+        type: series[realIndex].type || w.config.chart.type,
+      }
+      if (yaxis && yaxis.show && yaxis.showAlways) {
+        if (gl.ancillaryCollapsedSeriesIndices.indexOf(realIndex) < 0) {
+          gl.ancillaryCollapsedSeries.push(collapseData)
+          gl.ancillaryCollapsedSeriesIndices.push(realIndex)
+        }
+      } else {
+        if (gl.collapsedSeriesIndices.indexOf(realIndex) < 0) {
+          gl.collapsedSeries.push(collapseData)
+          gl.collapsedSeriesIndices.push(realIndex)
+
+          let removeIndexOfRising = gl.risingSeries.indexOf(realIndex)
+          gl.risingSeries.splice(removeIndexOfRising, 1)
         }
       }
-
-      if (!shouldNotHideYAxis) {
-        w.globals.collapsedSeries.push({
-          index: realIndex,
-          data: series[realIndex].data.slice(),
-          type: seriesEl.parentNode.className.baseVal.split('-')[1]
-        })
-        w.globals.collapsedSeriesIndices.push(realIndex)
-
-        let removeIndexOfRising = w.globals.risingSeries.indexOf(realIndex)
-
-        w.globals.risingSeries.splice(removeIndexOfRising, 1)
-      }
     } else {
-      w.globals.collapsedSeries.push({
+      gl.collapsedSeries.push({
         index: realIndex,
-        data: series[realIndex]
+        data: series[realIndex],
       })
-      w.globals.collapsedSeriesIndices.push(realIndex)
+      gl.collapsedSeriesIndices.push(realIndex)
     }
+
+    gl.allSeriesCollapsed =
+      gl.collapsedSeries.length + gl.ancillaryCollapsedSeries.length ===
+      w.config.series.length
+
+    return this._getSeriesBasedOnCollapsedState(series)
+  }
+
+  hideSeries({ seriesEl, realIndex }) {
+    const w = this.w
+
+    let series = this.getSeriesAfterCollapsing({
+      realIndex,
+    })
 
     let seriesChildren = seriesEl.childNodes
     for (let sc = 0; sc < seriesChildren.length; sc++) {
@@ -222,10 +243,6 @@ export default class Helpers {
       }
     }
 
-    w.globals.allSeriesCollapsed =
-      w.globals.collapsedSeries.length === w.config.series.length
-
-    series = this._getSeriesBasedOnCollapsedState(series)
     this.lgCtx.ctx.updateHelpers._updateSeries(
       series,
       w.config.chart.animations.dynamicAnimation.enabled
@@ -241,15 +258,15 @@ export default class Helpers {
         if (collapsedSeries[c].index === realIndex) {
           if (w.globals.axisCharts) {
             series[realIndex].data = collapsedSeries[c].data.slice()
-            collapsedSeries.splice(c, 1)
-            seriesIndices.splice(c, 1)
-            w.globals.risingSeries.push(realIndex)
           } else {
             series[realIndex] = collapsedSeries[c].data
-            collapsedSeries.splice(c, 1)
-            seriesIndices.splice(c, 1)
-            w.globals.risingSeries.push(realIndex)
           }
+          if (typeof series[realIndex] !== 'number') {
+            series[realIndex].hidden = false
+          }
+          collapsedSeries.splice(c, 1)
+          seriesIndices.splice(c, 1)
+          w.globals.risingSeries.push(realIndex)
         }
       }
 
@@ -264,20 +281,30 @@ export default class Helpers {
 
   _getSeriesBasedOnCollapsedState(series) {
     const w = this.w
+    let collapsed = 0
 
     if (w.globals.axisCharts) {
       series.forEach((s, sI) => {
-        if (w.globals.collapsedSeriesIndices.indexOf(sI) > -1) {
+        if (
+          !(
+            w.globals.collapsedSeriesIndices.indexOf(sI) < 0 &&
+            w.globals.ancillaryCollapsedSeriesIndices.indexOf(sI) < 0
+          )
+        ) {
           series[sI].data = []
+          collapsed++
         }
       })
     } else {
       series.forEach((s, sI) => {
-        if (w.globals.collapsedSeriesIndices.indexOf(sI) > -1) {
+        if (!w.globals.collapsedSeriesIndices.indexOf(sI) < 0) {
           series[sI] = 0
+          collapsed++
         }
       })
     }
+
+    w.globals.allSeriesCollapsed = collapsed === series.length
 
     return series
   }

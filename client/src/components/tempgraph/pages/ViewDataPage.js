@@ -1,4 +1,4 @@
-// client\src\pages\ViewDataPage.js
+// client\src\components\tempgraph\pages\ViewDataPage.js
 
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';

@@ -101,7 +101,11 @@ function DataListUI() {
       const csvHeader = 'filedate,countNumber,wNumber,dwNumber,dieNumber,min,median,max,startTime,endTime\n';
       // 각 항목을 CSV 형식의 문자열로 변환
       const csvRows = selectedDataDetails.map(item => {
-        const { filedate, numbering: { countNumber, wNumber, dwNumber, dieNumber }, boxplotStats: { min, median, max }, startTime, endTime } = item;
+        const { 
+          filedate, 
+          numbering: { countNumber, wNumber, dwNumber, dieNumber }, 
+          boxplotStats: { min, median, max }, startTime, endTime 
+        } = item;
         return `"${filedate}","${countNumber}","${wNumber}","${dwNumber}","${dieNumber}","${min}","${median}","${max}","${startTime}","${endTime}"`;
       });
       // CSV 헤더와 모든 행을 결합하여 최종 CSV 내용을 생성

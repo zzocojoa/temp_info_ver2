@@ -250,7 +250,7 @@ export async function sendFilteredLinegraphData(data, startTime, endTime) {
   }
 }
 
-// 클러스터링된 데이터를 가져오는 API 함수
+// 금형 별: 클러스터링된 데이터를 가져오는 API 함수
 export async function fetchClusteredData(dwNumber, k) {
   const requestInit = createFetchRequest('POST', { dwNumber, k });
   try {
@@ -261,6 +261,27 @@ export async function fetchClusteredData(dwNumber, k) {
     return await response.json();
   } catch (error) {
     console.error('Error fetching clustered data:', error);
+    throw error;
+  }
+}
+
+// 온도, 램 스피드, 압력 등: 클러스터링 수행
+export async function performClustering({ dwNumber, k }) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/extrusion-clustering`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dwNumber, k }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to perform extrusion clustering');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error performing extrusion clustering:', error);
     throw error;
   }
 }

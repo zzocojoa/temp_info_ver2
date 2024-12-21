@@ -1,0 +1,139 @@
+/* 공통 컨테이너 스타일 */
+.cluster-container {
+    margin: 20px auto;
+    max-width: 1300px;
+    padding: 20px 20px 0 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+/* 제목 스타일 */
+.container h1 {
+    font-size: 1.8em;
+    font-weight: bold;
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* 클러스터 버튼 컨테이너 */
+.cluster-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+/* 클러스터 버튼 스타일 */
+.cluster-button {
+    padding: 8px 16px;
+    font-size: 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.cluster-button.active {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.cluster-button.inactive {
+    background-color: #ccc;
+    color: #666;
+}
+
+.cluster-button:hover {
+    transform: translateY(-2px);
+}
+
+/* 데이터셋 레전드 스타일 */
+.dataset-legend {
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.dataset-legend strong {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #333;
+}
+
+.dataset-legend .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 5px;
+}
+
+.dataset-legend .legend-item button {
+    padding: 5px 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.dataset-legend .legend-item button.active {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.dataset-legend .legend-item button.inactive {
+    background-color: #ddd;
+    color: #aaa;
+}
+
+.dataset-legend .color-box {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 1px solid #ccc;
+}
+
+/* 공통 컨테이너 스타일 */
+.result-container {
+    margin: 20px auto;
+    max-width: 100%;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow-x: auto; /* 가로 스크롤 활성화 */
+}
+
+/* 차트 컨테이너 */
+.chart-container {
+    height: 600px; /* 고정된 높이 유지 */
+    min-width: 800px; /* 최소 너비를 설정하여 짤림 방지 */
+    width: 100%; /* 전체 너비 */
+}
+
+/* 반응형 디자인 */
+@media screen and (max-width: 768px) {
+    .chart-container {
+        min-width: 600px; /* 모바일 환경에서 최소 너비 조정 */
+        height: 300px; /* 모바일에서 적절한 높이 */
+    }
+    .cluster-buttons {
+        flex-direction: column;
+    }
+
+    .cluster-button {
+        width: 100%;
+        text-align: center;
+    }
+
+    .dataset-legend .legend-item {
+        display: block;
+        text-align: center;
+    }
+}

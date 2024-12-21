@@ -13,6 +13,7 @@ const calculateMedian = require('../utils/calculateMedian');
 const processFilteredData = require('../utils/filteredDataProcessor');
 const calculateBoxplotStats = require('../utils/boxplotStats');
 const performClustering = require('../utils/performClustering');
+const { clusterData } = require('../utils/extrusion_clustering.js');
 const { v4: uuidv4 } = require('uuid');
 const { spawn } = require('child_process');
 const archiver = require('archiver');
@@ -395,7 +396,7 @@ router.post('/calculate-median', (req, res) => {
   }
 });
 
-// 클러스터링된 데이터를 제공하는 엔드포인트
+// 금형 별: 클러스터링된 데이터를 제공하는 엔드포인트
 router.post('/clustered-data', async (req, res) => {
   const { dwNumber, k } = req.body;
 
@@ -443,6 +444,56 @@ router.post('/clustered-data', async (req, res) => {
   } catch (error) {
     console.error('클러스터링 데이터 조회 중 오류 발생:', error);
     res.status(500).json({ message: '클러스터링 작업을 수행하는 동안 서버에서 오류가 발생했습니다.' });
+  }
+});
+
+router.post('/extrusion-clustering', async (req, res) => {
+  const { dwNumber, k } = req.body;
+
+  console.log('Clustering Request Received:', { dwNumber, k });
+
+  try {
+    if (!dwNumber || typeof dwNumber !== 'string' || !dwNumber.trim()) {
+      throw new Error('Invalid DW Number. It must be a non-empty string.');
+    }
+    if (typeof k !== 'number' || k <= 0) {
+      throw new Error('Invalid k value for clustering. It must be a positive integer.');
+    }
+
+    const files = await FileMetadata.find({ 'numbering.dwNumber': dwNumber }).lean();
+
+    if (!files || files.length === 0) {
+      return res.status(404).json({ success: false, message: 'No files found for the given DW Number.' });
+    }
+
+    const results = [];
+
+    for (const file of files) {
+      const { fileName, numbering, filedate } = file;
+
+      const result = await clusterData(FileMetadata, { _id: file._id }, k);
+
+      results.push({
+        fileName,
+        dateCount: `${filedate}-${numbering.countNumber}`, // X축 값 추가
+        clusters: result.centroids.map((centroid, index) => ({
+          cluster: index,
+          temperature: centroid[0],
+          mainPressure: centroid[1],
+          currentSpeed: centroid[2],
+          containerTempFront: centroid[3],
+          containerTempBack: centroid[4],
+        })),
+      });
+    }
+
+    res.json({ success: true, results });
+  } catch (error) {
+    console.error('Error performing extrusion clustering:', {
+      message: error.message,
+      stack: error.stack,
+    });
+    res.status(500).json({ success: false, message: 'Clustering failed', error: error.message });
   }
 });
 

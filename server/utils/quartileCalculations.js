@@ -2,7 +2,6 @@
 
 const quartile = require('./quartile');
 
-
 const calculateQuartiles = (tempValues) => {
     const q1 = quartile(tempValues, 0.25);
     const q3 = quartile(tempValues, 0.75);

@@ -206,8 +206,9 @@ export default class Data {
       range = this.handleRangeDataFormat('xy', ser, i)
     }
 
-    gl.seriesRangeStart.push(range.start)
-    gl.seriesRangeEnd.push(range.end)
+    // Fix: RangeArea Chart: hide all series results in a crash #3984
+    gl.seriesRangeStart.push(range.start === undefined ? [] : range.start)
+    gl.seriesRangeEnd.push(range.end === undefined ? [] : range.end)
 
     gl.seriesRange.push(range.rangeUniques)
 
@@ -403,18 +404,28 @@ export default class Data {
       gl.groups = cnf.xaxis.group.groups
     }
 
-    gl.hasSeriesGroups = ser[0]?.group
-    if (gl.hasSeriesGroups) {
-      let buckets = []
-      let groups = [...new Set(ser.map((s) => s.group))]
-      ser.forEach((s, i) => {
-        let index = groups.indexOf(s.group)
-        if (!buckets[index]) buckets[index] = []
+    ser.forEach((s, i) => {
+      if (s.name !== undefined) {
+        gl.seriesNames.push(s.name)
+      } else {
+        gl.seriesNames.push('series-' + parseInt(i + 1, 10))
+      }
+    })
 
-        buckets[index].push(s.name)
-      })
-      gl.seriesGroups = buckets
-    }
+    this.coreUtils.setSeriesYAxisMappings()
+    // At this point, every series that didn't have a user defined group name
+    // has been given a name according to the yaxis the series is referenced by.
+    // This fits the existing behaviour where all series associated with an axis
+    // are defacto presented as a single group. It is now formalised.
+    let buckets = []
+    let groups = [...new Set(cnf.series.map((s) => s.group))]
+    cnf.series.forEach((s, i) => {
+      let index = groups.indexOf(s.group)
+      if (!buckets[index]) buckets[index] = []
+
+      buckets[index].push(gl.seriesNames[i])
+    })
+    gl.seriesGroups = buckets
 
     const handleDates = () => {
       for (let j = 0; j < xlabels.length; j++) {
@@ -506,12 +517,6 @@ export default class Data {
       }
 
       gl.seriesZ.push(this.threeDSeries)
-
-      if (ser[i].name !== undefined) {
-        gl.seriesNames.push(ser[i].name)
-      } else {
-        gl.seriesNames.push('series-' + parseInt(i + 1, 10))
-      }
 
       // overrided default color if user inputs color with series data
       if (ser[i].color !== undefined) {
@@ -714,14 +719,25 @@ export default class Data {
 
   excludeCollapsedSeriesInYAxis() {
     const w = this.w
-    w.globals.ignoreYAxisIndexes = w.globals.collapsedSeries.map(
-      (collapsed, i) => {
-        // fix issue #1215
-        // if stacked, not returning collapsed.index to preserve yaxis
-        if (this.w.globals.isMultipleYAxis && !w.config.chart.stacked) {
-          return collapsed.index
+    // Post revision 3.46.0 there is no longer a strict one-to-one
+    // correspondence between series and Y axes.
+    // An axis can be ignored only while all series referenced by it
+    // are collapsed.
+    let yAxisIndexes = []
+    w.globals.seriesYAxisMap.forEach((yAxisArr, yi) => {
+      let collapsedCount = 0
+      yAxisArr.forEach((seriesIndex) => {
+        if (w.globals.collapsedSeriesIndices.indexOf(seriesIndex) !== -1) {
+          collapsedCount++
         }
+      })
+      // It's possible to have a yaxis that doesn't reference any series yet,
+      // eg, because there are no series' yet, so don't list it as ignored
+      // prematurely.
+      if (collapsedCount > 0 && collapsedCount == yAxisArr.length) {
+        yAxisIndexes.push(yi)
       }
-    )
+    })
+    w.globals.ignoreYAxisIndexes = yAxisIndexes.map((x) => x)
   }
 }

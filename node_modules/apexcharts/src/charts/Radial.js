@@ -188,7 +188,6 @@ class Radial extends Pie {
         animBeginArr: 0,
         dur: 0,
         isTrack: true,
-        easing: w.globals.easing,
       })
     }
 
@@ -243,12 +242,20 @@ class Radial extends Pie {
     let dataLabels = null
 
     if (this.radialDataLabels.show) {
-      dataLabels = this.renderInnerDataLabels(this.radialDataLabels, {
-        hollowSize,
-        centerX: opts.centerX,
-        centerY: opts.centerY,
-        opacity: shown,
-      })
+      let dataLabelsGroup = w.globals.dom.Paper.findOne(
+        `.apexcharts-datalabels-group`
+      )
+
+      dataLabels = this.renderInnerDataLabels(
+        dataLabelsGroup,
+        this.radialDataLabels,
+        {
+          hollowSize,
+          centerX: opts.centerX,
+          centerY: opts.centerY,
+          opacity: shown,
+        }
+      )
     }
 
     if (w.config.plotOptions.radialBar.hollow.position === 'back') {
@@ -309,12 +316,12 @@ class Radial extends Pie {
       }
 
       const currFullAngle = Math.abs(endAngle) + Math.abs(startAngle)
-      if (currFullAngle >= 360) {
+      if (currFullAngle > 360) {
         endAngle = endAngle - 0.01
       }
 
       const prevFullAngle = Math.abs(prevEndAngle) + Math.abs(prevStartAngle)
-      if (prevFullAngle >= 360) {
+      if (prevFullAngle > 360) {
         prevEndAngle = prevEndAngle - 0.01
       }
 
@@ -378,8 +385,8 @@ class Radial extends Pie {
           textColor = w.config.chart.foreColor
         }
 
-        const x = barStartCords.x - this.barLabels.margin
-        const y = barStartCords.y
+        const x = barStartCords.x + this.barLabels.offsetX
+        const y = barStartCords.y + this.barLabels.offsetY
         let elText = graphics.drawText({
           x,
           y,
@@ -433,7 +440,6 @@ class Radial extends Pie {
         animBeginArr: this.animBeginArr,
         dur,
         shouldSetPrevPaths: true,
-        easing: w.globals.easing,
       })
     }
 
@@ -479,9 +485,7 @@ class Radial extends Pie {
       const imgWidth = w.config.plotOptions.radialBar.hollow.imageWidth
       const imgHeight = w.config.plotOptions.radialBar.hollow.imageHeight
       if (imgWidth === undefined && imgHeight === undefined) {
-        let image = w.globals.dom.Paper.image(hollowFillImg).loaded(function (
-          loader
-        ) {
+        let image = w.globals.dom.Paper.image(hollowFillImg, function (loader) {
           this.move(
             opts.centerX -
               loader.width / 2 +
@@ -493,9 +497,7 @@ class Radial extends Pie {
         })
         g.add(image)
       } else {
-        let image = w.globals.dom.Paper.image(hollowFillImg).loaded(function (
-          loader
-        ) {
+        let image = w.globals.dom.Paper.image(hollowFillImg, function (loader) {
           this.move(
             opts.centerX -
               imgWidth / 2 +

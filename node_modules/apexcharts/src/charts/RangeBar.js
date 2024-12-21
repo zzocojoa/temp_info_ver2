@@ -34,6 +34,7 @@ class RangeBar extends Bar {
         zeroW // zeroW is the baseline where 0 meets x axis
 
       let realIndex = w.globals.comboCharts ? seriesIndex[i] : i
+      let { columnGroupIndex } = this.barHelpers.getGroupIndex(realIndex)
 
       // el to which series will be drawn
       let elSeries = graphics.group({
@@ -52,8 +53,10 @@ class RangeBar extends Bar {
       let barHeight = 0
       let barWidth = 0
 
+      let translationsIndex = 0
       if (this.yRatio.length > 1) {
-        this.yaxisIndex = realIndex
+        this.yaxisIndex = w.globals.seriesYAxisReverseMap[realIndex][0]
+        translationsIndex = realIndex
       }
 
       let initPositions = this.barHelpers.initialPositions()
@@ -159,7 +162,7 @@ class RangeBar extends Bar {
           }
 
           paths = this.drawRangeColumnPaths({
-            indexes: { i, j, realIndex },
+            indexes: { i, j, realIndex, translationsIndex },
             barWidth,
             barXPosition,
             zeroH,
@@ -209,7 +212,7 @@ class RangeBar extends Bar {
           barWidth,
           barXPosition,
           barYPosition,
-          barWidth,
+          columnGroupIndex,
           elDataLabelsWrap,
           elGoalsMarkers,
           visibleSeries: this.visibleI,
@@ -266,14 +269,14 @@ class RangeBar extends Bar {
           barYPosition =
             barHeight * this.visibleI +
             (yDivision * (100 - parseInt(this.barOptions.barHeight, 10))) /
-              100 /
-              2 +
+            100 /
+            2 +
             barHeight * (this.visibleI + overlaps.indexOf(rangeName)) +
             yDivision * rowIndex
         }
       }
     } else {
-      if (rowIndex > -1) {
+      if (rowIndex > -1 && !w.globals.timescaleLabels.length) {
         if (w.config.plotOptions.bar.rangeBarGroupRows) {
           barXPosition = srtx + xDivision * rowIndex
         } else {
@@ -290,8 +293,8 @@ class RangeBar extends Bar {
           barXPosition =
             barWidth * this.visibleI +
             (xDivision * (100 - parseInt(this.barOptions.barWidth, 10))) /
-              100 /
-              2 +
+            100 /
+            2 +
             barWidth * (this.visibleI + overlaps.indexOf(rangeName)) +
             xDivision * rowIndex
         }
@@ -316,11 +319,9 @@ class RangeBar extends Bar {
   }) {
     let w = this.w
 
-    let i = indexes.i
-    let j = indexes.j
+    const { i, j, realIndex, translationsIndex } = indexes
 
-    const yRatio = this.yRatio[this.yaxisIndex]
-    let realIndex = indexes.realIndex
+    const yRatio = this.yRatio[translationsIndex]
 
     const range = this.getRangeValue(realIndex, j)
 
@@ -345,7 +346,7 @@ class RangeBar extends Bar {
       y2,
       strokeWidth: this.strokeWidth,
       series: this.seriesRangeEnd,
-      realIndex: indexes.realIndex,
+      realIndex: realIndex,
       i: realIndex,
       j,
       w,
@@ -369,10 +370,30 @@ class RangeBar extends Bar {
       pathFrom: paths.pathFrom,
       barHeight,
       x,
-      y: y2,
-      goalY: this.barHelpers.getGoalValues('y', null, zeroH, i, j),
+      y: range.start < 0 && range.end < 0 ? y1 : y2,
+      goalY: this.barHelpers.getGoalValues(
+        'y',
+        null,
+        zeroH,
+        i,
+        j,
+        translationsIndex
+      ),
       barXPosition,
     }
+  }
+
+  preventBarOverflow(val) {
+    const w = this.w
+
+    if (val < 0) {
+      val = 0
+    }
+    if (val > w.globals.gridWidth) {
+      val = w.globals.gridWidth
+    }
+
+    return val
   }
 
   drawRangeBarPaths({
@@ -387,8 +408,12 @@ class RangeBar extends Bar {
   }) {
     let w = this.w
 
-    const x1 = zeroW + y1 / this.invertedYRatio
-    const x2 = zeroW + y2 / this.invertedYRatio
+    const { realIndex, j } = indexes
+
+    let x1 = this.preventBarOverflow(zeroW + y1 / this.invertedYRatio)
+    let x2 = this.preventBarOverflow(zeroW + y2 / this.invertedYRatio)
+
+    const range = this.getRangeValue(realIndex, j)
 
     const barWidth = Math.abs(x2 - x1)
 
@@ -399,9 +424,9 @@ class RangeBar extends Bar {
       x2,
       strokeWidth: this.strokeWidth,
       series: this.seriesRangeEnd,
-      i: indexes.realIndex,
-      realIndex: indexes.realIndex,
-      j: indexes.j,
+      i: realIndex,
+      realIndex,
+      j,
       w,
     })
 
@@ -413,14 +438,8 @@ class RangeBar extends Bar {
       pathTo: paths.pathTo,
       pathFrom: paths.pathFrom,
       barWidth,
-      x: x2,
-      goalX: this.barHelpers.getGoalValues(
-        'x',
-        zeroW,
-        null,
-        indexes.realIndex,
-        indexes.j
-      ),
+      x: range.start < 0 && range.end < 0 ? x1 : x2,
+      goalX: this.barHelpers.getGoalValues('x', zeroW, null, realIndex, j),
       y,
     }
   }

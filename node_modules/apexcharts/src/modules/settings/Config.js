@@ -63,6 +63,10 @@ export default class Config {
         chartDefaults = defaults.brush(chartDefaults)
       }
 
+      if (opts.plotOptions?.line?.isSlopeChart) {
+        chartDefaults = defaults.slope()
+      }
+
       if (opts.chart.stacked && opts.chart.stackType === '100%') {
         opts = defaults.stacked100(opts)
       }
@@ -271,10 +275,6 @@ export default class Config {
 
       if (!opts.chart.foreColor) {
         opts.chart.foreColor = '#f6f7f8'
-      }
-
-      if (!opts.chart.background) {
-        opts.chart.background = '#424242'
       }
 
       if (!opts.theme.palette) {
